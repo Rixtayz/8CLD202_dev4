@@ -92,26 +92,26 @@
               ]
             },
             "applicationId": ""
-          }
+          },
           //Pipeline
-          //{
-          //  "objectId": "f13b1ae8-46ee-4866-8e83-d825e20b45f4",
-          //  "tenantId": "[subscription().tenantId]",
-          //  "permissions": {
-          //    "certificates": [],
-          //    "keys": [],
-          //    "secrets": [
-          //      "get",
-          //      "list",
-          //      "set",
-          //      "delete",
-          //      "recover",
-          //      "backup",
-          //      "restore"
-          //    ]
-          //  },
-          //  "applicationId": ""
-          //}
+          {
+            "objectId": "da7c8fb5-e899-422d-a3a2-95a756d1a114",
+            "tenantId": "[subscription().tenantId]",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "get",
+                "list",
+                "set",
+                "delete",
+                "recover",
+                "backup",
+                "restore"
+              ]
+            },
+            "applicationId": ""
+          }
         ],
         "tenantId": "[subscription().tenantId]",
         "sku": {
@@ -142,6 +142,33 @@
         "softDeleteRetentionInDays": "1",
         "enablePurgeProtection": "false",
         "disableLocalAuth": "false"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      //semi hardcoded
+      "name": "[format('{0}/{1}', parameters('VaultName'), 'ConnectionString_ApplicationInsight')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]"
+      ],
+      //Working this provide instrumentation key
+      "properties": {
+        "value": "[reference(resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName')), '2020-02-02').ConnectionString]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      //semi hardcoded
+      "name": "[format('{0}/{1}', parameters('VaultName'), 'ConnectionString_AppConfig')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[listKeys(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').value[2].connectionString]"
       }
     }
   ],
