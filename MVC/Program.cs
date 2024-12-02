@@ -34,7 +34,7 @@ builder.Services.AddControllersWithViews();
 
 // Ajouter la BD
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQL")!.Replace(@"\\",@"\"))  // not sure why, but AppConfig or AzureKey double escape that thing.
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!.Replace(@"\\",@"\"))  // not sure why, but AppConfig or AzureKey double escape that thing.
     .LogTo(Console.WriteLine, LogLevel.Trace)
     .EnableDetailedErrors());
 
