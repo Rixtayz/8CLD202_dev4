@@ -115,9 +115,23 @@
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]"
       ],
-      //Working this provide instrumentation key
+      //This provide instrumentation key
       "properties": {
         "value": "[reference(resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName')), '2020-02-02').ConnectionString]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-11-01-preview",
+      //semi hardcoded
+      "name": "[format('{0}/{1}', parameters('VaultName'), 'ConnectionStringAppConfig')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //This provide app config key
+      "properties": {
+        "value": "[listKeys(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').value[2].connectionString]"
       }
     }
   ],
