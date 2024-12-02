@@ -1,0 +1,180 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "String",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "VaultName": {
+      "type": "String",
+      "metadata": {
+        "description": "Key Vault Name"
+      }
+    },
+    "AppConfigName": {
+      "type": "String",
+      "metadata": {
+        "description": "AppConfigName Name"
+      }
+    },
+    "ApplicationInsightName": {
+      "type": "String",
+      "metadata": {
+        "description": "ApplicationInsight Name"
+      }
+    },
+    "LogAnalyticsName": {
+      "type": "String",
+      "metadata": {
+        "description": "LogAnalytics Name"
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "apiVersion": "2017-03-15-preview",
+      "name": "[parameters('LogAnalyticsName')]",
+      "location": "[resourceGroup().location]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "properties": {
+        "sku": {
+          "name": "pergb2018"
+        }
+      }
+    },
+    {
+      "name": "[parameters('ApplicationInsightName')]",
+      "type": "microsoft.insights/components",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2020-02-02-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('LogAnalyticsName'))]"
+      ],
+      "kind": "app",
+      "properties": {
+        "ApplicationId": "[parameters('ApplicationInsightName')]",
+        "Application_Type": "web",
+        "Flow_Type": "Bluefield",
+        "Request_Source": "rest",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('LogAnalyticsName'))]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-08-01-preview",
+      "name": "[parameters('VaultName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [],
+      "tags": {},
+      "properties": {
+        "enabledForDeployment": "true",
+        "enabledForTemplateDeployment": "true",
+        "enabledForDiskEncryption": "false",
+        "enableRbacAuthorization": "false",
+        "accessPolicies": [
+          {
+            //Default admin
+            "objectId": "08feffe8-3dbb-4fe9-a948-9129e9433a18",
+            "tenantId": "[subscription().tenantId]",
+            "permissions": {
+              "secrets": [
+                "get",
+                "list",
+                "set",
+                "delete",
+                "recover",
+                "backup",
+                "restore"
+              ]
+            },
+            "applicationId": ""
+          }
+          //Pipeline
+          //{
+          //  "objectId": "f13b1ae8-46ee-4866-8e83-d825e20b45f4",
+          //  "tenantId": "[subscription().tenantId]",
+          //  "permissions": {
+          //    "certificates": [],
+          //    "keys": [],
+          //    "secrets": [
+          //      "get",
+          //      "list",
+          //      "set",
+          //      "delete",
+          //      "recover",
+          //      "backup",
+          //      "restore"
+          //    ]
+          //  },
+          //  "applicationId": ""
+          //}
+        ],
+        "tenantId": "[subscription().tenantId]",
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        },
+        "publicNetworkAccess": "Enabled",
+        "enableSoftDelete": "false",
+        "networkAcls": {
+          "value": {
+            "defaultAction": "allow",
+            "bypass": "AzureServices",
+            "ipRules": [],
+            "virtualNetworkRules": []
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores",
+      "apiVersion": "2023-03-01",
+      "name": "[parameters('AppConfigName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "standard"
+      },
+      "properties": {
+        "softDeleteRetentionInDays": "1",
+        "enablePurgeProtection": "false",
+        "disableLocalAuth": "false"
+      }
+    }
+    //{
+    //  "type": "Microsoft.KeyVault/vaults/secrets",
+    //  "apiVersion": "2021-11-01-preview",
+    //  //semi hardcoded
+    //  "name": "[format('{0}/{1}', parameters('VaultName'), 'ConnectionStringApplicationInsight')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+    //    "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]"
+    //  ],
+    //  //Working this provide instrumentation key
+    //  "properties": {
+    //    "value": "[reference(resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName')), '2020-02-02').ConnectionString]"
+    //  }
+  ],
+  "outputs": {
+    "VaultName": {
+      "type": "String",
+      "value": "[parameters('VaultName')]"
+    },
+    "VaultURL": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))).vaultUri]"
+    },
+    "AppConfigName": {
+      "type": "String",
+      "value": "[parameters('AppConfigName')]"
+    },
+    // endpoint is not connectionstring .....
+    "AppConfigEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').endpoint]"
+    }
+  }
+}
