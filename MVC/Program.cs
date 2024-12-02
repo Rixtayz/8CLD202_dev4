@@ -19,6 +19,9 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     });
 });
 
+string test1 = builder.Configuration.GetConnectionString("ApplicationInsightsTest")!;
+string test2 = builder.Configuration.GetConnectionString("LocalSQLTest")!;
+
 
 // Application Insight Service
 // https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
@@ -31,7 +34,7 @@ builder.Services.AddControllersWithViews();
 
 // Ajouter la BD
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!.Replace(@"\\",@"\"))  // not sure why, but AppConfig or AzureKey double escape that thing.
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQL")!.Replace(@"\\",@"\"))  // not sure why, but AppConfig or AzureKey double escape that thing.
     .LogTo(Console.WriteLine, LogLevel.Trace)
     .EnableDetailedErrors());
 
