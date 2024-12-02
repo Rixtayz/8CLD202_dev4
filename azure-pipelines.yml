@@ -26,6 +26,7 @@ variables:
 
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
+    displayName: ARM Deployment
     inputs:
       deploymentScope: 'Resource Group'
       azureResourceManagerConnection: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
