@@ -31,6 +31,12 @@
       "metadata": {
         "description": "LogAnalytics Name"
       }
+    },
+    "LocalDB": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Local Database connection string"
+      }
     }
   },
   "variables": {},
@@ -132,32 +138,43 @@
       //This provide app config key
       "properties": {
         "value": "[listKeys(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').value[2].connectionString]"
+      } //application insight connection string, inside of App Config
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ConnectionStringLocalSQL')]",
+      "location": "eastus",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //this provide local configuration for the DB of the web site.
+      "properties": {
+        "value": "[parameters('LocalDB')]",
+        "attributes": {
+          "enabled": true
+        }
       }
-    }, //application insight connection string, inside of App Config
+    },
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
-      "apiVersion": "2021-10-01-preview",
-      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStringApplicationInsights')]",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "ConnectionStrings:ApplicationInsightsTest",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       "properties": {
-        "value": "[string(reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringApplicationInsight'), '2016-10-01').secretUri)]",
+        "value": "[string(reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringAppConfig'), '2016-10-01').secretUri)]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
     }
   ],
   "outputs": {
-    "VaultName": {
-      "type": "String",
-      "value": "[parameters('VaultName')]"
-    },
-    "VaultURL": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))).vaultUri]"
-    },
     "AppConfigName": {
       "type": "String",
       "value": "[parameters('AppConfigName')]"

@@ -16,6 +16,9 @@
     },
     "ApplicationInsightName": {
       "value": "ApplicationInsights"
+    },
+    "LocalDB": {
+      "value": ""
     }
   }
 }

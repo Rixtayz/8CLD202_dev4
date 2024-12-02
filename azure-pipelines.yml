@@ -23,6 +23,8 @@ variables:
   value: 'CloudInfrastructure'
 - name: ApplicationInsight
   value: 'ApplicationInsightName'
+- name: LocalSQLDB
+  value: 'Server=(localdb)\\MSSQLLocalDB;Database=MVC_local;Trusted_Connection=True;MultipleActiveResultSets=true'
 
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
@@ -37,7 +39,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight)'
+      overrideParameters: '-location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -LocalDB $(LocalSQLDB)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
