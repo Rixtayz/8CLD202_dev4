@@ -162,7 +162,7 @@
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
       // hardcoded
-      "name": "ConnectionStrings:ApplicationInsightsTest",
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:AppConfigTest')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
