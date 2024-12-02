@@ -110,7 +110,7 @@
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-11-01-preview",
       //semi hardcoded
-      "name": "[format('{0}/{1}', parameters('VaultName'), 'ConnectionString_ApplicationInsight')]",
+      "name": "[format('{0}/{1}', parameters('VaultName'), 'ConnectionStringApplicationInsight')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]"
