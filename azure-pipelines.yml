@@ -14,9 +14,9 @@ variables:
 - name: RG_Location
   value: 'eastus'
 - name: Vault
-  value: 'GuroKeyVault2'
+  value: 'GuroKeyVault4'
 - name: AppConfig
-  value: 'GuroAppConfiguration3'
+  value: 'GuroAppConfiguration4'
 - name: LogAnalytics
   value: 'LogAnalyticsName'
 - name: InfrastructureFolder

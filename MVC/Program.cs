@@ -1,8 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using MVC.Models;
 using Azure.Identity;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Azure.Monitor.OpenTelemetry;
 using Microsoft.FeatureManagement;
+
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using Azure.Monitor.OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,11 +54,19 @@ builder.Services.AddFeatureManagement();
 // Liaison de la Configuration "ApplicationConfiguration" a la class
 builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
 
-// Application Insight Service
-// https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
-builder.Services.AddOpenTelemetry().UseAzureMonitor(options => {
-    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
-});
+// Application Insight Service & OpenTelemetry
+builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing =>
+    {
+        tracing.AddAspNetCoreInstrumentation();
+        tracing.AddHttpClientInstrumentation();
+        tracing.AddAzureMonitorTraceExporter(options =>
+        {
+            options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
+        });
+    });
+
 
 // Ajouter la BD
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
