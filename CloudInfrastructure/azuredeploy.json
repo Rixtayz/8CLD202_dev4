@@ -235,7 +235,7 @@
       "apiVersion": "2021-03-01-preview",
       "name": "[format('{0}/{1}', parameters('AppConfigName'), format('.appconfig.featureflag~2F{0}', 'FeatureA'))]",
       "properties": {
-        "value": "[concat('{\"id\":\"FeatureA\",\"description\":\"\",\"enabled\":\"true\",\"conditions\":{\"client_filters\":[]}}')]",
+        "value": "[concat('{\"id\":\"FeatureA\",\"description\":\"\",\"enabled\":true,\"conditions\":{\"client_filters\":[]}}')]",
         "contentType": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
       },
       "dependsOn": [ "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('appConfigName'))]" ]
@@ -245,7 +245,7 @@
       "apiVersion": "2021-03-01-preview",
       "name": "[format('{0}/{1}', parameters('AppConfigName'), format('.appconfig.featureflag~2F{0}', 'FeatureB'))]",
       "properties": {
-        "value": "[concat('{\"id\":\"FeatureB\",\"description\":\"\",\"enabled\":\"false\",\"conditions\":{\"client_filters\":[]}}')]",
+        "value": "[concat('{\"id\":\"FeatureB\",\"description\":\"\",\"enabled\":false,\"conditions\":{\"client_filters\":[]}}')]",
         "contentType": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
       },
       "dependsOn": [ "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('appConfigName'))]" ]
