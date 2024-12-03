@@ -158,21 +158,21 @@
         }
       }
     },
-    //{
-    //  "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
-    //  "apiVersion": "2024-05-01",
-    //  // hardcoded
-    //  "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:ApplicationInsightTest')]",
-    //  "dependsOn": [
-    //    "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
-    //    "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
-    //    "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
-    //  ],
-    //  "properties": {
-    //    "value": "[string(reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringApplicationInsight'), '2019-09-01').secretUri)]",
-    //    "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
-    //  }
-    //},
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:ApplicationInsightTest')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringApplicationInsight'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -184,7 +184,7 @@
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       "properties": {
-        "value": "https://gurokeyvault2.vault.azure.net/secrets/ConnectionStringLocalSQL/", //[reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalSQL'), '2019-09-01').secretUri]
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalSQL'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
     }
