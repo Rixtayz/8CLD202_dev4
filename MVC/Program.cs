@@ -2,8 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using MVC.Models;
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
 
 // Configuration manuel pour prendre la connectionString du AppConfig hardcoder dans le appsettings.json
 // Cette information pourrait être passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
@@ -22,9 +26,15 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 
     // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
-    .Select("ApplicationConfiguration:*")
+    .Select("*")
+
+    // Requis pour l'ajout des Feature Flag ...
+    // https://learn.microsoft.com/en-us/azure/azure-app-configuration/use-feature-flags-dotnet-core
+    .UseFeatureFlags()
+
     .ConfigureRefresh(refreshOptions =>
-    refreshOptions.Register("ApplicationConfiguration:Sentinel", refreshAll: true).SetRefreshInterval(new TimeSpan(0,0,10)));
+    refreshOptions.Register("ApplicationConfiguration:Sentinel", refreshAll: true)
+        .SetRefreshInterval(new TimeSpan(0,0,10)));
 
     options.ConfigureKeyVault(keyVaultOptions =>
     {
@@ -32,6 +42,10 @@ builder.Configuration.AddAzureAppConfiguration(options =>
         keyVaultOptions.SetCredential(new DefaultAzureCredential());
     });
 });
+
+// ajout du service middleware pour AppConfig et FeatureFlag
+builder.Services.AddAzureAppConfiguration();
+builder.Services.AddFeatureManagement();
 
 // Liaison de la Configuration "ApplicationConfiguration" a la class
 builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
@@ -48,10 +62,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     .LogTo(Console.WriteLine, LogLevel.Trace)
     .EnableDetailedErrors());
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
 var app = builder.Build();
+
+// Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
+app.UseAzureAppConfiguration();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -60,9 +74,6 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-// Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
-app.UseAzureAppConfiguration();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -103,13 +103,19 @@
       "apiVersion": "2023-03-01",
       "name": "[parameters('AppConfigName')]",
       "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]"
+      ],
       "sku": {
         "name": "standard"
       },
       "properties": {
         "softDeleteRetentionInDays": "1",
         "enablePurgeProtection": "false",
-        "disableLocalAuth": "false"
+        "disableLocalAuth": "false",
+        "telemetry": {
+          "resourceId": "[resourceId('microsoft.insights/components', parameters('ApplicationInsightName'))]"
+        }
       }
     },
     {
@@ -228,13 +234,33 @@
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
       // hardcoded
-      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:Sentinel')]",
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'Features:A')]",
       "dependsOn": [
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       "properties": {
-        "value": 0
+        "value": true
       }
+    }, // Feature Flag -- hardcoded
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2021-03-01-preview",
+      "name": "[format('{0}/.appconfig.featureflag/{1}', parameters('AppConfigName'), 'FeatureA')]",
+      "properties": {
+        "value": "[json(concat('{ \"id\": \"', 'FeatureA', '\", \"description\": \"\", \"enabled\": ', 'true', ', \"conditions\": { \"client_filters\": [] } }'))]",
+        "contentType": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+      },
+      "dependsOn": [ "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('appConfigName'))]" ]
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2021-03-01-preview",
+      "name": "[format('{0}/.appconfig.featureflag/{1}', parameters('AppConfigName'), 'FeatureB')]",
+      "properties": {
+        "value": "[json(concat('{ \"id\": \"', 'FeatureB', '\", \"description\": \"\", \"enabled\": ', 'false', ', \"conditions\": { \"client_filters\": [] } }'))]",
+        "contentType": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+      },
+      "dependsOn": [ "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('appConfigName'))]" ]
     }
   ],
   "outputs": {

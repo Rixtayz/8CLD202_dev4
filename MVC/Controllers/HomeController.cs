@@ -2,7 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using MVC.Models;
 using System.Diagnostics;
+
+// Requis pour l'injection de la dépendance pour l'AppConfig
 using Microsoft.Extensions.Options;
+
+// Requis pour l'injection de la dépendance pour le Flag Management
+using Microsoft.FeatureManagement;
 
 namespace MVC.Controllers
 {
@@ -10,14 +15,19 @@ namespace MVC.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        // Configuraiton pour recevoir les ApplicationConfiguration du AppConfig ...
+        // Configuration pour recevoir les ApplicationConfiguration du AppConfig ...
         private ApplicationConfiguration _applicationConfiguration { get; }
 
-        // Voice le IOptionsSnapshot qui importe dans l'object la configuraiton du AppConfig.
-        public HomeController(ILogger<HomeController> logger, IOptionsSnapshot<ApplicationConfiguration> options)
+        // Configuration pour recevoir les Flags
+        private readonly IFeatureManager _featureManager;
+
+        // Voir le IOptionsSnapshot qui importe dans l'object la configuraiton du AppConfig.
+        // Ainsi que le IFeatureManager pour la gestion des Flags
+        public HomeController(ILogger<HomeController> logger, IOptionsSnapshot<ApplicationConfiguration> options, IFeatureManager featureManager)
         {
             _applicationConfiguration = options.Value;
             _logger = logger;
+            _featureManager = featureManager;
         }
 
         public IActionResult Index()
