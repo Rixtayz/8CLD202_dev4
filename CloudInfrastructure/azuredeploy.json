@@ -162,8 +162,9 @@
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
       // hardcoded
-      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:ApplicationInsightTest')]",
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:ApplicationInsight')]",
       "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', 'ConnectionStringApplicationInsight')]",
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
@@ -177,8 +178,9 @@
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
       // hardcoded
-      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:LocalSQLTest')]",
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:LocalSQL')]",
       "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', 'ConnectionStringLocalSQL')]",
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
