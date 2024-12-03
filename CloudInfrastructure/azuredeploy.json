@@ -222,19 +222,20 @@
       ],
       "properties": {
         "value": "Yo, welcome !!"
-      },
-      {
-        "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
-        "apiVersion": "2024-05-01",
-        // hardcoded
-        "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:Sentinel')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
-        ],
-        "properties": {
-          "value": 0
-        }
       }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:Sentinel')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": 0
+      }
+    }
   ],
   "outputs": {
     "AppConfigName": {
