@@ -229,18 +229,6 @@
       "properties": {
         "value": "Yo, welcome !!"
       }
-    },
-    {
-      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
-      "apiVersion": "2024-05-01",
-      // hardcoded
-      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'Features:A')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
-      ],
-      "properties": {
-        "value": true
-      }
     }, // Feature Flag -- hardcoded
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
