@@ -164,13 +164,13 @@
       // hardcoded
       "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:ApplicationInsight')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', 'ConnectionStringApplicationInsight')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ConnectionStringApplicationInsight')]",
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       "properties": {
-        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', 'ConnectionStringApplicationInsight'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringApplicationInsight'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
     },
@@ -180,13 +180,13 @@
       // hardcoded
       "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:LocalSQL')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', 'ConnectionStringLocalSQL')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalSQL')]",
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       "properties": {
-        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', 'ConnectionStringLocalSQL'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalSQL'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
     }
