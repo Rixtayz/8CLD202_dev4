@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using MVC.Models;
 using System.Diagnostics;
 
@@ -8,14 +9,17 @@ namespace MVC.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private ApplicationConfiguration _applicationConfiguration { get; }
+
+        public HomeController(ILogger<HomeController> logger, ApplicationConfiguration applicationConfiguration)
         {
+            _applicationConfiguration = applicationConfiguration;
             _logger = logger;
         }
 
         public IActionResult Index()
         {
-            return View();
+            return View(_applicationConfiguration);
         }
 
         public IActionResult Privacy()

@@ -7,36 +7,40 @@ using NuGet.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 
 // Retrieve the connection string This one is local to the project ... could be pass as environment variable.
-string connectionString = builder.Configuration.GetConnectionString("AppConfig")!;
+//string connectionString = builder.Configuration.GetConnectionString("AppConfig")!;
+
+// Best option is to use the Microsoft EntraID to connect with only the endpoint, so no secrets is "exposed"
+string AppConfigEndPoint = "";
 
 // Load configuration from Azure App Configuration
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
-    options.Connect(connectionString);
+    //options.Connect(connectionString);
+    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential());
+
     options.ConfigureKeyVault(keyVaultOptions =>
     {
         keyVaultOptions.SetCredential(new DefaultAzureCredential());
     });
 });
 
-string test1 = builder.Configuration.GetConnectionString("ApplicationInsights")!;
-string test2 = builder.Configuration.GetConnectionString("LocalSQL")!;
-
+// Bind Configuration "ApplicationConfiguration" to the class
+builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
 
 // Application Insight Service
 // https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
 builder.Services.AddOpenTelemetry().UseAzureMonitor(options => {
-    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsights")!;
+    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
 
 // Ajouter la BD
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQL")!.Replace(@"\\",@"\"))  // not sure why, but AppConfig or AzureKey double escape that thing.
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQL")!)
     .LogTo(Console.WriteLine, LogLevel.Trace)
     .EnableDetailedErrors());
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 

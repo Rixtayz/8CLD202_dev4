@@ -128,20 +128,6 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-11-01-preview",
-      //semi hardcoded
-      "name": "[format('{0}/{1}', parameters('VaultName'), 'ConnectionStringAppConfig')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
-        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
-      ],
-      //This provide app config key
-      "properties": {
-        "value": "[listKeys(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').value[2].connectionString]"
-      } //application insight connection string, inside of App Config
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2024-04-01-preview",
       //semi hardcoded
       "name": "[concat(parameters('VaultName'), '/ConnectionStringLocalSQL')]",
@@ -157,7 +143,7 @@
           "enabled": true
         }
       }
-    },
+    }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -188,6 +174,54 @@
       "properties": {
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalSQL'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'Endpoints:AppConfiguration')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[reference(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').endpoint]"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:FontSize')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "20"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:FontColor')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "red"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:WelcomePhrase')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "Yo, welcome !!"
       }
     }
   ],
