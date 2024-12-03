@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using MVC.Models;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace MVC.Controllers
 {
@@ -9,11 +10,13 @@ namespace MVC.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
+        // Configuraiton pour recevoir les ApplicationConfiguration du AppConfig ...
         private ApplicationConfiguration _applicationConfiguration { get; }
 
-        public HomeController(ILogger<HomeController> logger, ApplicationConfiguration applicationConfiguration)
+        // Voice le IOptionsSnapshot qui importe dans l'object la configuraiton du AppConfig.
+        public HomeController(ILogger<HomeController> logger, IOptionsSnapshot<ApplicationConfiguration> options)
         {
-            _applicationConfiguration = applicationConfiguration;
+            _applicationConfiguration = options.Value;
             _logger = logger;
         }
 

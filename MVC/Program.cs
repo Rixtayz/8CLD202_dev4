@@ -2,29 +2,38 @@ using Microsoft.EntityFrameworkCore;
 using MVC.Models;
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
-using NuGet.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Retrieve the connection string This one is local to the project ... could be pass as environment variable.
-//string connectionString = builder.Configuration.GetConnectionString("AppConfig")!;
+// Configuration manuel pour prendre la connectionString du AppConfig hardcoder dans le appsettings.json
+// Cette information pourrait être passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
+// https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
+string connectionString = builder.Configuration.GetConnectionString("AppConfig")!;
 
-// Best option is to use the Microsoft EntraID to connect with only the endpoint, so no secrets is "exposed"
-string AppConfigEndPoint = "";
+// Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
+// string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 
-// Load configuration from Azure App Configuration
+// Initialize AppConfig
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
-    //options.Connect(connectionString);
-    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential());
+    options.Connect(connectionString)
+    // Besoin du "App Configuration Data Reader" role
+    // options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential());
+
+    // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
+    // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
+    .Select("ApplicationConfiguration:*")
+    .ConfigureRefresh(refreshOptions =>
+    refreshOptions.Register("ApplicationConfiguration:Sentinel", refreshAll: true).SetRefreshInterval(new TimeSpan(0,0,10)));
 
     options.ConfigureKeyVault(keyVaultOptions =>
     {
+        // Besoin du "Key Vault Secrets Officer" role
         keyVaultOptions.SetCredential(new DefaultAzureCredential());
     });
 });
 
-// Bind Configuration "ApplicationConfiguration" to the class
+// Liaison de la Configuration "ApplicationConfiguration" a la class
 builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
 
 // Application Insight Service
@@ -51,6 +60,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
+app.UseAzureAppConfiguration();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
