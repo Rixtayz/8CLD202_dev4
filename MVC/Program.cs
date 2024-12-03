@@ -1,32 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 using MVC.Models;
 using Azure.Identity;
-using Azure.Monitor.OpenTelemetry;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 
-using OpenTelemetry;
-using OpenTelemetry.Trace;
-using Azure.Monitor.OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configuration manuel pour prendre la connectionString du AppConfig hardcoder dans le appsettings.json
 // Cette information pourrait être passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
 // https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
-string connectionString = builder.Configuration.GetConnectionString("AppConfig")!;
 
 // Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
-// string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
+ string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 
 // Initialize AppConfig
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
-    options.Connect(connectionString)
     // Besoin du "App Configuration Data Reader" role
-    // options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential());
+    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential())
 
     // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
@@ -47,7 +41,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     });
 });
 
-// ajout du service middleware pour AppConfig et FeatureFlag
+// Ajout du service middleware pour AppConfig et FeatureFlag
 builder.Services.AddAzureAppConfiguration();
 builder.Services.AddFeatureManagement();
 
@@ -55,18 +49,10 @@ builder.Services.AddFeatureManagement();
 builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
 
 // Application Insight Service & OpenTelemetry
-builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddOpenTelemetry()
-    .WithTracing(tracing =>
-    {
-        tracing.AddAspNetCoreInstrumentation();
-        tracing.AddHttpClientInstrumentation();
-        tracing.AddAzureMonitorTraceExporter(options =>
-        {
-            options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
-        });
-    });
-
+// https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
+builder.Services.AddOpenTelemetry().UseAzureMonitor(options => {
+    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
+});
 
 // Ajouter la BD
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
