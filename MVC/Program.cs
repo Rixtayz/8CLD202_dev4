@@ -14,7 +14,7 @@ builder.Services.AddControllersWithViews();
 // https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
 
 // Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
- string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
+string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 
 // Initialize AppConfig
 builder.Configuration.AddAzureAppConfiguration(options =>
@@ -32,7 +32,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 
     .ConfigureRefresh(refreshOptions =>
     refreshOptions.Register("ApplicationConfiguration:Sentinel", refreshAll: true)
-        .SetRefreshInterval(new TimeSpan(0,0,10)));
+        .SetRefreshInterval(new TimeSpan(0, 0, 10)));
 
     options.ConfigureKeyVault(keyVaultOptions =>
     {
@@ -50,20 +50,33 @@ builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSe
 
 // Application Insight Service & OpenTelemetry
 // https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
-builder.Services.AddOpenTelemetry().UseAzureMonitor(options => {
+builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
+{
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
 
-// Ajouter la BD
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
+//Ajouter la BD SQL
+builder.Services.AddDbContext<ApplicationDbContextSQL>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQL")!)
     .LogTo(Console.WriteLine, LogLevel.Trace)
     .EnableDetailedErrors());
 
+//builder.Services.AddDbContextFactory<ApplicationDbContextNoSQL>(options =>
+//    options
+//    .UseCosmos(
+//        connectionString: "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+//        databaseName: "ApplicationDB",
+//        cosmosOptionsAction: options =>
+//        {
+//            options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Direct);
+//            options.MaxRequestsPerTcpConnection(16);
+//            options.MaxTcpConnectionsPerEndpoint(32);
+//        }));
+
 var app = builder.Build();
 
 // Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
-app.UseAzureAppConfiguration();
+// app.UseAzureAppConfiguration();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

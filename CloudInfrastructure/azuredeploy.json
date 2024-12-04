@@ -37,6 +37,72 @@
       "metadata": {
         "description": "Local Database connection string"
       }
+    },
+    "storageAccountName": {
+      "type": "String"
+    },
+    "storageBlobContainerName1": {
+      "type": "String"
+    },
+    "storageBlobContainerName2": {
+      "type": "String"
+    },
+    "accountType": {
+      "type": "String"
+    },
+    "kind": {
+      "type": "String"
+    },
+    "minimumTlsVersion": {
+      "type": "String"
+    },
+    "supportsHttpsTrafficOnly": {
+      "type": "Bool"
+    },
+    "allowBlobPublicAccess": {
+      "type": "Bool"
+    },
+    "allowSharedKeyAccess": {
+      "type": "Bool"
+    },
+    "defaultOAuth": {
+      "type": "Bool"
+    },
+    "accessTier": {
+      "type": "String"
+    },
+    "publicNetworkAccess": {
+      "type": "String"
+    },
+    "allowCrossTenantReplication": {
+      "type": "Bool"
+    },
+    "networkAclsBypass": {
+      "type": "String"
+    },
+    "networkAclsDefaultAction": {
+      "type": "String"
+    },
+    "networkAclsIpRules": {
+      "type": "Array"
+    },
+    "dnsEndpointType": {
+      "type": "String"
+    },
+    "largeFileSharesState": {
+      "type": "String"
+    },
+    "keySource": {
+      "type": "String"
+    },
+    "encryptionEnabled": {
+      "type": "Bool"
+    },
+    "keyTypeForTableAndQueueEncryption": {
+      "type": "String"
+    },
+    "infrastructureEncryptionEnabled": {
+      "type": "Bool"
     }
   },
   "variables": {},
@@ -149,6 +215,25 @@
           "enabled": true
         }
       }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ConnectionStringBlob')]",
+      "location": "eastus",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //this provide connectionString for the Blob Access
+      "properties": {
+        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2019-06-01').keys[0].value, ';EndpointSuffix=core.windows.net')]",
+        "attributes": {
+          "enabled": true
+        }
+      }
     }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
@@ -179,6 +264,22 @@
       ],
       "properties": {
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalSQL'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:Blob')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringBlob')]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringBlob'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
     },
@@ -249,7 +350,107 @@
         "contentType": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
       },
       "dependsOn": [ "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('appConfigName'))]" ]
-    }
+    }, // Blob creation
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [],
+      "tags": {},
+      "sku": {
+        "name": "[parameters('accountType')]"
+      },
+      "kind": "[parameters('kind')]",
+      "properties": {
+        "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+        "supportsHttpsTrafficOnly": "[parameters('supportsHttpsTrafficOnly')]",
+        "allowBlobPublicAccess": "[parameters('allowBlobPublicAccess')]",
+        "allowSharedKeyAccess": "[parameters('allowSharedKeyAccess')]",
+        "defaultToOAuthAuthentication": "[parameters('defaultOAuth')]",
+        "accessTier": "[parameters('accessTier')]",
+        "publicNetworkAccess": "[parameters('publicNetworkAccess')]",
+        "allowCrossTenantReplication": "[parameters('allowCrossTenantReplication')]",
+        "networkAcls": {
+          "bypass": "[parameters('networkAclsBypass')]",
+          "defaultAction": "[parameters('networkAclsDefaultAction')]",
+          "ipRules": "[parameters('networkAclsIpRules')]"
+        },
+        "dnsEndpointType": "[parameters('dnsEndpointType')]",
+        "largeFileSharesState": "[parameters('largeFileSharesState')]",
+        "encryption": {
+          "keySource": "[parameters('keySource')]",
+          "services": {
+            "blob": {
+              "enabled": "[parameters('encryptionEnabled')]"
+            },
+            "file": {
+              "enabled": "[parameters('encryptionEnabled')]"
+            },
+            "table": {
+              "enabled": "[parameters('encryptionEnabled')]"
+            },
+            "queue": {
+              "enabled": "[parameters('encryptionEnabled')]"
+            }
+          },
+          "requireInfrastructureEncryption": "[parameters('infrastructureEncryptionEnabled')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-05-01",
+      "name": "[concat(parameters('storageAccountName'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "enabled": false
+        }
+      }
+
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-05-01",
+      "name": "[concat(parameters('storageAccountName'), '/default/', parameters('storageBlobContainerName1'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false
+      },
+      {
+        "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+        "apiVersion": "2023-05-01",
+        "name": "[concat(parameters('storageAccountName'), '/default/', parameters('storageBlobContainerName2'))]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]",
+          "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+        ],
+        "properties": {
+          "immutableStorageWithVersioning": {
+            "enabled": false
+          },
+          "defaultEncryptionScope": "$account-encryption-key",
+          "denyEncryptionScopeOverride": false
+        }
+      }
   ],
   "outputs": {
     "AppConfigName": {
