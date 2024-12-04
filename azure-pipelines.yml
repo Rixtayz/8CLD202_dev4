@@ -25,6 +25,12 @@ variables:
   value: 'ApplicationInsight'
 - name: LocalSQLDB
   value: 'Server=(localdb)\\MSSQLLocalDB;Database=MVC_local;Trusted_Connection=True;MultipleActiveResultSets=true'
+- name: BlobName
+  value: 'guroblobstore'
+- name: BlobContainer1
+  value: 'unvalidated'
+- name: BlobContainer2
+  value: 'validated'
 
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
@@ -39,7 +45,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -LocalDB $(LocalSQLDB)'
+      overrideParameters: '-location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -LocalDB $(LocalSQLDB) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
