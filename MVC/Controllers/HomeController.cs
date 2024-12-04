@@ -19,7 +19,7 @@ namespace MVC.Controllers
         private ApplicationConfiguration _applicationConfiguration { get; }
 
         // Configuration pour recevoir les Flags
-        private readonly IFeatureManager _featureManager;
+        private IFeatureManager _featureManager { get; }
 
         // Voir le IOptionsSnapshot qui importe dans l'object la configuraiton du AppConfig.
         // Ainsi que le IFeatureManager pour la gestion des Flags

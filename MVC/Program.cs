@@ -56,7 +56,7 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 });
 
 //Ajouter la BD SQL
-builder.Services.AddDbContext<ApplicationDbContextSQL>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQL")!)
     .LogTo(Console.WriteLine, LogLevel.Trace)
     .EnableDetailedErrors());
@@ -76,7 +76,7 @@ builder.Services.AddDbContext<ApplicationDbContextSQL>(options =>
 var app = builder.Build();
 
 // Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
-// app.UseAzureAppConfiguration();
+app.UseAzureAppConfiguration();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -72,7 +72,10 @@ namespace MVC.Models
 
         public bool IsDeleted { get; private set; } = false;
 
-        public required byte[] Image { get; set; }
+        // Implemented to put the Images in StorageBucket.
+        public Guid? BlobImage { get; set; }
+        
+        public byte[]? Image { get; set; }
 
         public ICollection<Comment> Comments { get; private set; } = new List<Comment>();
 

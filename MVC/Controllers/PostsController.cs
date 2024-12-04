@@ -7,15 +7,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MVC.Models;
 
+// Pour le support du Blob pour les images
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
+using Microsoft.Extensions.Options;
+
 namespace MVC.Controllers
 {
     public class PostsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public PostsController(ApplicationDbContext context)
+        // Configuration pour recevoir les ApplicationConfiguration du AppConfig ...
+        // Ici ce qui nous interesse c'est l'access au BlobConnectionString
+        private ApplicationConfiguration _applicationConfiguration { get; }
+
+        public PostsController(ApplicationDbContext context, IOptionsSnapshot<ApplicationConfiguration> options)
         {
             _context = context;
+            _applicationConfiguration = options.Value;
         }
 
         // GET: Posts
@@ -41,13 +51,26 @@ namespace MVC.Controllers
         public async Task<IActionResult> Create([Bind("Title,Category,User,Created,FileToUpload")] PostForm postForm)
         {
 
-            //Conversion du fichier recu and IFormFile and Byte[]. L'utilisation ici du modèle d'héritage avec la propriété supplémentaire sert de passerelle.
+            // Conversion du fichier recu en IFormFile a Byte[]. 
+            // Ensuite le Byte[] sera envoyer au BlobStorage en utilisant un Guid comme identifiant.
+            // Nous allons garder le Guid et créer un URL.
             using (MemoryStream ms = new MemoryStream())
             {
                 if (ms.Length < 40971520)
                 {
                     await postForm.FileToUpload.CopyToAsync(ms);
-                    postForm.Image = ms.ToArray();
+
+                    //Création du service connection au Blob
+                    BlobServiceClient serviceClient = new BlobServiceClient(_applicationConfiguration.BlobConnectionString);
+
+                    //Création du client pour le Blob
+                    BlobContainerClient blobClient = serviceClient.GetBlobContainerClient(_applicationConfiguration.UnvalidatedBlob);
+
+                    //Création d'un nom pour l'image
+                    postForm.BlobImage = new Guid();
+
+                    //Envoie de l'image sur le blob
+                    await blobClient.UploadBlobAsync(postForm.Image.ToString(), ms);
 
                     //retrait de l'erreur du au manque de l'imnage, celle-ci fut ajouter au model de base par notre CopyToAsync.
                     ModelState.Remove("Image");

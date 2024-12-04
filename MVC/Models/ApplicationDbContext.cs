@@ -6,19 +6,15 @@ using Microsoft.Identity.Client;
 
 namespace MVC.Models
 {
-    //base class
-    public class ApplicationDbContext : DbContext
-    { 
-        public ApplicationDbContext(DbContextOptions options) : base(options) { }
+    //dotnet ef migrations add InitialCreate -c jokecontext
+    //dotnet ef migrations add "MigrationName" -c ContextName
+    //dotnet ef database update -c ContextName
 
-        public DbSet<Post> Posts { get; set; } = null!;
-        public DbSet<Comment> Comments { get; set; } = null!;
-    }
 
     //SQL
-    public class ApplicationDbContextSQL : ApplicationDbContext
+    public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContextSQL(DbContextOptions options) : base(options) 
+        public ApplicationDbContext(DbContextOptions options) : base(options) 
         {
 
         }
@@ -51,12 +47,14 @@ namespace MVC.Models
                     new Post { Id = -3, Title = "Meme3", Category = Category.Humour, User = "Guillaume R.", Image = File.ReadAllBytes(AppContext.BaseDirectory + "Meme3.png") },
                     new Post { Id = -4, Title = "Meme4", Category = Category.Humour, User = "Guillaume R", Image = File.ReadAllBytes(AppContext.BaseDirectory + "Meme4.jpg") }
                 );
-
         }
+        public DbSet<Post> Posts { get; set; } = null!;
+        public DbSet<Comment> Comments { get; set; } = null!;
+
     }
 
     //No SQL
-    public class ApplicationDbContextNoSQL : ApplicationDbContext
+    public class ApplicationDbContextNoSQL : DbContext
     {
         public ApplicationDbContextNoSQL(DbContextOptions options) : base(options)
         {
@@ -90,5 +88,8 @@ namespace MVC.Models
                 );
 
         }
+
+        public DbSet<Post> Posts { get; set; } = null!;
+        public DbSet<Comment> Comments { get; set; } = null!;
     }
 }

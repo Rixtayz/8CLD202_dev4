@@ -271,7 +271,7 @@
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
       // hardcoded
-      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:Blob')]",
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:BlobConnectionString')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringBlob')]",
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
@@ -281,6 +281,30 @@
       "properties": {
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringBlob'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:UnvalidatedBlob')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('storageBlobContainerName1')]"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:ValidatedBlob')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('storageBlobContainerName2')]"
       }
     },
     {
