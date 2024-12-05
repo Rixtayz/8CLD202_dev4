@@ -56,54 +56,56 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
 
-builder.Services.AddDbContext<ApplicationDbContextSQL>();
-builder.Services.AddScoped<IRepository, EFRepositorySQL>();
+// Pour rebuild des database SQL
+//builder.Services.AddDbContext<ApplicationDbContextSQL>();
+//builder.Services.AddScoped<IRepository, EFRepositorySQL>();
 
 // Ajouter la BD ( SQL ou NoSQL )
-//switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
-//{
-//    case "SQL":
-//        builder.Services.AddDbContext<ApplicationDbContextSQL>();
-//        builder.Services.AddScoped<IRepository, EFRepositorySQL>();
-//        break;
+switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
+{
+    case "SQL":
+        builder.Services.AddDbContext<ApplicationDbContextSQL>();
+        builder.Services.AddScoped<IRepository, EFRepositorySQL>();
+        break;
 
-//    case "NoSQL":
-//        builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
-//        builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
-//        break;
-//}
+    case "NoSQL":
+        builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
+        builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
+        break;
+}
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
+// Pour rebuild des database SQL
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
 
-    dbContext.Database.EnsureDeleted();
-    dbContext.Database.Migrate();
-}
+//    dbContext.Database.EnsureDeleted();
+//    dbContext.Database.Migrate();
+//}
 
 // Configuration de la BD ( SQL ou NoSQL )
-//switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
-//{
-//    case "SQL":
-//        using (var scope = app.Services.CreateScope())
-//        {
-//            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
+switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
+{
+    case "SQL":
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
 
-//            dbContext.Database.EnsureDeleted();
-//            dbContext.Database.Migrate();
-//        }
-//        break;
+            dbContext.Database.EnsureDeleted();
+            dbContext.Database.Migrate();
+        }
+        break;
 
-//    case "NoSQL":
-//        using (var scope = app.Services.CreateScope())
-//        {
-//            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
-//            await context.Database.EnsureCreatedAsync();
-//        }
-//        break;
-//}
+    case "NoSQL":
+        using (var scope = app.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
+            await context.Database.EnsureCreatedAsync();
+        }
+        break;
+}
 
 // Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
 app.UseAzureAppConfiguration();
