@@ -24,7 +24,8 @@ namespace MVC.Models
         [Key]
         // Ajouter pour NoSQL
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; init; }
+        // Utilisation du Guid pour etre mieux aligner avec NoSQL
+        public Guid Id { get; init; }
 
         [Required(ErrorMessage = "SVP entrer votre commentaire")]
         [MaxLength(128)]
@@ -86,7 +87,7 @@ namespace MVC.Models
         // référence pour ForeignKey ...
         public Post Post { get; set; } = null!;
 
-        public int PostId { get; set; }
+        public Guid PostId { get; set; }
 
         //public int? ParentCommentId { get; set; }
 

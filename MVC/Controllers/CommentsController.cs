@@ -20,7 +20,7 @@ namespace MVC.Controllers
         }
 
         // GET: Comments
-        public async Task<IActionResult> Index(int id)
+        public async Task<IActionResult> Index(Guid id)
         {
             return View(await _repo.GetCommentsIndex(id));
         }
@@ -30,7 +30,7 @@ namespace MVC.Controllers
         // GET: Comments/Create/{PostId}{CommentId}
         // int PostId
         [HttpGet]
-        public IActionResult Create(int PostId)
+        public IActionResult Create(Guid PostId)
         {
             ViewData["PostId"] = PostId;
             return View();
@@ -59,7 +59,7 @@ namespace MVC.Controllers
         }
 
         // Function pour ajouter un like a un Comment
-        public async Task<ActionResult> Like(int CommentId, int PostId)
+        public async Task<ActionResult> Like(Guid CommentId, Guid PostId)
         {
             await _repo.IncrementCommentLike(CommentId);
 
@@ -68,7 +68,7 @@ namespace MVC.Controllers
         }
 
         // Fonction pour ajouter un dislike a un Comment
-        public async Task<ActionResult> Dislike(int CommentId, int PostId)
+        public async Task<ActionResult> Dislike(Guid CommentId, Guid PostId)
         {
             await _repo.IncrementCommentDislike(CommentId);
 

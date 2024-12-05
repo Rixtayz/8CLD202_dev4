@@ -43,7 +43,8 @@ namespace MVC.Models
         [Key]
         // Ajouter pour NoSQL
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; init; }
+        // Utilisation du Guid pour être mieux aligner avec NoSQL
+        public Guid Id { get; init; }
 
         [Required(ErrorMessage = "SVP entrer un titre que personne ne lira")]
         [MaxLength(128)]
@@ -79,7 +80,7 @@ namespace MVC.Models
         
         public required string Url { get; set; }
 
-        public ICollection<Comment> Comments { get; private set; } = new List<Comment>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
         public override string ToString()
         {

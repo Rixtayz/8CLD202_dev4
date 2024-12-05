@@ -4,8 +4,6 @@ using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 using MVC.Data;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,30 +55,43 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
- 
+
 // Ajouter la BD ( SQL ou NoSQL )
-builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
-builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
+switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
+{
+    case "SQL":
+        builder.Services.AddDbContext<ApplicationDbContextSQL>();
+        builder.Services.AddScoped<IRepository, EFRepositorySQL>();
+        break;
 
-
+    case "NoSQL":
+        builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
+        builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
+        break;
+}
 
 var app = builder.Build();
 
-// Seulement si SQL
-//using (var scope = app.Services.CreateScope())
-//{
-//    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
-
-//     dbContext.Database.EnsureDeleted();
-//     dbContext.Database.Migrate();
-//}
-
-
-// Seulement pour NoSQL
-using (var scope = app.Services.CreateScope())
+// Configuration de la BD ( SQL ou NoSQL )
+switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
-    await context.Database.EnsureCreatedAsync();
+    case "SQL":
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
+
+            dbContext.Database.EnsureDeleted();
+            dbContext.Database.Migrate();
+        }
+        break;
+
+    case "NoSQL":
+        using (var scope = app.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
+            await context.Database.EnsureCreatedAsync();
+        }
+        break;
 }
 
 // Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.

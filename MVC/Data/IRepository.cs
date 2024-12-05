@@ -11,17 +11,17 @@ namespace MVC.Data
 
         abstract Task Add(Object Entity);
 
-        abstract Task IncrementPostLike(int id);
+        abstract Task IncrementPostLike(Guid id);
 
-        abstract Task IncrementPostDislike(int id);
+        abstract Task IncrementPostDislike(Guid id);
 
         // Comments
-        Task<List<Comment>> GetCommentsIndex(int id);
+        Task<List<Comment>> GetCommentsIndex(Guid id);
 
         abstract Task AddComments(Comment comment);
 
-        abstract Task IncrementCommentLike(int id);
+        abstract Task IncrementCommentLike(Guid id);
 
-        abstract Task IncrementCommentDislike(int id);
+        abstract Task IncrementCommentDislike(Guid id);
     }
  }

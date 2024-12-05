@@ -17,7 +17,10 @@
     "ApplicationInsightName": {
       "value": "ApplicationInsights"
     },
-    "LocalDB": {
+    "LocalDBsql": {
+      "value": ""
+    },
+    "LocalDBnosql": {
       "value": ""
     },
     "storageAccountName": {

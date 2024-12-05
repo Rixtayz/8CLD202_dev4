@@ -27,40 +27,40 @@ namespace MVC.Data
             await _context.SaveChangesAsync();
         }
 
-        public async Task IncrementPostLike(int id)
+        public async Task IncrementPostLike(Guid id)
         {
             var post = await _context.Posts.FindAsync(id);
             post!.IncrementLike();
             await _context.SaveChangesAsync();
         }
 
-        public async Task IncrementPostDislike(int id)
+        public async Task IncrementPostDislike(Guid id)
         {
             var post = await _context.Posts.FindAsync(id);
             post!.IncrementDislike();
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Comment>> GetCommentsIndex(int id)
+        public async Task<List<Comment>> GetCommentsIndex(Guid id)
         {
-            return await _context.Comments.Where(w => w.PostId == id).ToListAsync();
+            return await _context.Comments.Where(w => w.PostId == id).OrderBy(o => o.Created).ToListAsync();
         }
 
         public async Task AddComments(Comment comment)
         {
-            var post = _context.Posts.Where(w => w.Id == comment.PostId).FirstOrDefault();
+            var post = await _context.Posts.FindAsync(comment.PostId);
             post!.Comments.Add(comment);
             await _context.SaveChangesAsync();
         }
 
-        public async Task IncrementCommentLike(int id)
+        public async Task IncrementCommentLike(Guid id)
         {
             var comment = await _context.Comments.FindAsync(id);
             comment!.IncrementLike();
             await _context.SaveChangesAsync();
         }
 
-        public async Task IncrementCommentDislike(int id)
+        public async Task IncrementCommentDislike(Guid id)
         {
             var comment = await _context.Comments.FindAsync(id);
             comment!.IncrementDislike();

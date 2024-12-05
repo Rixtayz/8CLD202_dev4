@@ -32,7 +32,13 @@
         "description": "LogAnalytics Name"
       }
     },
-    "LocalDB": {
+    "LocalDBsql": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Local Database connection string"
+      }
+    },
+    "LocalDBnosql": {
       "type": "securestring",
       "metadata": {
         "description": "Local Database connection string"
@@ -210,7 +216,25 @@
       ],
       //this provide local configuration for the DB of the web site.
       "properties": {
-        "value": "[parameters('LocalDB')]",
+        "value": "[parameters('LocalDBsql')]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ConnectionStringLocalNoSQL')]",
+      "location": "eastus",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //this provide local configuration for the DB of the web site.
+      "properties": {
+        "value": "[parameters('LocalDBnosql')]",
         "attributes": {
           "enabled": true
         }
@@ -264,6 +288,22 @@
       ],
       "properties": {
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalSQL'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:LocalNoSQL')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalNoSQL')]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringLocalNoSQL'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
     },
@@ -354,6 +394,18 @@
       "properties": {
         "value": "Yo, welcome !!"
       }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'DatabaseConfiguration')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "SQL"
+      }
     }, // Feature Flag -- hardcoded
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
@@ -442,7 +494,6 @@
           "enabled": false
         }
       }
-
     },
     {
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",

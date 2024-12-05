@@ -98,7 +98,7 @@ namespace MVC.Controllers
         }
 
         // Function pour ajouter un like a un Post
-        public async Task<ActionResult> Like(int id)
+        public async Task<ActionResult> Like(Guid id)
         {
             await _repo.IncrementPostLike(id);
 
@@ -106,7 +106,7 @@ namespace MVC.Controllers
         }
 
         // Fonction pour ajouter un dislike a un Post
-        public async Task<ActionResult> Dislike(int id)
+        public async Task<ActionResult> Dislike(Guid id)
         {
             await _repo.IncrementPostDislike(id);
 
