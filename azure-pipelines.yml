@@ -24,7 +24,7 @@ variables:
 - name: ApplicationInsight
   value: 'ApplicationInsight'
 - name: LocalSQLDB
-  value: 'Server=(localdb)\\MSSQLLocalDB;Database=MVC_local;Trusted_Connection=True;MultipleActiveResultSets=true'
+  value: 'Server=(localdb)\\MSSQLLocalDB;Database=MVC;Trusted_Connection=True;MultipleActiveResultSets=true'
 - name: BlobName
   value: 'guroblobstore'
 - name: BlobContainer1
