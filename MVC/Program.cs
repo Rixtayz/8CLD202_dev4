@@ -59,20 +59,28 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 });
  
 // Ajouter la BD ( SQL ou NoSQL )
-builder.Services.AddDbContext<ApplicationDbContextSQL>();
-builder.Services.AddScoped<IRepository, EFRepositorySQL>();
+builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
+builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
 
 
 
 var app = builder.Build();
 
 // Seulement si SQL
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
+
+//     dbContext.Database.EnsureDeleted();
+//     dbContext.Database.Migrate();
+//}
+
+
+// Seulement pour NoSQL
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
-
-     dbContext.Database.EnsureDeleted();
-     dbContext.Database.Migrate();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
+    await context.Database.EnsureCreatedAsync();
 }
 
 // Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.

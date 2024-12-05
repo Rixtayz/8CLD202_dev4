@@ -41,6 +41,8 @@ namespace MVC.Models
         //
 
         [Key]
+        // Ajouter pour NoSQL
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; init; }
 
         [Required(ErrorMessage = "SVP entrer un titre que personne ne lira")]
