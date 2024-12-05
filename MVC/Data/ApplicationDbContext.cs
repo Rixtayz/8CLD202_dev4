@@ -17,36 +17,15 @@ namespace MVC.Data
 
     //dotnet ef database update 0 --context ApplicationDbContext
 
-    public abstract class ApplicationDbContext : DbContext, IRepository
+
+    //SQL
+    public class ApplicationDbContextSQL : DbContext
     {
         public required IConfiguration Configuration { get; set; }
 
-        public ApplicationDbContext(DbContextOptions options) : base(options)
-        {
-        }
-
-        public ApplicationDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
+        public ApplicationDbContextSQL(DbContextOptions options, IConfiguration configuration) : base(options)
         {
             Configuration = configuration;
-        }
-
-        protected abstract override void OnConfiguring(DbContextOptionsBuilder optionsBuilder);
-
-        protected abstract override void OnModelCreating(ModelBuilder modelBuilder);
-
-        public abstract Task<List<Post>> GetIndex();
-
-        public DbSet<Post> Posts { get; set; } = null!;
-        public DbSet<Comment> Comments { get; set; } = null!;
-    }
-   
-
-    //SQL
-    public class ApplicationDbContextSQL : ApplicationDbContext
-    {
-        public ApplicationDbContextSQL(DbContextOptions options, IConfiguration configuration) : base(options, configuration)
-        {
-            
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -74,15 +53,8 @@ namespace MVC.Data
 
         }
 
-        public override async Task<List<Post>> GetIndex() 
-        {
-            // Ajout d'un "order by", pour trier les resultats
-            // Ajout d'un "take", pour prendre seulement une partie des entré, nous ferons une paginations plus tard.
-            // Ajout d'un include pour ajouter a notre collection les commentaires lier a notre Post.
-            // return View(await _context.Posts.OrderByDescending(o => o.Created).Take(10).Include(i => i.Comments).ToListAsync());
-            return await Posts.OrderByDescending(o => o.Created).Take(10).Include(i => i.Comments).ToListAsync();
-        }
-
+        public DbSet<Post> Posts { get; set; } = null!;
+        public DbSet<Comment> Comments { get; set; } = null!;
     }
 
     //No SQL
@@ -93,6 +65,21 @@ namespace MVC.Data
         public ApplicationDbContextNoSQL(DbContextOptions options, IConfiguration configuration) : base(options)
         {
             Configuration = configuration;
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder
+                .UseCosmos(
+                // Change for dynamic
+                    connectionString: "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+                    databaseName: "ApplicationDB",
+                    cosmosOptionsAction: options =>
+                    {
+                        options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Direct);
+                        options.MaxRequestsPerTcpConnection(16);
+                        options.MaxTcpConnectionsPerEndpoint(32);
+                    });
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

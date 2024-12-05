@@ -11,7 +11,7 @@ using MVC.Data;
 
 namespace MVC.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(ApplicationDbContextSQL))]
     [Migration("20241204205040_InitialCreate")]
     partial class InitialCreate
     {

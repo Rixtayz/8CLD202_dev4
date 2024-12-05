@@ -17,15 +17,15 @@ namespace MVC.Controllers
 {
     public class PostsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private IRepository _repo;
 
         // Configuration pour recevoir les ApplicationConfiguration du AppConfig ...
         // Ici ce qui nous interesse c'est l'access au BlobConnectionString
         private ApplicationConfiguration _applicationConfiguration { get; }
 
-        public PostsController(ApplicationDbContext context, IOptionsSnapshot<ApplicationConfiguration> options)
+        public PostsController(IRepository repo, IOptionsSnapshot<ApplicationConfiguration> options)
         {
-            _context = context;
+            _repo = repo;
             _applicationConfiguration = options.Value;
         }
 
@@ -33,7 +33,7 @@ namespace MVC.Controllers
         public async Task<IActionResult> Index()
         {
 
-            return View(await _context.GetIndex());
+            return View(await _repo.GetPostsIndex());
         }
 
         // GET: Posts/Create
@@ -90,9 +90,8 @@ namespace MVC.Controllers
 
             if (ModelState.IsValid)
             {
-                //le format de l'object envoyer ici va utiliser le polymorphise pour revenir a ça forme de base, ainsi il perdra le IFormFile.
-                _context.Add(postForm);
-                await _context.SaveChangesAsync();
+                await _repo.Add(postForm);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(postForm);
@@ -101,12 +100,7 @@ namespace MVC.Controllers
         // Function pour ajouter un like a un Post
         public async Task<ActionResult> Like(int id)
         {
-            // Utiliation du null-forgiving operator
-            // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving
-
-            var post = await _context.Posts.FindAsync(id);
-            post!.IncrementLike();
-            await _context.SaveChangesAsync();
+            await _repo.IncrementPostLike(id);
 
             return RedirectToAction("Index");
         }
@@ -114,13 +108,7 @@ namespace MVC.Controllers
         // Fonction pour ajouter un dislike a un Post
         public async Task<ActionResult> Dislike(int id)
         {
-            // Utiliation du null-forgiving operator
-            // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving
-
-            var post = await _context.Posts.FindAsync(id);
-
-            post!.IncrementDislike();
-            await _context.SaveChangesAsync();
+            await _repo.IncrementPostDislike(id);
 
             return RedirectToAction("Index");
         }

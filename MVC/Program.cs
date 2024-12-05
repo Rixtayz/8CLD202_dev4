@@ -57,34 +57,21 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
-
-//Ajouter la BD ( SQL ou NoSQL )
-
+ 
+// Ajouter la BD ( SQL ou NoSQL )
 builder.Services.AddDbContext<ApplicationDbContextSQL>();
+builder.Services.AddScoped<IRepository, EFRepositorySQL>();
 
-//builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-//    options
-//        .UseCosmos(
-//            connectionString: "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
-//            databaseName: "ApplicationDB",
-//            cosmosOptionsAction: options =>
-//            {
-//                options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Direct);
-//                options.MaxRequestsPerTcpConnection(16);
-//                options.MaxTcpConnectionsPerEndpoint(32);
-//            }));
+
 
 var app = builder.Build();
 
+// Seulement si SQL
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
 
-    //Efface la Database a chaque usage
-    // If No SQL deactivate this
      dbContext.Database.EnsureDeleted();
-
-    //Migration des Schema
      dbContext.Database.Migrate();
 }
 

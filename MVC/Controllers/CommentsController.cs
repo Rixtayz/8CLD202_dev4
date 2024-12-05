@@ -12,17 +12,17 @@ namespace MVC.Controllers
 {
     public class CommentsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private IRepository _repo;
 
-        public CommentsController(ApplicationDbContext context)
+        public CommentsController(IRepository repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
         // GET: Comments
         public async Task<IActionResult> Index(int id)
         {
-            return View(await _context.Comments.Where(w => w.PostId == id).ToListAsync());
+            return View(await _repo.GetCommentsIndex(id));
         }
 
 
@@ -48,9 +48,7 @@ namespace MVC.Controllers
 
             if (ModelState.IsValid)
             {
-                var post = _context.Posts.Where(w => w.Id == comment.PostId).FirstOrDefault();
-                post!.Comments.Add(comment);
-                await _context.SaveChangesAsync();
+                await _repo.AddComments(comment);
 
                 // la fonction Index s'attend a un object nommé id ...
                 return RedirectToAction(nameof(Index), new { id = comment.PostId } );
@@ -63,13 +61,7 @@ namespace MVC.Controllers
         // Function pour ajouter un like a un Comment
         public async Task<ActionResult> Like(int CommentId, int PostId)
         {
-            // Utiliation du null-forgiving operator
-            // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving
-
-            var comment = await _context.Comments.FindAsync(CommentId);
-            comment!.IncrementLike();
-
-            await _context.SaveChangesAsync();
+            await _repo.IncrementCommentLike(CommentId);
 
             // la fonction Index s'attend a un object nommé id ...
             return RedirectToAction(nameof(Index), new { id = PostId });
@@ -78,13 +70,7 @@ namespace MVC.Controllers
         // Fonction pour ajouter un dislike a un Comment
         public async Task<ActionResult> Dislike(int CommentId, int PostId)
         {
-            // Utiliation du null-forgiving operator
-            // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving
-
-            var comment = await _context.Comments.FindAsync(CommentId);
-            comment!.IncrementDislike();
-
-            await _context.SaveChangesAsync();
+            await _repo.IncrementCommentDislike(CommentId);
 
             // la fonction Index s'attend a un object nommé id ...
             return RedirectToAction(nameof(Index), new { id = PostId });
