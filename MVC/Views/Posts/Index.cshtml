@@ -13,20 +13,12 @@
         <tbody>
             <tr>
                 <br>
-                    @Html.DisplayFor(modelItem => item.Category) - @Html.DisplayFor(modelItem => item.Title)
+                @Html.DisplayFor(modelItem => item.Category) - @Html.DisplayFor(modelItem => item.Title)
                 <br>
 
-                @{
-                    string imageSrc = "";
-                    if (item.Image != null && item.Image.Length > 0)
-                    {
-                        var imageBase64 = Convert.ToBase64String(item.Image);
-                        imageSrc = $"data:image/png;base64,{imageBase64}";
-                    }
-                }
-                @if (!string.IsNullOrEmpty(imageSrc))
+                @if (!string.IsNullOrEmpty(@item.Url))
                 {
-                    <img src="@imageSrc" alt="Image" />
+                    <img src="@item.Url" alt="Image" />
                 }
 
                 <td>

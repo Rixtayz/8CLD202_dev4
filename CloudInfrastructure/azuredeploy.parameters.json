@@ -42,7 +42,7 @@
       "value": true
     },
     "allowBlobPublicAccess": {
-      "value": false
+      "value": true
     },
     "allowSharedKeyAccess": {
       "value": true

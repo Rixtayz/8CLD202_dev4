@@ -9,24 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Meme2.png" />
-    <None Remove="Meme3.png" />
-    <None Remove="meme4.jpg" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Meme2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Meme3.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="meme4.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.2.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
@@ -48,12 +30,12 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<InternalsVisibleTo Include="MVC_Test" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Migrations\NoSQL\" />
 	</ItemGroup>
 	
 </Project>

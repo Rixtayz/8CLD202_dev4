@@ -11,6 +11,7 @@ using MVC.Models;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
 using Microsoft.Extensions.Options;
+using MVC.Data;
 
 namespace MVC.Controllers
 {
@@ -31,10 +32,8 @@ namespace MVC.Controllers
         // GET: Posts
         public async Task<IActionResult> Index()
         {
-            // Ajout d'un "order by", pour trier les resultats
-            // Ajout d'un "take", pour prendre seulement une partie des entré, nous ferons une paginations plus tard.
-            // Ajout d'un include pour ajouter a notre collection les commentaires lier a notre Post.
-            return View(await _context.Posts.OrderByDescending(o => o.Created).Take(10).Include(i => i.Comments).ToListAsync());
+
+            return View(await _context.GetIndex());
         }
 
         // GET: Posts/Create
@@ -67,13 +66,19 @@ namespace MVC.Controllers
                     BlobContainerClient blobClient = serviceClient.GetBlobContainerClient(_applicationConfiguration.UnvalidatedBlob);
 
                     //Création d'un nom pour l'image
-                    postForm.BlobImage = new Guid();
+                    postForm.BlobImage = Guid.NewGuid();
+
+                    //Reinitialize le Stream
+                    ms.Position = 0;
 
                     //Envoie de l'image sur le blob
-                    await blobClient.UploadBlobAsync(postForm.Image.ToString(), ms);
+                    await blobClient.UploadBlobAsync(postForm.BlobImage.ToString(), ms);
+
+                    postForm.Url = blobClient.Uri.AbsoluteUri + "/" + postForm.BlobImage;
 
                     //retrait de l'erreur du au manque de l'imnage, celle-ci fut ajouter au model de base par notre CopyToAsync.
-                    ModelState.Remove("Image");
+                    ModelState.Remove("BlobImage");
+                    ModelState.Remove("Url");
                 }
                 else
                 {

@@ -457,7 +457,8 @@
           "enabled": false
         },
         "defaultEncryptionScope": "$account-encryption-key",
-        "denyEncryptionScopeOverride": false
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "Blob"
       }
     },
     {
@@ -473,7 +474,8 @@
           "enabled": false
         },
         "defaultEncryptionScope": "$account-encryption-key",
-        "denyEncryptionScopeOverride": false
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "Blob"
       }
     }
   ],

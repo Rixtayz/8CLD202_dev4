@@ -3,6 +3,9 @@ using MVC.Models;
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
+using MVC.Data;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,25 +58,35 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
 
-//Ajouter la BD SQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQL")!)
-    .LogTo(Console.WriteLine, LogLevel.Trace)
-    .EnableDetailedErrors());
+//Ajouter la BD ( SQL ou NoSQL )
 
-//builder.Services.AddDbContextFactory<ApplicationDbContextNoSQL>(options =>
+builder.Services.AddDbContext<ApplicationDbContextSQL>();
+
+//builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 //    options
-//    .UseCosmos(
-//        connectionString: "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
-//        databaseName: "ApplicationDB",
-//        cosmosOptionsAction: options =>
-//        {
-//            options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Direct);
-//            options.MaxRequestsPerTcpConnection(16);
-//            options.MaxTcpConnectionsPerEndpoint(32);
-//        }));
+//        .UseCosmos(
+//            connectionString: "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+//            databaseName: "ApplicationDB",
+//            cosmosOptionsAction: options =>
+//            {
+//                options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Direct);
+//                options.MaxRequestsPerTcpConnection(16);
+//                options.MaxTcpConnectionsPerEndpoint(32);
+//            }));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    //Efface la Database a chaque usage
+    // If No SQL deactivate this
+     dbContext.Database.EnsureDeleted();
+
+    //Migration des Schema
+     dbContext.Database.Migrate();
+}
 
 // Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
 app.UseAzureAppConfiguration();
