@@ -47,7 +47,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -LocalDB $(LocalSQLDB) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -LocalNoSQLDB $(LocalNoSQLDB)'
+      overrideParameters: '-location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -LocalDBsql $(LocalSQLDB) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -LocalDBnosql $(LocalNoSQLDB)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
