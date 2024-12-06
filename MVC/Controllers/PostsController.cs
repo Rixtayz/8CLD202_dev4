@@ -97,6 +97,7 @@ namespace MVC.Controllers
             return View(postForm);
         }
 
+        [HttpPost]
         // Function pour ajouter un like a un Post
         public async Task<ActionResult> Like(Guid id)
         {
@@ -105,6 +106,7 @@ namespace MVC.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
         // Fonction pour ajouter un dislike a un Post
         public async Task<ActionResult> Dislike(Guid id)
         {
