@@ -75,7 +75,7 @@ namespace MVC.Models
 
         public bool IsDeleted { get; private set; } = false;
 
-        // Implemented to put the Images in StorageBucket.
+        // Implementation pour entreposé les images sur un Storage Blog
         public required Guid? BlobImage { get; set; }
         
         public required string Url { get; set; }

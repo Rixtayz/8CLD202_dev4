@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Azure.Cosmos;
-using Microsoft.EntityFrameworkCore.Cosmos;
 using MVC.Models;
 
 namespace MVC.Data

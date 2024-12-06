@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationInsightsResourceId>/subscriptions/970fcef5-9c23-4f7d-a11b-5a96d104f066/resourceGroups/Guro/providers/microsoft.insights/components/ApplicationInsights</ApplicationInsightsResourceId>

@@ -36,7 +36,6 @@ namespace MVC.Data
         {
 
             //Création de la hiérarchie des tables
-
             modelBuilder.Entity<Post>()
                 .ToTable("Posts")
                 .HasMany(m => m.Comments)
