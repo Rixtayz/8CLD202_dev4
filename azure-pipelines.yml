@@ -16,7 +16,7 @@ variables:
 - name: Vault
   value: 'GuroKeyVault4'
 - name: AppConfig
-  value: 'GuroAppConfiguration10'
+  value: 'GuroAppConfiguration11'
 - name: LogAnalytics
   value: 'LogAnalyticsName'
 - name: InfrastructureFolder
