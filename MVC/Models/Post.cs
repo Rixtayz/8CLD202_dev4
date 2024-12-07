@@ -34,6 +34,41 @@ namespace MVC.Models
         public required IFormFile FileToUpload { get; set; }
     }
 
+    // Implementation du DTO
+
+    [NotMapped]
+    public class PostDTO
+    { 
+        public Guid Id { get; init; }
+
+        public string Title { get; init; }
+
+        public Category Category { get; init; }
+
+        public string User { get; init; }
+
+        public int Like { get; init; }
+
+        public int Dislike { get; init; }
+
+        public DateTime Created { get; init; } 
+
+        public string Url { get; init; }
+
+        public PostDTO(Post post)
+        { 
+            Id = post.Id;
+            Title = post.Title;
+            Category = post.Category;
+            User = post.User;
+            Like = post.Like;
+            Dislike = post.Dislike;
+            Created = post.Created;
+            Url = post.Url;
+        }
+    }
+
+
     public class Post
     {
         // Référence pour les Accessor ( Get, Set, Init )

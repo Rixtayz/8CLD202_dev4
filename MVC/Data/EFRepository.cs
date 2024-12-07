@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using MVC.Models;
 
 namespace MVC.Data
@@ -13,9 +14,38 @@ namespace MVC.Data
         }
 
         //API
-        public virtual async Task<List<Post>> GetAPIPostsIndex() { return await _context.Set<Post>().ToListAsync(); }
+        // Avec l'implementation du DTO
+        public virtual async Task<Results<Ok<List<PostDTO>>, InternalServerError>> GetAPIPostsIndex() 
+        {
+            try
+            {
+                // Converstion dans le DTO
+                Post[] posts = await _context.Set<Post>().ToArrayAsync();
+                List<PostDTO> postsDTO = posts.Select(x => new PostDTO(x)).ToList();
 
-        public virtual async Task<Post> GetAPIPost(Guid id) { return await _context.Set<Post>().FirstOrDefaultAsync(w => w.Id == id); }
+                return TypedResults.Ok(postsDTO);
+            }
+            catch 
+            {
+                return TypedResults.InternalServerError();
+            }
+        }
+
+        public virtual async Task<Results<Ok<PostDTO>, NotFound, InternalServerError>> GetAPIPost(Guid id) 
+        {
+            try
+            {
+                var post = await _context.Set<Post>().FirstOrDefaultAsync(w => w.Id == id);
+                if (post == null)
+                    return TypedResults.NotFound();
+                else
+                    return TypedResults.Ok(new PostDTO(post));
+            }
+            catch
+            {
+                return TypedResults.InternalServerError();
+            }
+        }
 
         //Post
         public abstract Task<List<Post>> GetPostsIndex();
@@ -25,13 +55,7 @@ namespace MVC.Data
 
         //Comments
         public virtual async Task<List<Comment>> GetCommentsIndex(Guid id) { return await _context.Set<Comment>().Where(w => w.PostId == id).OrderBy(o => o.Created).ToListAsync(); }
-
-        public virtual async Task AddComments(Comment comment) 
-        { 
-            var post = await _context.Set<Post>().FindAsync(comment.PostId); 
-            post!.Comments.Add(comment); 
-            await _context.SaveChangesAsync(); 
-        }
+        public virtual async Task AddComments(Comment comment) { var post = await _context.Set<Post>().FindAsync(comment.PostId); post!.Comments.Add(comment); await _context.SaveChangesAsync(); }
         public virtual async Task IncrementCommentLike(Guid id) { var comment = await _context.Set<Comment>().FindAsync(id); comment!.IncrementLike(); await _context.SaveChangesAsync(); }
         public virtual async Task IncrementCommentDislike(Guid id) { var comment = await _context.Set<Comment>().FindAsync(id); comment!.IncrementDislike(); await _context.SaveChangesAsync(); }
     }

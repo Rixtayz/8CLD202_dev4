@@ -4,6 +4,7 @@ using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 using MVC.Data;
+using OpenTelemetry.Resources;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +26,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 
     // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
-    .Select("ApplicationConfiguration:*")
+    .Select("*")
 
     // Requis pour l'ajout des Feature Flag ...
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/use-feature-flags-dotnet-core
@@ -55,6 +56,7 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
+
 
 // Pour rebuild des database SQL
 //builder.Services.AddDbContext<ApplicationDbContextSQL>();
