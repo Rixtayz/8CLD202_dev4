@@ -4,6 +4,8 @@ using MVC.Data;
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
+using MVC.Business;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,9 +70,12 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
         break;
 }
-
+// Ajouter le service pour Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance
+builder.Services.AddScoped<BlobController>();
 
 var app = builder.Build();
 
@@ -101,7 +106,8 @@ app.UseAzureAppConfiguration();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
+{ 
+    // Configuration des services Swagger
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -112,9 +118,23 @@ app.UseHttpsRedirection();
 //API Specific
 app.MapGet("/Posts/Index/", async (IRepository repo) => await repo.GetAPIPostsIndex());
 app.MapGet("/Posts/Index/{id}", async (IRepository repo, Guid id) => await repo.GetAPIPost(id));
+app.MapPost("/Posts/Add", async (IRepository repo, PostCreateDTO post, BlobController blob) =>
+{
+    try
+    {
+        Guid guid = Guid.NewGuid();
+        string Url = await blob.PushImageToBlob(post.Image, guid);
+        Post Post = new Post { Title = post.Title, Category = post.Category, User = post.User, BlobImage = guid, Url = Url };
+        return await repo.CreateAPIPost(Post);
+    }
+    catch (ExceptionFilesize)
+    {
+        return TypedResults.BadRequest();
+    }
+});
 
 //Post
-app.MapPost("/Posts/Add", async (IRepository repo, Post post) => await repo.Add(post));
+//app.MapPost("/Posts/Add", async (IRepository repo, Post post) => await repo.Add(post));
 app.MapPost("/Posts/IncrementPostLike/{id}", async (IRepository repo, Guid id) => await repo.IncrementPostLike(id));
 app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepository repo, Guid id) => await repo.IncrementPostDislike(id));
 

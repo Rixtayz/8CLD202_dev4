@@ -4,6 +4,7 @@ using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 using MVC.Data;
+using MVC.Business;
 using OpenTelemetry.Resources;
 
 
@@ -75,6 +76,9 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
         break;
 }
+
+// Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance
+builder.Services.AddScoped<BlobController>();
 
 var app = builder.Build();
 

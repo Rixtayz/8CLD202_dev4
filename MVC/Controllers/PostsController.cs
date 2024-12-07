@@ -12,21 +12,19 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
 using Microsoft.Extensions.Options;
 using MVC.Data;
+using MVC.Business;
 
 namespace MVC.Controllers
 {
     public class PostsController : Controller
     {
         private IRepository _repo;
+        private BlobController _blobController;
 
-        // Configuration pour recevoir les ApplicationConfiguration du AppConfig ...
-        // Ici ce qui nous interesse c'est l'access au BlobConnectionString
-        private ApplicationConfiguration _applicationConfiguration { get; }
-
-        public PostsController(IRepository repo, IOptionsSnapshot<ApplicationConfiguration> options)
+        public PostsController(IRepository repo, BlobController blobController)
         {
             _repo = repo;
-            _applicationConfiguration = options.Value;
+            _blobController = blobController;
         }
 
         // GET: Posts
@@ -50,42 +48,20 @@ namespace MVC.Controllers
         public async Task<IActionResult> Create([Bind("Title,Category,User,Created,FileToUpload")] PostForm postForm)
         {
 
-            // Conversion du fichier recu en IFormFile a Byte[]. 
-            // Ensuite le Byte[] sera envoyer au BlobStorage en utilisant un Guid comme identifiant.
-            // Nous allons garder le Guid et créer un URL.
-            using (MemoryStream ms = new MemoryStream())
+            try
             {
-                if (ms.Length < 40971520)
-                {
-                    await postForm.FileToUpload.CopyToAsync(ms);
+                postForm.BlobImage = Guid.NewGuid();
+                postForm.Url = await _blobController.PushImageToBlob(postForm.FileToUpload, (Guid)postForm.BlobImage);
 
-                    //Création du service connection au Blob
-                    BlobServiceClient serviceClient = new BlobServiceClient(_applicationConfiguration.BlobConnectionString);
-
-                    //Création du client pour le Blob
-                    BlobContainerClient blobClient = serviceClient.GetBlobContainerClient(_applicationConfiguration.UnvalidatedBlob);
-
-                    //Création d'un nom pour l'image
-                    postForm.BlobImage = Guid.NewGuid();
-
-                    //Reinitialize le Stream
-                    ms.Position = 0;
-
-                    //Envoie de l'image sur le blob
-                    await blobClient.UploadBlobAsync(postForm.BlobImage.ToString(), ms);
-
-                    postForm.Url = blobClient.Uri.AbsoluteUri + "/" + postForm.BlobImage;
-
-                    //retrait de l'erreur du au manque de l'imnage, celle-ci fut ajouter au model de base par notre CopyToAsync.
-                    ModelState.Remove("BlobImage");
-                    ModelState.Remove("Url");
-                }
-                else
-                {
-                    //ajout d'une erreur si le fichier est trop gros
-                    ModelState.AddModelError("FileToUpload", "Le fichier est trop gros.");
-                }
-
+                //retrait de l'erreur du au manque de l'imnage, celle-ci fut ajouter au model de base par notre CopyToAsync.
+                ModelState.Remove("BlobImage");
+                ModelState.Remove("Url");
+            }
+            catch (ExceptionFilesize)
+            {
+                // Fichier trop gros
+                // ajout d'une erreur si le fichier est trop gros
+                ModelState.AddModelError("FileToUpload", "Le fichier est trop gros.");
             }
 
             if (ModelState.IsValid)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using MVC.Models;
+using MVC.Business;
 
 namespace MVC.Data
 {
@@ -15,13 +16,13 @@ namespace MVC.Data
 
         //API
         // Avec l'implementation du DTO
-        public virtual async Task<Results<Ok<List<PostDTO>>, InternalServerError>> GetAPIPostsIndex() 
+        public virtual async Task<Results<Ok<List<PostReadDTO>>, InternalServerError>> GetAPIPostsIndex() 
         {
             try
             {
                 // Converstion dans le DTO
                 Post[] posts = await _context.Set<Post>().ToArrayAsync();
-                List<PostDTO> postsDTO = posts.Select(x => new PostDTO(x)).ToList();
+                List<PostReadDTO> postsDTO = posts.Select(x => new PostReadDTO(x)).ToList();
 
                 return TypedResults.Ok(postsDTO);
             }
@@ -31,7 +32,7 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Ok<PostDTO>, NotFound, InternalServerError>> GetAPIPost(Guid id) 
+        public virtual async Task<Results<Ok<PostReadDTO>, NotFound, InternalServerError>> GetAPIPost(Guid id) 
         {
             try
             {
@@ -39,10 +40,29 @@ namespace MVC.Data
                 if (post == null)
                     return TypedResults.NotFound();
                 else
-                    return TypedResults.Ok(new PostDTO(post));
+                    return TypedResults.Ok(new PostReadDTO(post));
             }
             catch
             {
+                return TypedResults.InternalServerError();
+            }
+        }
+
+        public virtual async Task<Results<Created<PostReadDTO>, BadRequest, InternalServerError>> CreateAPIPost(Post post)
+        {
+            try
+            {
+                _context.Add(post);
+                await _context.SaveChangesAsync();
+                return TypedResults.Created($"/Posts/{post.Id}", new PostReadDTO(post));
+
+            }
+            catch (Exception ex) when (ex is DbUpdateException)
+            {
+                return TypedResults.BadRequest();
+            }
+            catch (Exception)
+            { 
                 return TypedResults.InternalServerError();
             }
         }
