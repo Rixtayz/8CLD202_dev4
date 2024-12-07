@@ -416,7 +416,7 @@
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       "properties": {
-        "value": "SQL"
+        "value": "NoSQL"
       }
     }, // Feature Flag -- hardcoded
     {

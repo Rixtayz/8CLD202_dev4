@@ -109,7 +109,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/Posts/Index/{id}", async (IRepository repo) => await repo.GetPostsIndex());
+//API Specific
+app.MapGet("/Posts/Index/", async (IRepository repo) => await repo.GetAPIPostsIndex());
+app.MapGet("/Posts/Index/{id}", async (IRepository repo, Guid id) => await repo.GetAPIPost(id));
+
+//Post
+app.MapPost("/Posts/Add", async (IRepository repo, Post post) => await repo.Add(post));
+app.MapPost("/Posts/IncrementPostLike/{id}", async (IRepository repo, Guid id) => await repo.IncrementPostLike(id));
+app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepository repo, Guid id) => await repo.IncrementPostDislike(id));
+
+//Comment
+app.MapGet("/Comments/Index/{id}", async (IRepository repo, Guid id) => await repo.GetCommentsIndex(id));
+app.MapPost("/Comments/Add", async (IRepository repo, Comment comment) => await repo.AddComments(comment));
+app.MapPost("/Comments/IncrementCommentLike/{id}", async (IRepository repo, Guid id) => await repo.IncrementCommentLike(id));
+app.MapPost("/Comments/IncrementCommentsDislike/{id}", async (IRepository repo, Guid id) => await repo.IncrementCommentDislike(id));
 
 app.Run();
 

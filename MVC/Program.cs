@@ -25,7 +25,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 
     // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
-    .Select("*")
+    .Select("ApplicationConfiguration:*")
 
     // Requis pour l'ajout des Feature Flag ...
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/use-feature-flags-dotnet-core
@@ -33,7 +33,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 
     .ConfigureRefresh(refreshOptions =>
     refreshOptions.Register("ApplicationConfiguration:Sentinel", refreshAll: true)
-        .SetRefreshInterval(new TimeSpan(0, 0, 10)));
+        .SetRefreshInterval(new TimeSpan(0, 0, 30)));
 
     options.ConfigureKeyVault(keyVaultOptions =>
     {

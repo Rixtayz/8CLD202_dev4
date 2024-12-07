@@ -55,8 +55,6 @@ namespace MVC.Data
                 entity.Property(i => i.Id)
                       .ValueGeneratedOnAdd();
             });
-
-
         }
 
         public DbSet<Post> Posts { get; set; } = null!;

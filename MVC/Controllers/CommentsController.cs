@@ -58,6 +58,7 @@ namespace MVC.Controllers
             return RedirectToAction(nameof(Index), new { id = comment.PostId } );
         }
 
+        [HttpPost]
         // Function pour ajouter un like a un Comment
         public async Task<ActionResult> Like(Guid CommentId, Guid PostId)
         {
@@ -67,6 +68,7 @@ namespace MVC.Controllers
             return RedirectToAction(nameof(Index), new { id = PostId });
         }
 
+        [HttpPost]
         // Fonction pour ajouter un dislike a un Comment
         public async Task<ActionResult> Dislike(Guid CommentId, Guid PostId)
         {

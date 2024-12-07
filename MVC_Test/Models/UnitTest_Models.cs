@@ -1,41 +1,234 @@
+using System;
 using MVC.Models;
+using Xunit;
 
 namespace MVC_Test.Models
 {
-    public class UnitTest
+    public class UnitTest_Post
     {
-        [Theory]
-        [InlineData("", "")]
-        [InlineData("Guillaume Routhier", "Guillaume Routhier")]
-        [InlineData(@"LongString with many !@#%%$&&?(**$?%!@$\\", @"LongString with many !@#%%$&&?(**$?%!@$\\")]
-
-        public void Post_Creation_Title(string title, string expectedTitle)
+        [Fact]
+        public void IncrementLike_ShouldIncrementLike()
         {
             // Arrange
-            Post post = new Post { Title = title, User = "", Image = new byte[1] };
+            var post = new Post
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Post",
+                Category = Category.Humour,
+                User = "TestUser",
+                BlobImage = Guid.NewGuid(),
+                Url = "http://example.com"
+            };
 
             // Act
+            post.IncrementLike();
 
-
-            // Asset
-            Assert.Equal(post.Title, expectedTitle);
+            // Assert
+            Assert.Equal(1, post.Like);
         }
 
-        [Theory]
-        [InlineData(0, 0)]
-        [InlineData(2, 2)]
-        [InlineData(1, 1)]
-
-        public void Post_Creation_Category(int category, int expectedCategory)
+        [Fact]
+        public void IncrementDislike_ShouldIncrementDislike()
         {
             // Arrange
-            Post post = new Post { Title = "", User = "", Image = new byte[1], Category = (Category)category };
+            var post = new Post
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Post",
+                Category = Category.Humour,
+                User = "TestUser",
+                BlobImage = Guid.NewGuid(),
+                Url = "http://example.com"
+            };
 
             // Act
+            post.IncrementDislike();
 
+            // Assert
+            Assert.Equal(1, post.Dislike);
+        }
 
-            // Asset
-            Assert.True(post.Category == (Category)expectedCategory);
+        [Fact]
+        public void Approve_ShouldSetIsApprovedToTrue()
+        {
+            // Arrange
+            var post = new Post
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Post",
+                Category = Category.Humour,
+                User = "TestUser",
+                BlobImage = Guid.NewGuid(),
+                Url = "http://example.com"
+            };
+
+            // Act
+            post.Approve();
+
+            // Assert
+            Assert.True(post.IsApproved);
+        }
+
+        [Fact]
+        public void Delete_ShouldSetIsDeletedToTrue()
+        {
+            // Arrange
+            var post = new Post
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Post",
+                Category = Category.Humour,
+                User = "TestUser",
+                BlobImage = Guid.NewGuid(),
+                Url = "http://example.com"
+            };
+
+            // Act
+            post.Delete();
+
+            // Assert
+            Assert.True(post.IsDeleted);
+        }
+
+        [Fact]
+        public void ToString_ShouldReturnCorrectString()
+        {
+            // Arrange
+            var post = new Post
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Post",
+                Category = Category.Humour,
+                User = "TestUser",
+                BlobImage = Guid.NewGuid(),
+                Url = "http://example.com"
+            };
+
+            var expectedString = "===============\r\n" +
+                                 "Title : Test Post\r\n" +
+                                 "Category : Humour\r\n" +
+                                 "User : TestUser\r\n" +
+                                 "Like : 0\r\n" +
+                                 "Dislike : 0\r\n" +
+                                 "Created : " + post.Created.ToString() + "\r\n" +
+                                 "===============";
+
+            // Act
+            var result = post.ToString();
+
+            // Assert
+            Assert.Equal(expectedString, result);
+        }
+    }
+
+    public class UnitTest_Comment
+    {
+        [Fact]
+        public void IncrementLike_ShouldIncrementLike()
+        {
+            // Arrange
+            var comment = new Comment
+            {
+                Id = Guid.NewGuid(),
+                Commentaire = "Test Comment",
+                User = "TestUser",
+                PostId = Guid.NewGuid(),
+                Post = new Post { Id = Guid.NewGuid(), Title = "Test Post", User = "TestUser", BlobImage = Guid.NewGuid(), Url = "" }
+            };
+
+            // Act
+            comment.IncrementLike();
+
+            // Assert
+            Assert.Equal(1, comment.Like);
+        }
+
+        [Fact]
+        public void IncrementDislike_ShouldIncrementDislike()
+        {
+            // Arrange
+            var comment = new Comment
+            {
+                Id = Guid.NewGuid(),
+                Commentaire = "Test Comment",
+                User = "TestUser",
+                PostId = Guid.NewGuid(),
+                Post = new Post { Id = Guid.NewGuid(), Title = "Test Post", User = "TestUser", BlobImage = Guid.NewGuid(), Url = "" }
+            };
+
+            // Act
+            comment.IncrementDislike();
+
+            // Assert
+            Assert.Equal(1, comment.Dislike);
+        }
+
+        [Fact]
+        public void Approve_ShouldSetIsApprovedToTrue()
+        {
+            // Arrange
+            var comment = new Comment
+            {
+                Id = Guid.NewGuid(),
+                Commentaire = "Test Comment",
+                User = "TestUser",
+                PostId = Guid.NewGuid(),
+                Post = new Post { Id = Guid.NewGuid(), Title = "Test Post", User = "TestUser", BlobImage = Guid.NewGuid(), Url = "" }
+            };
+
+            // Act
+            comment.Approve();
+
+            // Assert
+            Assert.True(comment.IsApproved);
+        }
+
+        [Fact]
+        public void Delete_ShouldSetIsDeletedToTrue()
+        {
+            // Arrange
+            var comment = new Comment
+            {
+                Id = Guid.NewGuid(),
+                Commentaire = "Test Comment",
+                User = "TestUser",
+                PostId = Guid.NewGuid(),
+                Post = new Post { Id = Guid.NewGuid(), Title = "Test Post", User = "TestUser", BlobImage = Guid.NewGuid(), Url = "" }
+            };
+
+            // Act
+            comment.Delete();
+
+            // Assert
+            Assert.True(comment.IsDeleted);
+        }
+
+        [Fact]
+        public void ToString_ShouldReturnCorrectString()
+        {
+            // Arrange
+            var comment = new Comment
+            {
+                Id = Guid.NewGuid(),
+                Commentaire = "Test Comment",
+                User = "TestUser",
+                PostId = Guid.NewGuid(),
+                Post = new Post { Id = Guid.NewGuid(), Title = "Test Post", User = "TestUser", BlobImage = Guid.NewGuid(), Url = "" }
+            };
+
+            var expectedString = "===============\r\n" +
+                                 "Comment : Test Comment\r\n" +
+                                 "User : TestUser\r\n" +
+                                 "Like : 0\r\n" +
+                                 "Dislike : 0\r\n" +
+                                 "Created : " + comment.Created.ToString() + "\r\n" +
+                                 "===============";
+
+            // Act
+            var result = comment.ToString();
+
+            // Assert
+            Assert.Equal(expectedString, result);
         }
     }
 }

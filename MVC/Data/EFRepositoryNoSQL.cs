@@ -12,15 +12,15 @@ namespace MVC.Data
             // En NoSQL nous ne pouvons pas faire de "include" nous devons donc faire 2 query et les merger.
             List<Post> posts = await _context.Posts.OrderByDescending(o => o.Created).Take(10).ToListAsync();
 
-            // Nous extractons ensuite la list de Guid des posts
-            List<Guid> postGuid = posts.Select(p => p.Id).ToList();
+            // nous extractons ensuite la list de guid des posts
+            List<Guid> postguid = posts.Select(p => p.Id).ToList();
 
-            // Nous extractons ensuite les comments relier au posts.
-            List<Comment> comments = await _context.Comments.Where(c => postGuid.Contains(c.PostId)).ToListAsync();
+            // nous extractons ensuite les comments relier au posts.
+            List<Comment> comments = await _context.Comments.Where(c => postguid.Contains(c.PostId)).ToListAsync();
 
-            // Agregation du lots
+            // agregation du lots
             foreach (var post in posts)
-            { 
+            {
                 post.Comments = comments.Where(w => w.PostId == post.Id).ToList();
             }
 
