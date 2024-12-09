@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MVC.Models;
-using MVC.Business;
 
 namespace MVC.Data
 {
@@ -12,59 +10,6 @@ namespace MVC.Data
         protected EFRepository(TContext context) 
         { 
             _context = context; 
-        }
-
-        //API
-        // Avec l'implementation du DTO
-        public virtual async Task<Results<Ok<List<PostReadDTO>>, InternalServerError>> GetAPIPostsIndex() 
-        {
-            try
-            {
-                // Converstion dans le DTO
-                Post[] posts = await _context.Set<Post>().ToArrayAsync();
-                List<PostReadDTO> postsDTO = posts.Select(x => new PostReadDTO(x)).ToList();
-
-                return TypedResults.Ok(postsDTO);
-            }
-            catch 
-            {
-                return TypedResults.InternalServerError();
-            }
-        }
-
-        public virtual async Task<Results<Ok<PostReadDTO>, NotFound, InternalServerError>> GetAPIPost(Guid id) 
-        {
-            try
-            {
-                var post = await _context.Set<Post>().FirstOrDefaultAsync(w => w.Id == id);
-                if (post == null)
-                    return TypedResults.NotFound();
-                else
-                    return TypedResults.Ok(new PostReadDTO(post));
-            }
-            catch
-            {
-                return TypedResults.InternalServerError();
-            }
-        }
-
-        public virtual async Task<Results<Created<PostReadDTO>, BadRequest, InternalServerError>> CreateAPIPost(Post post)
-        {
-            try
-            {
-                _context.Add(post);
-                await _context.SaveChangesAsync();
-                return TypedResults.Created($"/Posts/{post.Id}", new PostReadDTO(post));
-
-            }
-            catch (Exception ex) when (ex is DbUpdateException)
-            {
-                return TypedResults.BadRequest();
-            }
-            catch (Exception)
-            { 
-                return TypedResults.InternalServerError();
-            }
         }
 
         //Post

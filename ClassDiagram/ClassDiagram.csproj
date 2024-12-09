@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\MVC\Business\BlobController.cs" Link="Business\BlobController.cs" />
+    <Compile Include="..\MVC\Controllers\CommentsController.cs" Link="Controllers\CommentsController.cs" />
+    <Compile Include="..\MVC\Controllers\HomeController.cs" Link="Controllers\HomeController.cs" />
+    <Compile Include="..\MVC\Controllers\PostsController.cs" Link="Controllers\PostsController.cs" />
+    <Compile Include="..\MVC\Data\ApplicationDbContextNoSQL.cs" Link="Data\ApplicationDbContextNoSQL.cs" />
+    <Compile Include="..\MVC\Data\ApplicationDbContextSQL.cs" Link="Data\ApplicationDbContextSQL.cs" />
+    <Compile Include="..\MVC\Data\EFRepository.cs" Link="Data\EFRepository.cs" />
+    <Compile Include="..\MVC\Data\EFRepositoryNoSQL.cs" Link="Data\EFRepositoryNoSQL.cs" />
+    <Compile Include="..\MVC\Data\EFRepositorySQL.cs" Link="Data\EFRepositorySQL.cs" />
+    <Compile Include="..\MVC\Data\IRepository.cs" Link="Data\IRepository.cs" />
+    <Compile Include="..\MVC\Models\ApplicationConfiguration.cs" Link="Models\ApplicationConfiguration.cs" />
+    <Compile Include="..\MVC\Models\ApplicationFeatures.cs" Link="Models\ApplicationFeatures.cs" />
+    <Compile Include="..\MVC\Models\Comment.cs" Link="Models\Comment.cs" />
+    <Compile Include="..\MVC\Models\Post.cs" Link="Models\Post.cs" />
+    <Compile Include="..\MVC\Program.cs" Link="Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Business\" />
+    <Folder Include="Controllers\" />
+    <Folder Include="Data\" />
+    <Folder Include="Models\NewFolder\" />
+  </ItemGroup>
+
+</Project>

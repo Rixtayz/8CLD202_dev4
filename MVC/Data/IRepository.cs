@@ -1,18 +1,9 @@
-﻿
-using Microsoft.AspNetCore.Http.HttpResults;
-using MVC.Models;
+﻿using MVC.Models;
 
 namespace MVC.Data
 {
     public interface IRepository
     {
-        // API, avec implementation des DTO
-        Task<Results<Ok<List<PostReadDTO>>, InternalServerError>> GetAPIPostsIndex();
-
-        Task<Results<Ok<PostReadDTO>, NotFound, InternalServerError>> GetAPIPost(Guid id);
-
-        Task<Results<Created<PostReadDTO>, BadRequest, InternalServerError>> CreateAPIPost(Post post);
-
         // Post
         Task<List<Post>> GetPostsIndex();
 

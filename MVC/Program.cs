@@ -75,6 +75,11 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
         builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
         break;
+
+    case "InMemory":
+        builder.Services.AddDbContext<ApplicationDbContextInMemory>();
+        builder.Services.AddScoped<IRepository, EFRepositoryInMemory>();
+        break;
 }
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance

@@ -8,12 +8,9 @@
 
   <ItemGroup>
     <Compile Include="..\MVC\Business\BlobController.cs" Link="Business\BlobController.cs" />
+    <Compile Include="..\MVC\Data\ApplicationDbContextInMemory.cs" Link="Data\ApplicationDbContextInMemory.cs" />
     <Compile Include="..\MVC\Data\ApplicationDbContextNoSQL.cs" Link="Data\ApplicationDbContextNoSQL.cs" />
     <Compile Include="..\MVC\Data\ApplicationDbContextSQL.cs" Link="Data\ApplicationDbContextSQL.cs" />
-    <Compile Include="..\MVC\Data\EFRepository.cs" Link="Data\EFRepository.cs" />
-    <Compile Include="..\MVC\Data\EFRepositoryNoSQL.cs" Link="Data\EFRepositoryNoSQL.cs" />
-    <Compile Include="..\MVC\Data\EFRepositorySQL.cs" Link="Data\EFRepositorySQL.cs" />
-    <Compile Include="..\MVC\Data\IRepository.cs" Link="Data\IRepository.cs" />
     <Compile Include="..\MVC\Models\ApplicationConfiguration.cs" Link="Models\ApplicationConfiguration.cs" />
     <Compile Include="..\MVC\Models\ApplicationFeatures.cs" Link="Models\ApplicationFeatures.cs" />
     <Compile Include="..\MVC\Models\Comment.cs" Link="Models\Comment.cs" />
@@ -43,8 +40,6 @@
 
   <ItemGroup>
     <Folder Include="Business\" />
-    <Folder Include="Models\" />
-    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

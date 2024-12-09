@@ -5,7 +5,7 @@ using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 using MVC.Business;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,17 +62,25 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 {
     case "SQL":
         builder.Services.AddDbContext<ApplicationDbContextSQL>();
-        builder.Services.AddScoped<IRepository, EFRepositorySQL>();
+        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPI<ApplicationDbContextSQL>>();
         break;
 
     case "NoSQL":
         builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
-        builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
+        builder.Services.AddScoped<IRepositoryAPI,  EFRepositoryAPI<ApplicationDbContextNoSQL>>();
+        break;
+
+    case "InMemory":
+        builder.Services.AddDbContext<ApplicationDbContextInMemory>();
+        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPI<ApplicationDbContextInMemory>>();
         break;
 }
 // Ajouter le service pour Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+    c.OperationFilter<FileUploadOperationFilter>() // Add custom operation filter, Ceci est pour le FileUpload
+);
+
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance
 builder.Services.AddScoped<BlobController>();
@@ -116,9 +124,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 //API Specific
-app.MapGet("/Posts/Index/", async (IRepository repo) => await repo.GetAPIPostsIndex());
-app.MapGet("/Posts/Index/{id}", async (IRepository repo, Guid id) => await repo.GetAPIPost(id));
-app.MapPost("/Posts/Add", async (IRepository repo, PostCreateDTO post, BlobController blob) =>
+//Post
+app.MapGet("/Posts/", async (IRepositoryAPI repo) => await repo.GetAPIPostsIndex());
+app.MapGet("/Posts/{id}", async (IRepositoryAPI repo, Guid id) => await repo.GetAPIPost(id));
+
+// https://andrewlock.net/reading-json-and-binary-data-from-multipart-form-data-sections-in-aspnetcore/
+// J'ai laisser cette fonction la car je voulais m'assurer de la séparation des concern, sinon j'aurais ajouté de la logique business dans le data layer.
+app.MapPost("/Posts/Add", async (IRepositoryAPI repo, [FromForm] PostCreateDTO post, BlobController blob) =>
 {
     try
     {
@@ -131,18 +143,16 @@ app.MapPost("/Posts/Add", async (IRepository repo, PostCreateDTO post, BlobContr
     {
         return TypedResults.BadRequest();
     }
-});
+    // DisableAntiforgery car .net 9.0 l'ajoute automatiquement.
+}).DisableAntiforgery();
 
-//Post
-//app.MapPost("/Posts/Add", async (IRepository repo, Post post) => await repo.Add(post));
-app.MapPost("/Posts/IncrementPostLike/{id}", async (IRepository repo, Guid id) => await repo.IncrementPostLike(id));
-app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepository repo, Guid id) => await repo.IncrementPostDislike(id));
+app.MapPost("/Posts/IncrementPostLike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementPostLike(id));
+app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementPostDislike(id));
 
 //Comment
-app.MapGet("/Comments/Index/{id}", async (IRepository repo, Guid id) => await repo.GetCommentsIndex(id));
-app.MapPost("/Comments/Add", async (IRepository repo, Comment comment) => await repo.AddComments(comment));
-app.MapPost("/Comments/IncrementCommentLike/{id}", async (IRepository repo, Guid id) => await repo.IncrementCommentLike(id));
-app.MapPost("/Comments/IncrementCommentsDislike/{id}", async (IRepository repo, Guid id) => await repo.IncrementCommentDislike(id));
+app.MapGet("/Comments/{id}", async (IRepositoryAPI repo, Guid id) => await repo.GetAPIComment(id));
+app.MapPost("/Comments/Add", async (IRepositoryAPI repo, Comment comment) => await repo.CreateAPIComment(comment));
+app.MapPost("/Comments/IncrementCommentLike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentLike(id));
+app.MapPost("/Comments/IncrementCommentsDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentDislike(id));
 
 app.Run();
-

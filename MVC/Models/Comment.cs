@@ -52,7 +52,6 @@ namespace MVC.Models
         public bool IsDeleted { get; private set; } = false;
 
 
-
         public override string ToString()
         {
             return $"===============" + Environment.NewLine +
