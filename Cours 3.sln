@@ -14,7 +14,7 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "CloudInfrastructure", "Clou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{EC35C17A-0EE5-4156-9EB0-F7C17C42B9DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassDiagram", "ClassDiagram\ClassDiagram.csproj", "{AC284790-E8EA-4319-A0AD-8EA90A81500C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API_Test", "API_Test\API_Test.csproj", "{BF322B65-486B-4A0A-85EC-47FBCFE20352}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,10 +38,10 @@ Global
 		{EC35C17A-0EE5-4156-9EB0-F7C17C42B9DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC35C17A-0EE5-4156-9EB0-F7C17C42B9DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC35C17A-0EE5-4156-9EB0-F7C17C42B9DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AC284790-E8EA-4319-A0AD-8EA90A81500C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AC284790-E8EA-4319-A0AD-8EA90A81500C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AC284790-E8EA-4319-A0AD-8EA90A81500C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AC284790-E8EA-4319-A0AD-8EA90A81500C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF322B65-486B-4A0A-85EC-47FBCFE20352}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF322B65-486B-4A0A-85EC-47FBCFE20352}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF322B65-486B-4A0A-85EC-47FBCFE20352}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF322B65-486B-4A0A-85EC-47FBCFE20352}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

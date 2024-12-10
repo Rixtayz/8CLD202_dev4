@@ -15,10 +15,6 @@ namespace MVC.Data
 
         //API
         // Avec l'implementation du DTO
-        /// <summary>
-        /// Méthode pour recevoir toutes les Posts
-        /// </summary>
-        /// <returns>List<PostReadDTO></PostReadDTO></returns>
         public virtual async Task<Results<Ok<List<PostReadDTO>>, InternalServerError>> GetAPIPostsIndex()
         {
             try
@@ -34,11 +30,7 @@ namespace MVC.Data
                 return TypedResults.InternalServerError();
             }
         }
-        /// <summary>
-        /// Méthode pour recevoir un Post unique
-        /// </summary>
-        /// <param name="id">Guid du Post désiré</param>
-        /// <returns>PostReadDTO</returns>
+
         public virtual async Task<Results<Ok<PostReadDTO>, NotFound, InternalServerError>> GetAPIPost(Guid id)
         {
             try
@@ -54,11 +46,8 @@ namespace MVC.Data
                 return TypedResults.InternalServerError();
             }
         }
-        /// <summary>
-        /// Création d'un post
-        /// </summary>
-        /// <param name="post"></param>
-        /// <returns>Id</returns>
+
+        // Normallement cette méthode ne devrait pas être Post, cette object est interne, mais nous avons géré la conversion dans une autre méthode interne avant ...
         public virtual async Task<Results<Created<PostReadDTO>, BadRequest, InternalServerError>> CreateAPIPost(Post post)
         {
             try
@@ -136,8 +125,6 @@ namespace MVC.Data
                 return TypedResults.InternalServerError();
             }
         }
-
-        // Comments param not good.
 
         public virtual async Task<Results<Created<CommentReadDTO>, NoContent, BadRequest, InternalServerError>> CreateAPIComment(CommentCreateDTO commentDTO)
         {

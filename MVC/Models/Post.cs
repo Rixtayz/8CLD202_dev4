@@ -28,27 +28,18 @@ namespace MVC.Models
         public required IFormFile FileToUpload { get; set; }
     }
 
-    /// <summary>
-    /// Objet de représentation du post interne
-    /// </summary>
     public class Post
     {
         // Référence pour les Accessor ( Get, Set, Init )
         // https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/using-properties
         //
 
-        /// <summary>
-        /// Id du post
-        /// </summary>
         [Key]
         // Ajouter pour NoSQL
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         // Utilisation du Guid pour être mieux aligner avec NoSQL
         public Guid Id { get; init; }
 
-        /// <summary>
-        /// Titre du post
-        /// </summary>
         [Required(ErrorMessage = "SVP entrer un titre que personne ne lira")]
         [MaxLength(128)]
         [Display(Name = "Titre")]

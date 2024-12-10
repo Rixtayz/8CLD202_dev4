@@ -6,6 +6,7 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 using MVC.Business;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,7 +63,7 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 {
     case "SQL":
         builder.Services.AddDbContext<ApplicationDbContextSQL>();
-        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPI<ApplicationDbContextSQL>>();
+        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPISQL>();
         break;
 
     case "NoSQL":
@@ -72,14 +73,16 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 
     case "InMemory":
         builder.Services.AddDbContext<ApplicationDbContextInMemory>();
-        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPI<ApplicationDbContextInMemory>>();
+        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPIInMemory>();
         break;
 }
 // Ajouter le service pour Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
-    c.OperationFilter<FileUploadOperationFilter>() // Add custom operation filter, Ceci est pour le FileUpload
-);
+{
+    c.OperationFilter<FileUploadOperationFilter>(); // Add custom operation filter, Ceci est pour le FileUpload
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml")); // Pour ajouter la documentation Swagger
+});
 
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance
@@ -152,9 +155,11 @@ app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepositoryAPI repo, Guid
 //Comment
 //Id or PostId ( va retourner 1 ou plusieurs comments)
 app.MapGet("/Comments/{id}", async (IRepositoryAPI repo, Guid id) => await repo.GetAPIComment(id));
-
-app.MapPost("/Comments/Add", async (IRepositoryAPI repo, Comment comment) => await repo.CreateAPIComment(comment));
+app.MapPost("/Comments/Add", async (IRepositoryAPI repo, CommentCreateDTO commentDTO) => await repo.CreateAPIComment(commentDTO));
 app.MapPost("/Comments/IncrementCommentLike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentLike(id));
 app.MapPost("/Comments/IncrementCommentsDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentDislike(id));
 
 app.Run();
+
+// Pour les xUnit test ...
+public partial class Program { }
