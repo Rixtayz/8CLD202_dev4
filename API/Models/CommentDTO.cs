@@ -41,11 +41,9 @@ namespace MVC.Models
 
         public required Guid PostId { get; init; }
 
-        public CommentCreateDTO(string commentaire, string user, Guid postid)
+        public static Comment GetComment(CommentCreateDTO comment)
         {
-            Commentaire = commentaire;
-            User = user;
-            PostId = postid;
+            return new Comment { Commentaire = comment.Commentaire, User = comment.User, PostId = comment.PostId }; 
         }
     }
 }

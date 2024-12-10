@@ -15,12 +15,16 @@ namespace MVC.Data
 
         //API
         // Avec l'implementation du DTO
+        /// <summary>
+        /// Méthode pour recevoir toutes les Posts
+        /// </summary>
+        /// <returns>List<PostReadDTO></PostReadDTO></returns>
         public virtual async Task<Results<Ok<List<PostReadDTO>>, InternalServerError>> GetAPIPostsIndex()
         {
             try
             {
                 // Converstion dans le DTO
-                Post[] posts = await _context.Set<Post>().ToArrayAsync();
+                Post[] posts = await _context.Set<Post>().OrderByDescending(o => o.Created).ToArrayAsync();
                 List<PostReadDTO> postsDTO = posts.Select(x => new PostReadDTO(x)).ToList();
 
                 return TypedResults.Ok(postsDTO);
@@ -30,7 +34,11 @@ namespace MVC.Data
                 return TypedResults.InternalServerError();
             }
         }
-
+        /// <summary>
+        /// Méthode pour recevoir un Post unique
+        /// </summary>
+        /// <param name="id">Guid du Post désiré</param>
+        /// <returns>PostReadDTO</returns>
         public virtual async Task<Results<Ok<PostReadDTO>, NotFound, InternalServerError>> GetAPIPost(Guid id)
         {
             try
@@ -46,7 +54,11 @@ namespace MVC.Data
                 return TypedResults.InternalServerError();
             }
         }
-
+        /// <summary>
+        /// Création d'un post
+        /// </summary>
+        /// <param name="post"></param>
+        /// <returns>Id</returns>
         public virtual async Task<Results<Created<PostReadDTO>, BadRequest, InternalServerError>> CreateAPIPost(Post post)
         {
             try
@@ -106,15 +118,18 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Ok<CommentReadDTO>, NotFound, InternalServerError>> GetAPIComment(Guid id)
+        public virtual async Task<Results<Ok<List<CommentReadDTO>>, NotFound, InternalServerError>> GetAPIComment(Guid id)
         {
             try
             {
-                var comment = await _context.Set<Comment>().FirstOrDefaultAsync(w => w.Id == id);
-                if (comment == null)
-                    return TypedResults.NotFound();
-                else
-                    return TypedResults.Ok(new CommentReadDTO(comment));
+                Comment[] comments = await _context.Set<Comment>().Where(x => x.Id == id || x.PostId == id).OrderByDescending(o => o.Created).ToArrayAsync();
+                if (comments.Length > 0)
+                {
+                    // Converstion dans le DTO
+                    List<CommentReadDTO> commentsDTO = comments.Select(x => new CommentReadDTO(x)).ToList();
+                    return TypedResults.Ok(commentsDTO);
+                }  
+                return TypedResults.NotFound();
             }
             catch
             {
@@ -122,15 +137,18 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Created<CommentReadDTO>, NoContent, BadRequest, InternalServerError>> CreateAPIComment(Comment comment)
+        // Comments param not good.
+
+        public virtual async Task<Results<Created<CommentReadDTO>, NoContent, BadRequest, InternalServerError>> CreateAPIComment(CommentCreateDTO commentDTO)
         {
             try
             {
-                var post = await _context.Set<Post>().FindAsync(comment.PostId);
+                var post = await _context.Set<Post>().FindAsync(commentDTO.PostId);
                 if (post == null)
                     return TypedResults.NoContent();
                 else
                 {
+                    Comment comment = CommentCreateDTO.GetComment(commentDTO);
                     post!.Comments.Add(comment);
                     await _context.SaveChangesAsync();
                     return TypedResults.Created($"/Comments/{comment.Id}", new CommentReadDTO(comment));

@@ -67,7 +67,7 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 
     case "NoSQL":
         builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
-        builder.Services.AddScoped<IRepositoryAPI,  EFRepositoryAPI<ApplicationDbContextNoSQL>>();
+        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPINoSQL>();
         break;
 
     case "InMemory":
@@ -150,7 +150,9 @@ app.MapPost("/Posts/IncrementPostLike/{id}", async (IRepositoryAPI repo, Guid id
 app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementPostDislike(id));
 
 //Comment
+//Id or PostId ( va retourner 1 ou plusieurs comments)
 app.MapGet("/Comments/{id}", async (IRepositoryAPI repo, Guid id) => await repo.GetAPIComment(id));
+
 app.MapPost("/Comments/Add", async (IRepositoryAPI repo, Comment comment) => await repo.CreateAPIComment(comment));
 app.MapPost("/Comments/IncrementCommentLike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentLike(id));
 app.MapPost("/Comments/IncrementCommentsDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentDislike(id));
