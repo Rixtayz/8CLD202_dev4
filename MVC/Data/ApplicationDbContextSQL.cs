@@ -19,7 +19,7 @@ namespace MVC.Data
     {
         public required IConfiguration Configuration { get; set; }
 
-        public ApplicationDbContextSQL(DbContextOptions options, IConfiguration configuration) : base(options)
+        public ApplicationDbContextSQL(DbContextOptions<ApplicationDbContextSQL> options, IConfiguration configuration) : base(options)
         {
             Configuration = configuration;
         }

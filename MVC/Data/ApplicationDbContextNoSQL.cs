@@ -8,7 +8,7 @@ namespace MVC.Data
     {
         public required IConfiguration Configuration { get; set; }
 
-        public ApplicationDbContextNoSQL(DbContextOptions options, IConfiguration configuration) : base(options)
+        public ApplicationDbContextNoSQL(DbContextOptions<ApplicationDbContextNoSQL> options, IConfiguration configuration) : base(options)
         {
             Configuration = configuration;
         }

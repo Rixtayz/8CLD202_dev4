@@ -5,15 +5,42 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 using MVC.Data;
 using MVC.Business;
-using OpenTelemetry.Resources;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+
+
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// This is required to be instantiated before the OpenIdConnectOptions starts getting configured.
+// By default, the claims mapping will map claim names in the old format to accommodate older SAML applications.
+// For instance, 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role' instead of 'roles' claim.
+// This flag ensures that the ClaimsIdentity claims collection will be built from the claims in the token
+JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
+// Sign-in users with the Microsoft identity platform
+builder.Services
+    .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration);
+
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+}).AddMicrosoftIdentityUI();
+
+
 
 // Cette information pourrait �tre passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
 // https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
@@ -86,16 +113,6 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 // Ajouter le BlobController du BusinessLayer dans nos Injection de d�pendance
 builder.Services.AddScoped<BlobController>();
 
-// Ajout de l'authentification 
-// Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContextInMemoryIdentity>();
-
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-    options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContextInMemoryIdentity>();
-
-builder.Services.AddRazorPages();
-
 var app = builder.Build();
 
 // Pour rebuild des database SQL
@@ -146,7 +163,6 @@ app.UseRouting();
 
 
 // Identity
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
