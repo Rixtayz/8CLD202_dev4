@@ -17,7 +17,7 @@ namespace MVC.Models
         /// <summary>
         /// Titre du Post
         /// </summary>
-        public string Title { get; init; }
+        public string? Title { get; init; }
 
         /// <summary>
         /// Catégorie du Post
@@ -27,7 +27,7 @@ namespace MVC.Models
         /// <summary>
         /// Usager qui a soumis le Post
         /// </summary>
-        public string User { get; init; }
+        public string? User { get; init; }
 
         /// <summary>
         /// Nombre de Like
@@ -47,9 +47,11 @@ namespace MVC.Models
         /// <summary>
         /// URL de l'image du Post
         /// </summary>
-        public string Url { get; init; }
+        public string? Url { get; init; }
 
         // Constructeur
+        public PostReadDTO() { }
+
         public PostReadDTO(Post post)
         {
             Id = post.Id;
@@ -66,13 +68,15 @@ namespace MVC.Models
     public class PostCreateDTO
     {
 
-        public string Title { get; init; }
+        public string? Title { get; init; }
 
         public Category Category { get; init; }
 
-        public string User { get; init; }
+        public string? User { get; init; }
 
-        public IFormFile Image { get; init; }
+        public IFormFile? Image { get; init; }
+
+        public PostCreateDTO() { }
 
         public PostCreateDTO(string title, Category category, string user, IFormFile image)
         {

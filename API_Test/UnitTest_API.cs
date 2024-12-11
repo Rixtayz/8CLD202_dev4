@@ -5,61 +5,48 @@ using System.Net.Http.Headers;
 using MVC.Models;
 using MVC.Data;
 
+
 namespace API_Test
 {
-    public class ApiTestFixture : IDisposable
-    {
-        private readonly WebApplicationFactory<Program> _factory;
-        public HttpClient Client { get; }
-        public IServiceProvider Services { get; }
-
-        public ApiTestFixture()
-        {
-            _factory = new WebApplicationFactory<Program>();
-            Client = _factory.CreateClient();
-            Services = _factory.Services;
-        }
-
-        public void Dispose()
-        {
-            _factory.Dispose();
-        }
-    }
-
-    [CollectionDefinition("Api collection")]
-    public class ApiCollection : ICollectionFixture<ApiTestFixture> { }
-
-
-    [Collection("Api collection")]
     public class PostControllerTests
     {
-        private readonly HttpClient _client;
-        private readonly IServiceProvider _services;
+        [Theory]
+        [InlineData("Test Title", "User", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 1", "User 1", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 2", "User 2", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 3", "User 3", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 4", "User 4", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 5", "User 5", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 6", "User 6", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 7", "User 7", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 8", "User 8", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
+        [InlineData("Test Title 9", "User 9", "C:\\Users\\gui44\\OneDrive\\Bureau\\meme2\\meme1.jpg")]
 
-        public PostControllerTests(ApiTestFixture fixture)
+        public async Task AddPost_Should_Return_Created_Result(string Title, string User, string Image)
         {
-            _client = fixture.Client;
-            _services = fixture.Services;
-        }
+            HttpClient _client = new HttpClient
+            {
+                BaseAddress = new Uri("https://127.00.0.1")
+            };
 
-        [Fact]
-        public async Task AddPost_Should_Return_Created_Result()
-        {
-            var imageContent = new ByteArrayContent(File.ReadAllBytes("Meme2.png"));
+            var imageContent = new ByteArrayContent(File.ReadAllBytes(Image));
             imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
 
             var content = new MultipartFormDataContent();
             content.Add(imageContent, "Image", "test-image.jpg");
-            content.Add(new StringContent("Test Title"), "Title");
+            content.Add(new StringContent(Title), "Title");
             content.Add(new StringContent(Category.Nouvelle.ToString()), "Category");
-            content.Add(new StringContent("User1"), "User");
+            content.Add(new StringContent(User), "User");
 
             var response = await _client.PostAsync("/Posts/Add", content);
 
             response.EnsureSuccessStatusCode();
 
             var createdPost = await response.Content.ReadAsAsync<PostReadDTO>();
-            Assert.Equal("Test Title", createdPost.Title);
+            Assert.Equal(Title, createdPost.Title);
+            Assert.Equal(User, createdPost.User);
         }
+
+
     }
 }

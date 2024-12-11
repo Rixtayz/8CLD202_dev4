@@ -35,15 +35,15 @@ namespace MVC.Models
 
     public class CommentCreateDTO
     {
-        public string Commentaire { get; init; }
+        public string? Commentaire { get; init; }
 
-        public string User { get; init; }
+        public string? User { get; init; }
 
         public required Guid PostId { get; init; }
 
         public static Comment GetComment(CommentCreateDTO comment)
         {
-            return new Comment { Commentaire = comment.Commentaire, User = comment.User, PostId = comment.PostId }; 
+            return new Comment { Commentaire = comment.Commentaire!, User = comment.User!, PostId = comment.PostId }; 
         }
     }
 }
