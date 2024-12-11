@@ -88,14 +88,13 @@ builder.Services.AddScoped<BlobController>();
 
 // Ajout de l'authentification 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContextInMemory>();
+builder.Services.AddDbContext<ApplicationDbContextInMemoryIdentity>();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContextInMemory>();
+    .AddEntityFrameworkStores<ApplicationDbContextInMemoryIdentity>();
 
 builder.Services.AddRazorPages();
-
 
 var app = builder.Build();
 
