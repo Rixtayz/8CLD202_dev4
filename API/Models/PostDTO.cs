@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
 using MVC.Models;
 
 namespace MVC.Models
@@ -67,23 +68,35 @@ namespace MVC.Models
 
     public class PostCreateDTO
     {
-
+        [FromForm(Name = "Title")]
         public string? Title { get; init; }
 
+        [FromForm(Name = "Category")]
         public Category Category { get; init; }
 
+        [FromForm(Name = "User")]
         public string? User { get; init; }
 
+        [FromForm(Name = "Image")]
         public IFormFile? Image { get; init; }
 
         public PostCreateDTO() { }
 
-        public PostCreateDTO(string title, Category category, string user, IFormFile image)
+        // Ajout d'un constructeur pour les API
+        public PostCreateDTO(string Title, string Category, string User, IFormFile Image)
         {
-            Title = title;
-            Category = category;
-            User = user;
-            Image = image;
+            this.Title = Title;
+            this.Category = (Category)Enum.Parse(typeof(Category), Category);
+            this.User = User;
+            this.Image = Image;
+        }
+
+        public PostCreateDTO(string Title, Category Category, string User, IFormFile Image)
+        {
+            this.Title = Title;
+            this.Category = Category;
+            this.User = User;
+            this.Image = Image;
         }
     }
 }

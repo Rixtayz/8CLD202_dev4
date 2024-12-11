@@ -133,13 +133,14 @@ app.MapGet("/Posts/{id}", async (IRepositoryAPI repo, Guid id) => await repo.Get
 
 // https://andrewlock.net/reading-json-and-binary-data-from-multipart-form-data-sections-in-aspnetcore/
 // J'ai laisser cette fonction la car je voulais m'assurer de la séparation des concern, sinon j'aurais ajouté de la logique business dans le data layer.
-app.MapPost("/Posts/Add", async (IRepositoryAPI repo, [FromForm] PostCreateDTO post, BlobController blob) =>
+app.MapPost("/Posts/Add", async (IRepositoryAPI repo, [FromForm] IFormFile Image, HttpRequest request, BlobController blob) =>
 {
     try
     {
+        PostCreateDTO post = new PostCreateDTO(request.Form["Title"]!, request.Form["Category"]!, request.Form["User"]!, Image);
         Guid guid = Guid.NewGuid();
-        string Url = await blob.PushImageToBlob(post.Image, guid);
-        Post Post = new Post { Title = post.Title, Category = post.Category, User = post.User, BlobImage = guid, Url = Url };
+        string Url = await blob.PushImageToBlob(post.Image!, guid);
+        Post Post = new Post { Title = post.Title!, Category = post.Category, User = post.User!, BlobImage = guid, Url = Url };
         return await repo.CreateAPIPost(Post);
     }
     catch (ExceptionFilesize)
