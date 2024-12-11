@@ -6,6 +6,8 @@ using Microsoft.FeatureManagement;
 using MVC.Data;
 using MVC.Business;
 using OpenTelemetry.Resources;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Cette information pourrait être passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
+// Cette information pourrait ï¿½tre passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
 // https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
 
 // Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
@@ -58,7 +60,6 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
 
-
 // Pour rebuild des database SQL
 //builder.Services.AddDbContext<ApplicationDbContextSQL>();
 //builder.Services.AddScoped<IRepository, EFRepositorySQL>();
@@ -82,8 +83,19 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         break;
 }
 
-// Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance
+// Ajouter le BlobController du BusinessLayer dans nos Injection de dï¿½pendance
 builder.Services.AddScoped<BlobController>();
+
+// Ajout de l'authentification 
+// Add services to the container.
+builder.Services.AddDbContext<ApplicationDbContextInMemory>();
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+    options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContextInMemory>();
+
+builder.Services.AddRazorPages();
+
 
 var app = builder.Build();
 
@@ -131,9 +143,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
+
+// Identity
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

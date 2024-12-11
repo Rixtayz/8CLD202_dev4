@@ -5,7 +5,9 @@ namespace MVC.Data
     public interface IRepository
     {
         // Post
-        Task<List<Post>> GetPostsIndex();
+        Task<List<Post>> GetPostsIndex(int pageNumber, int pageSize);
+
+        Task<int> GetPostsCount();
 
         abstract Task Add(Post post);
 

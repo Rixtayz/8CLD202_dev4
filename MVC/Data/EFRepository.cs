@@ -13,7 +13,8 @@ namespace MVC.Data
         }
 
         //Post
-        public abstract Task<List<Post>> GetPostsIndex();
+        public abstract Task<List<Post>> GetPostsIndex(int pageNumber, int pageSize);
+        public virtual async Task<int> GetPostsCount() { return await _context.Set<Post>().CountAsync(); }
         public virtual async Task Add(Post post) { _context.Add(post); await _context.SaveChangesAsync(); }
         public virtual async Task IncrementPostLike(Guid id) { var post = await _context.Set<Post>().FindAsync(id); post!.IncrementLike(); await _context.SaveChangesAsync(); }
         public virtual async Task IncrementPostDislike(Guid id) { var post = await _context.Set<Post>().FindAsync(id); post!.IncrementDislike(); await _context.SaveChangesAsync(); }

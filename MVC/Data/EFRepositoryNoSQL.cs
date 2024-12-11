@@ -7,10 +7,10 @@ namespace MVC.Data
     {
         public EFRepositoryNoSQL(ApplicationDbContextNoSQL context) : base(context) { }
 
-        public override async Task<List<Post>> GetPostsIndex()
+        public override async Task<List<Post>> GetPostsIndex(int pageNumber, int pageSize)
         {
             // En NoSQL nous ne pouvons pas faire de "include" nous devons donc faire 2 query et les merger.
-            List<Post> posts = await _context.Posts.OrderByDescending(o => o.Created).Take(10).ToListAsync();
+            List<Post> posts = await _context.Posts.OrderByDescending(o => o.Created).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
             // nous extractons ensuite la list de guid des posts
             List<Guid> postguid = posts.Select(p => p.Id).ToList();

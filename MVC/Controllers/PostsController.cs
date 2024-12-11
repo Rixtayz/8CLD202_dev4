@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using MVC.Models;
-
-// Pour le support du Blob pour les images
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Specialized;
-using Microsoft.Extensions.Options;
 using MVC.Data;
 using MVC.Business;
 
@@ -28,10 +18,15 @@ namespace MVC.Controllers
         }
 
         // GET: Posts
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
         {
+            List<Post> posts = await _repo.GetPostsIndex(pageNumber, pageSize);
+            int totalPosts = await _repo.GetPostsCount();
+            int totalPages = (int)Math.Ceiling(totalPosts/(double)pageSize);
 
-            return View(await _repo.GetPostsIndex());
+            PostIndexViewModel viewModel = new PostIndexViewModel { Posts = posts, CurrentPage = pageNumber, TotalPages = totalPages, PageSize = pageSize };
+
+            return View(viewModel);
         }
 
         // GET: Posts/Create

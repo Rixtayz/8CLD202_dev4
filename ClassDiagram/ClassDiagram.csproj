@@ -8,20 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\API\Data\EFRepositoryAPI.cs" Link="NewFolder\EFRepositoryAPI.cs" />
-    <Compile Include="..\API\Data\EFRepositoryAPIInMemory.cs" Link="NewFolder\EFRepositoryAPIInMemory.cs" />
-    <Compile Include="..\API\Data\EFRepositoryAPINoSQL.cs" Link="NewFolder\EFRepositoryAPINoSQL.cs" />
-    <Compile Include="..\API\Data\EFRepositoryAPISQL.cs" Link="NewFolder\EFRepositoryAPISQL.cs" />
-    <Compile Include="..\API\Data\IRepositoryAPI.cs" Link="NewFolder\IRepositoryAPI.cs" />
-    <Compile Include="..\MVC\Business\BlobController.cs" Link="Business\BlobController.cs" />
-    <Compile Include="..\MVC\Controllers\CommentsController.cs" Link="Controllers\CommentsController.cs" />
-    <Compile Include="..\MVC\Controllers\HomeController.cs" Link="Controllers\HomeController.cs" />
-    <Compile Include="..\MVC\Controllers\PostsController.cs" Link="Controllers\PostsController.cs" />
-    <Compile Include="..\MVC\Models\ApplicationConfiguration.cs" Link="Models\ApplicationConfiguration.cs" />
-    <Compile Include="..\MVC\Models\ApplicationFeatures.cs" Link="Models\ApplicationFeatures.cs" />
+    <Compile Include="..\API\Models\CommentDTO.cs" Link="Models\CommentDTO.cs" />
+    <Compile Include="..\API\Models\PostDTO.cs" Link="Models\PostDTO.cs" />
     <Compile Include="..\MVC\Models\Comment.cs" Link="Models\Comment.cs" />
     <Compile Include="..\MVC\Models\Post.cs" Link="Models\Post.cs" />
-    <Compile Include="..\MVC\Program.cs" Link="Program.cs" />
   </ItemGroup>
 
   <ItemGroup>

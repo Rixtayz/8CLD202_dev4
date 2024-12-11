@@ -1,7 +1,7 @@
-﻿
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using MVC.Models;
+
 
 namespace MVC.Data
 {
@@ -14,5 +14,13 @@ namespace MVC.Data
         }
         public DbSet<Post> Posts { get; set; } = null!;
         public DbSet<Comment> Comments { get; set; } = null!;
+    }
+
+    // Pour l'identity
+    public class ApplicationDbContextInMemoryIdentity : IdentityDbContext
+    {
+        public ApplicationDbContextInMemoryIdentity(DbContextOptions<ApplicationDbContextInMemoryIdentity> options) : base(options)
+        {
+        }
     }
 }

@@ -3,8 +3,11 @@ using MVC.Models;
 
 namespace API_Test
 {
+
     public class PostControllerTests
     {
+        private const string HostURL = "https://localhost:7101";
+
         [Theory]
         [InlineData("Test Title", "User", @"C:\Users\gui44\OneDrive\Bureau\meme2\meme1.jpg")]
         [InlineData("Test Title 1", "User 1", @"C:\Users\gui44\OneDrive\Bureau\meme2\meme2.jpg")]
@@ -21,7 +24,7 @@ namespace API_Test
             // Arrange
             HttpClient _client = new HttpClient
             {
-                BaseAddress = new Uri("https://localhost:7244")
+                BaseAddress = new Uri(HostURL)
             };
 
             MemoryStream _stream = new MemoryStream();
@@ -75,7 +78,7 @@ namespace API_Test
             // Arrange
             HttpClient _client = new HttpClient
             {
-                BaseAddress = new Uri("https://localhost:7244")
+                BaseAddress = new Uri(HostURL)
             };
 
             MemoryStream _stream = new MemoryStream();
@@ -108,7 +111,7 @@ namespace API_Test
             // Act
             var response2 = await _client.GetAsync($"/Posts/{createdPost.Id}");
             response2.EnsureSuccessStatusCode();
-            var postReadDTO = await response.Content.ReadAsAsync<PostReadDTO>();
+            var postReadDTO = await response2.Content.ReadAsAsync<PostReadDTO>();
 
             // Assert
             Assert.Equal(postReadDTO.Id, createdPost.Id);
@@ -120,7 +123,7 @@ namespace API_Test
             // Arrange
             HttpClient _client = new HttpClient
             {
-                BaseAddress = new Uri("https://localhost:7244")
+                BaseAddress = new Uri(HostURL)
             };
 
             // Act

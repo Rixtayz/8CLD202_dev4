@@ -28,6 +28,16 @@ namespace MVC.Models
         public required IFormFile FileToUpload { get; set; }
     }
 
+    // Model pour les vue de pages, ce modèle sert a tenir l'emplacement et les Posts
+    [NotMapped]
+    public class PostIndexViewModel
+    { 
+        public List<Post> Posts { get; set; }
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int PageSize { get; set; } = 10;
+    }
+
     public class Post
     {
         // Référence pour les Accessor ( Get, Set, Init )
