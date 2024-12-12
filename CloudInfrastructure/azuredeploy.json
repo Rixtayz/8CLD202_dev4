@@ -112,6 +112,9 @@
     },
     "AzureAdClientId": {
       "type": "string"
+    },
+    "AzureAdDomainName": {
+      "type": "string"
     }
   },
   "variables": {},
@@ -443,7 +446,7 @@
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       "properties": {
-        "value": "[subscriptionResourceId('Microsoft.Resources/subscriptions', subscription().id, 'domainName')]"
+        "value": "[parameters('AzureAdDomainName')]"
       }
     },
     {
