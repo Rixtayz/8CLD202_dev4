@@ -1,47 +1,27 @@
 using Microsoft.EntityFrameworkCore;
-using MVC.Models;
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
+
+// Project
 using MVC.Data;
 using MVC.Business;
+using MVC.Models;
+
+// Identity
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
-
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// step 10.1
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-
-
-// step 10.2
-builder.Services.AddControllersWithViews(options =>
-{
-    var policy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-    options.Filters.Add(new AuthorizeFilter(policy));
-});
-
-
-// step 10.3
-builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
-
-
-
 // Cette information pourrait �tre passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
 // https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
-
 // Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 
@@ -85,8 +65,9 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 });
 
 // Pour rebuild des database SQL
-//builder.Services.AddDbContext<ApplicationDbContextSQL>();
-//builder.Services.AddScoped<IRepository, EFRepositorySQL>();
+// Ceci est requis si nous changeons la configuration de la BD.
+// builder.Services.AddDbContext<ApplicationDbContextSQL>();
+// builder.Services.AddScoped<IRepository, EFRepositorySQL>();
 
 // Ajouter la BD ( SQL ou NoSQL )
 switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
@@ -109,6 +90,20 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de d�pendance
 builder.Services.AddScoped<BlobController>();
+
+// Service d'identité avec AzureAD
+// L'information de la section AD peut venir du AppConfig
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
+builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
+
 
 var app = builder.Build();
 
@@ -160,12 +155,8 @@ app.UseRouting();
 
 
 // Identity
-// step 11.1
 app.UseAuthentication();
-
-
 app.UseAuthorization();
-
 
 app.MapControllerRoute(
     name: "default",

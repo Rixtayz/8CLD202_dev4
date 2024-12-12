@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using MVC.Models;
 using MVC.Data;
 using MVC.Business;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MVC.Controllers
 {
+    [Authorize]
     public class PostsController : Controller
     {
         private IRepository _repo;

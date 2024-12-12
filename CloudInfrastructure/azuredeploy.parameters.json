@@ -88,6 +88,9 @@
     },
     "infrastructureEncryptionEnabled": {
       "value": false
+    },
+    "AzureAdClientId": {
+      "value": "c11d2628-cd67-4e13-8cbf-9a12c7fc5fd9"
     }
   }
 }

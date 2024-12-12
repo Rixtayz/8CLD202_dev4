@@ -109,6 +109,9 @@
     },
     "infrastructureEncryptionEnabled": {
       "type": "Bool"
+    },
+    "AzureAdClientId": {
+      "type": "string"
     }
   },
   "variables": {},
@@ -417,6 +420,66 @@
       ],
       "properties": {
         "value": "NoSQL"
+      }
+    }, // Information pour l'identity
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'AzureAd:Instance')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "https://login.microsoftonline.com/"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'AzureAd:Domain')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[subscriptionResourceId('Microsoft.Resources/subscriptions', subscription().id, 'domainName')]"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'AzureAd:TenantId')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[subscription().tenantId]"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'AzureAd:ClientId')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('AzureAdClientId')]"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'AzureAd:CallbackPath')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "/signin-oidc"
       }
     }, // Feature Flag -- hardcoded
     {

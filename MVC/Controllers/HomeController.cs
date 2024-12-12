@@ -47,11 +47,6 @@ namespace MVC.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        /// <summary>
-        /// Get the user name, user domain and email of the user from the authentication claims
-        /// </summary>
-        /// <param name="user">Auth Claims</param>
-        /// <returns>Azure AD</returns>
         public static UserAzureAD GetUserOnAzureAd(ClaimsPrincipal user)
         {
             var preferredUsernameClaim = user.Claims.FirstOrDefault(c => c.Type.Equals("preferred_username"));
@@ -61,10 +56,10 @@ namespace MVC.Controllers
                 {
                     user_name = user.Claims.FirstOrDefault(p => p.Type.Equals("name")).Value,
                     user_email = preferredUsernameClaim.Value,
-                    user_domain = string.Format(@"cpiccr\{0}", preferredUsernameClaim.Value.Split('@')[0])
+                    user_domain = string.Format(@"Domain\{0}", preferredUsernameClaim.Value.Split('@')[0])
                 };
             }
-            return null; // Or throw an exception if preferred_username claim is required
+            return null;
         }
     }
 }
