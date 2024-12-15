@@ -407,7 +407,7 @@
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
       // hardcoded
-      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:SB')]",
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:ServiceBusConnectionString')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ConnectionStringSB')]",
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",

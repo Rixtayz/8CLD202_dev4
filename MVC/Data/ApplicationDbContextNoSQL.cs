@@ -17,7 +17,7 @@ namespace MVC.Data
         {
             optionsBuilder
                 .UseCosmos(
-                    connectionString: Configuration.GetConnectionString("LocalNoSQL")!,
+                    connectionString: Configuration.GetConnectionString("CosmosDB")!,
                     databaseName: "ApplicationDB",
                     cosmosOptionsAction: options =>
                     {
@@ -30,7 +30,7 @@ namespace MVC.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Ajustement de la capacité de la BD
-            modelBuilder.HasAutoscaleThroughput(1000);
+            // modelBuilder.HasAutoscaleThroughput(1000);
 
             //Création de la hiérarchie des tables
 

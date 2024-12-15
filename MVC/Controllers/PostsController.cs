@@ -12,11 +12,13 @@ namespace MVC.Controllers
     {
         private IRepository _repo;
         private BlobController _blobController;
+        private ServiceBusController _serviceBusController;
 
-        public PostsController(IRepository repo, BlobController blobController)
+        public PostsController(IRepository repo, BlobController blobController, ServiceBusController serviceBusController)
         {
             _repo = repo;
             _blobController = blobController;
+            _serviceBusController = serviceBusController;
         }
 
         // GET: Posts
@@ -64,6 +66,10 @@ namespace MVC.Controllers
             if (ModelState.IsValid)
             {
                 await _repo.Add(postForm);
+
+                // Envoie des messages dans le Service Bus
+                await _serviceBusController.SendImageToResize(postForm.FileToUpload.FileName);
+                await _serviceBusController.SendContentImageToValidation(postForm.FileToUpload.FileName, postForm.Id);
 
                 return RedirectToAction(nameof(Index));
             }

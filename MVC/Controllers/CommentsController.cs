@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MVC.Business;
 using MVC.Data;
 using MVC.Models;
 
@@ -15,10 +16,12 @@ namespace MVC.Controllers
     public class CommentsController : Controller
     {
         private IRepository _repo;
+        private ServiceBusController _serviceBusController;
 
-        public CommentsController(IRepository repo)
+        public CommentsController(IRepository repo, ServiceBusController serviceBusController)
         {
             _repo = repo;
+            _serviceBusController = serviceBusController;
         }
 
         // GET: Comments
@@ -51,6 +54,8 @@ namespace MVC.Controllers
             if (ModelState.IsValid)
             {
                 await _repo.AddComments(comment);
+
+                await _serviceBusController.SendContentTextToValidation(comment.Commentaire, comment.Id);
 
                 // la fonction Index s'attend a un object nommé id ...
                 return RedirectToAction(nameof(Index), new { id = comment.PostId } );

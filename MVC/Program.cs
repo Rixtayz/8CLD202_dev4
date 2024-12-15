@@ -29,7 +29,13 @@ string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:App
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
     // Besoin du "App Configuration Data Reader" role
-    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential())
+    // Ajout du defaultAzureCredentialOptions pour obtenir les Cred passer dans le docker.
+    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential(new DefaultAzureCredentialOptions{
+        ExcludeSharedTokenCacheCredential = true,
+        ExcludeVisualStudioCredential = true,
+        ExcludeVisualStudioCodeCredential = true,
+        ExcludeEnvironmentCredential = false
+    }))
 
     // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
@@ -90,6 +96,9 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de d�pendance
 builder.Services.AddScoped<BlobController>();
+
+// Ajouter le ServiceBusController du BsinessLayer dans nos Injection ..
+builder.Services.AddScoped<ServiceBusController>();
 
 // Service d'identité avec AzureAD
 // L'information de la section AD peut venir du AppConfig
