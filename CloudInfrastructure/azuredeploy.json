@@ -44,6 +44,9 @@
         "description": "Local Database connection string"
       }
     },
+    "NoSQLname": {
+      "type": "string"
+    },
     "storageAccountName": {
       "type": "String"
     },
@@ -115,9 +118,57 @@
     },
     "AzureAdDomainName": {
       "type": "string"
+    },
+    "ServiceBusName": {
+      "type": "string"
+    },
+    "ContentSafetyname": {
+      "type": "String"
+    },
+    "resourceGroupName": {
+      "type": "String"
+    },
+    "sku": {
+      "type": "String"
+    },
+    "tagValues": {
+      "type": "Object"
+    },
+    "virtualNetworkType": {
+      "type": "String"
+    },
+    "vnet": {
+      "type": "Object"
+    },
+    "ipRules": {
+      "type": "Array"
+    },
+    "identity": {
+      "type": "Object"
+    },
+    "privateEndpoints": {
+      "type": "Array"
+    },
+    "privateDnsZone": {
+      "type": "String"
+    },
+    "isCommitmentPlanForDisconnectedContainerEnabled": {
+      "type": "Bool"
+    },
+    "commitmentPlanForDisconnectedContainer": {
+      "type": "Object"
+    },
+    "uniqueId": {
+      "defaultValue": "[newGuid()]",
+      "type": "String"
     }
   },
-  "variables": {},
+  "variables": {
+    "defaultVNetName": "csCSDefaultVNet9901",
+    "defaultSubnetName": "csCSDefaultSubnet9901",
+    "defaultAddressPrefix": "13.41.6.0/26",
+    "LocationName": "[replace(toLower(parameters('location')), ' ', '')]"
+  },
   "resources": [
     {
       "apiVersion": "2017-03-15-preview",
@@ -264,7 +315,109 @@
           "enabled": true
         }
       }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ConnectionStringSB')]",
+      "location": "eastus",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //this provide connectionString for the ServiceBus
+      "properties": {
+        "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationrules', parameters('ServiceBusName'), 'RootManageSharedAccessKey'), '2023-01-01-preview').primaryConnectionString]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ConnectionStringContentSafety')]",
+      "location": "eastus",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[parameters('ContentSafetyname')]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //this provide connectionString for the ContentSafety
+      "properties": {
+        "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('ContentSafetyname')),'2024-06-01-preview').key1]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ConnectionStringCosmosDB')]",
+      "location": "eastus",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('NoSQLname'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //this provide connectionString for the CosmoDB
+      "properties": {
+        "value": "[concat('AccountEndpoint=https://', parameters('NoSQLname'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('NoSQLname')), '2024-12-01-preview').primaryMasterKey)]",
+        "attributes": {
+          "enabled": true
+        }
+      }
     }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:CosmosDB')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ConnectionStringCosmosDB')]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringCosmosDB'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:ContentSafety')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ConnectionStringContentSafety')]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringContentSafety'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:SB')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ConnectionStringSB')]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringSB'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -363,6 +516,19 @@
       ],
       "properties": {
         "value": "[reference(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').endpoint]"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'Endpoints:ContentSafety')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]",
+        "[parameters('ContentSafetyname')]"
+      ],
+      "properties": {
+        "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('ContentSafetyname')), '2024-06-01-preview').endpoint]"
       }
     },
     {
@@ -605,6 +771,337 @@
         "defaultEncryptionScope": "$account-encryption-key",
         "denyEncryptionScopeOverride": false,
         "publicAccess": "Blob"
+      }
+    },
+    { // Queue pour Image Resize / hardcoded
+      "type": "Microsoft.ServiceBus/namespaces/queues",
+      "apiVersion": "2023-01-01-preview",
+      "name": "[concat(parameters('ServiceBusName'), '/imageresizemessage')]",
+      "location": "canadacentral",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]"
+      ],
+      "properties": {
+        "maxMessageSizeInKilobytes": 256,
+        "lockDuration": "PT1M",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "requiresSession": false,
+        "defaultMessageTimeToLive": "P14D",
+        "deadLetteringOnMessageExpiration": false,
+        "enableBatchedOperations": true,
+        "duplicateDetectionHistoryTimeWindow": "PT10M",
+        "maxDeliveryCount": 10,
+        "status": "Active",
+        "enablePartitioning": false,
+        "enableExpress": false
+      }
+    },
+    { // Queue pour la validation du content / hardcoded
+      "type": "Microsoft.ServiceBus/namespaces/queues",
+      "apiVersion": "2023-01-01-preview",
+      "name": "[concat(parameters('ServiceBusName'), '/contentsafetymessage')]",
+      "location": "canadacentral",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]"
+      ],
+      "properties": {
+        "maxMessageSizeInKilobytes": 256,
+        "lockDuration": "PT1M",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "requiresSession": false,
+        "defaultMessageTimeToLive": "P14D",
+        "deadLetteringOnMessageExpiration": false,
+        "enableBatchedOperations": true,
+        "duplicateDetectionHistoryTimeWindow": "PT10M",
+        "maxDeliveryCount": 10,
+        "status": "Active",
+        "enablePartitioning": false,
+        "enableExpress": false
+      }
+    },
+    { // Ceci est pour recevoir la connectionString
+      "type": "Microsoft.ServiceBus/namespaces/authorizationrules",
+      "apiVersion": "2023-01-01-preview",
+      "name": "[concat(parameters('ServiceBusName'), '/RootManageSharedAccessKey')]",
+      "location": "canadacentral",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]"
+      ],
+      "properties": {
+        "rights": [
+          "Listen",
+          "Manage",
+          "Send"
+        ]
+      }
+    },
+    { // Ceci est pour le contentSafety
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "deployVnet",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2020-04-01",
+              "name": "[if(equals(parameters('virtualNetworkType'), 'External'), parameters('vnet').name, variables('defaultVNetName'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": "[if(equals(parameters('virtualNetworkType'), 'External'), parameters('vnet').addressPrefixes, json(concat('[{\"', variables('defaultAddressPrefix'),'\"}]')))]"
+                },
+                "subnets": [
+                  {
+                    "name": "[if(equals(parameters('virtualNetworkType'), 'External'), parameters('vnet').subnets.subnet.name, variables('defaultSubnetName'))]",
+                    "properties": {
+                      "serviceEndpoints": [
+                        {
+                          "service": "Microsoft.CognitiveServices",
+                          "locations": [
+                            "[parameters('location')]"
+                          ]
+                        }
+                      ],
+                      "addressPrefix": "[if(equals(parameters('virtualNetworkType'), 'External'), parameters('vnet').subnets.subnet.addressPrefix, variables('defaultAddressPrefix'))]"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "parameters": {}
+      },
+      "condition": "[and(and(not(empty(parameters('vnet'))), equals(parameters('vnet').newOrExisting, 'new')), equals(parameters('virtualNetworkType'), 'External'))]"
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('ContentSafetyname')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'deployVnet')]"
+      ],
+      "tags": "[if(contains(parameters('tagValues'), 'Microsoft.CognitiveServices/accounts'), parameters('tagValues')['Microsoft.CognitiveServices/accounts'], json('{}'))]",
+      "sku": {
+        "name": "[parameters('sku')]"
+      },
+      "kind": "ContentSafety",
+      "identity": "[parameters('identity')]",
+      "properties": {
+        "customSubDomainName": "[toLower(parameters('ContentSafetyname'))]",
+        "publicNetworkAccess": "[if(equals(parameters('virtualNetworkType'), 'Internal'), 'Disabled', 'Enabled')]",
+        "networkAcls": {
+          "defaultAction": "[if(equals(parameters('virtualNetworkType'), 'External'), 'Deny', 'Allow')]",
+          "virtualNetworkRules": "[if(equals(parameters('virtualNetworkType'), 'External'), json(concat('[{\"id\": \"', concat(subscription().id, '/resourceGroups/', parameters('vnet').resourceGroup, '/providers/Microsoft.Network/virtualNetworks/', parameters('vnet').name, '/subnets/', parameters('vnet').subnets.subnet.name), '\"}]')), json('[]'))]",
+          "ipRules": "[if(or(empty(parameters('ipRules')), empty(parameters('ipRules')[0].value)), json('[]'), parameters('ipRules'))]"
+        }
+      },
+      "resources": [
+        {
+          "type": "commitmentPlans",
+          "apiVersion": "2021-10-01",
+          "name": "DisconnectedContainer-ContentSafety-1",
+          "dependsOn": [
+            "[parameters('ContentSafetyname')]"
+          ],
+          "properties": "[parameters('commitmentPlanForDisconnectedContainer')]",
+          "condition": "[parameters('isCommitmentPlanForDisconnectedContainerEnabled')]"
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "[concat('deployPrivateEndpoint-', parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name)]",
+      "dependsOn": [
+        "[concat('Microsoft.CognitiveServices/accounts/', parameters('ContentSafetyname'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "location": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.location]",
+              "name": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name]",
+              "type": "Microsoft.Network/privateEndpoints",
+              "apiVersion": "2021-05-01",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.properties.subnet.id]"
+                },
+                "privateLinkServiceConnections": [
+                  {
+                    "name": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name]",
+                    "properties": {
+                      "privateLinkServiceId": "[resourceId('Microsoft.CognitiveServices/accounts/', parameters('ContentSafetyname'))]",
+                      "groupIds": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.properties.privateLinkServiceConnections[0].properties.groupIds]"
+                    }
+                  }
+                ],
+                "customNetworkInterfaceName": "[concat(parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name, '-nic')]"
+              },
+              "tags": {}
+            }
+          ]
+        }
+      },
+      "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.subscription.subscriptionId]",
+      "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.resourceGroup.value.name]",
+      "copy": {
+        "name": "privateendpointscopy",
+        "count": "[length(parameters('privateEndpoints'))]"
+      },
+      "condition": "[equals(parameters('virtualNetworkType'), 'Internal')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "[concat('deployDnsZoneGroup-', parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name)]",
+      "dependsOn": [
+        "[concat('deployPrivateEndpoint-', parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name)]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2018-09-01",
+              "name": "[parameters('privateDnsZone')]",
+              "location": "global",
+              "tags": {},
+              "properties": {}
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2018-09-01",
+              "name": "[concat(parameters('privateDnsZone'), '/', replace(uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.properties.subnet.id), '/subnets/default', ''))]",
+              "location": "global",
+              "dependsOn": [
+                "[parameters('privateDnsZone')]"
+              ],
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[split(parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.properties.subnet.id, '/subnets/')[0]]"
+                },
+                "registrationEnabled": false
+              }
+            },
+            {
+              "apiVersion": "2017-05-10",
+              "name": "[concat('EndpointDnsRecords-', parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name)]",
+              "type": "Microsoft.Resources/deployments",
+              "dependsOn": [
+                "[parameters('privateDnsZone')]"
+              ],
+              "properties": {
+                "mode": "Incremental",
+                "templatelink": {
+                  "uri": "https://go.microsoft.com/fwlink/?linkid=2264916"
+                },
+                "parameters": {
+                  "privateDnsName": {
+                    "value": "[parameters('privateDnsZone')]"
+                  },
+                  "privateEndpointNicResourceId": {
+                    "value": "[concat('/subscriptions/', parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.subscription.subscriptionId, '/resourceGroups/', parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.resourceGroup.value.name, '/providers/Microsoft.Network/networkInterfaces/', parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name, '-nic')]"
+                  },
+                  "nicRecordsTemplateUri": {
+                    "value": "https://go.microsoft.com/fwlink/?linkid=2264719"
+                  },
+                  "ipConfigRecordsTemplateUri": {
+                    "value": "https://go.microsoft.com/fwlink/?linkid=2265018"
+                  },
+                  "uniqueId": {
+                    "value": "[parameters('uniqueId')]"
+                  },
+                  "existingRecords": {
+                    "value": {}
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+              "apiVersion": "2020-03-01",
+              "name": "[concat(parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.privateEndpoint.name, '/', 'default')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [
+                "[parameters('privateDnsZone')]"
+              ],
+              "properties": {
+                "privateDnsZoneConfigs": [
+                  {
+                    "name": "privatelink-cognitiveservices",
+                    "properties": {
+                      "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZone'))]"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.subscription.subscriptionId]",
+      "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].privateEndpointConfiguration.resourceGroup.value.name]",
+      "copy": {
+        "name": "privateendpointdnscopy",
+        "count": "[length(parameters('privateEndpoints'))]"
+      },
+      "condition": "[and(equals(parameters('virtualNetworkType'), 'Internal'), parameters('privateEndpoints')[copyIndex()].privateDnsZoneConfiguration.integrateWithPrivateDnsZone)]"
+    },
+    {
+      "apiVersion": "2024-12-01-preview",
+      "kind": "GlobalDocumentDB",
+      "type": "Microsoft.DocumentDb/databaseAccounts",
+      "name": "[parameters('NoSQLname')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "locations": [
+          {
+            "id": "[concat(parameters('NoSQLname'), '-', parameters('location'))]",
+            "failoverPriority": 0,
+            "locationName": "[variables('locationName')]"
+          }
+        ],
+        "backupPolicy": {
+          "type": "Periodic",
+          "periodicModeProperties": {
+            "backupIntervalInMinutes": 1440,
+            "backupRetentionIntervalInHours": 48,
+            "backupStorageRedundancy": "Local"
+          }
+        },
+        "isVirtualNetworkFilterEnabled": false,
+        "virtualNetworkRules": [],
+        "ipRules": [],
+        "dependsOn": [],
+        "minimalTlsVersion": "Tls12",
+        "capabilities": [],
+        "capacityMode": "Serverless",
+        "enableFreeTier": false,
+        "capacity": {
+          "totalThroughputLimit": 4000
+        }
+      },
+      "tags": {
+        "defaultExperience": "Core (SQL)",
+        "hidden-cosmos-mmspecial": ""
       }
     }
   ],
