@@ -772,6 +772,22 @@
         "denyEncryptionScopeOverride": false,
         "publicAccess": "Blob"
       }
+    }, // SB
+    {
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2023-01-01-preview",
+      "name": "[parameters('ServiceBusName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "properties": {
+        "zoneRedundant": false,
+        "minimumTlsVersion": "1.2",
+        "disableLocalAuth": false,
+        "publicNetworkAccess": "Enabled"
+      }
     },
     { // Queue pour Image Resize / hardcoded
       "type": "Microsoft.ServiceBus/namespaces/queues",
