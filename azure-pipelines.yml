@@ -33,7 +33,12 @@ variables:
   value: 'validated'
 - name: LocalNoSQLDB
   value: 'AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=='
-
+- name: SBusName
+  value: 'GuroSb'
+- name: CosmosDBName
+  value: 'gurocosmo'
+- name: ContentName
+  value: 'GuroContentSafety'
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
@@ -47,7 +52,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -LocalDBsql $(LocalSQLDB) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -LocalDBnosql $(LocalNoSQLDB)'
+      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -LocalDBsql $(LocalSQLDB) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -LocalDBnosql $(LocalNoSQLDB)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
