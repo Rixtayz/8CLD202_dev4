@@ -32,7 +32,7 @@ namespace MVC.Models
     [NotMapped]
     public class PostIndexViewModel
     { 
-        public List<Post> Posts { get; set; }
+        public List<Post> Posts { get; set; } = new List<Post>();
         public int CurrentPage { get; set; } = 1;
         public int TotalPages { get; set; }
         public int PageSize { get; set; } = 10;

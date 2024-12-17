@@ -1,12 +1,8 @@
 ﻿using MVC.Models;
 using Microsoft.Extensions.Options;
 using Azure.Messaging.ServiceBus;
-using Azure.Storage.Blobs;
-using System;
-using System.Net.Mime;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
-using Azure.Core;
+using NuGet.Protocol;
 
 namespace MVC.Business
 {
@@ -45,10 +41,10 @@ namespace MVC.Business
             await serviceBusSender.SendMessageAsync(message);
         }
 
-        public async Task SendImageToResize(string imageName)
+        public async Task SendImageToResize(string imageName, Guid Id)
         {
             Console.WriteLine("Envoi d'un message pour ImageResize : " + DateTime.Now.ToString());
-            ServiceBusMessage message = new ServiceBusMessage(imageName);
+            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new Tuple<string,Guid> (imageName,Id)));
             await SendMessageAsync(_applicationConfiguration.SB_resizeQueueName, message);
         }
 

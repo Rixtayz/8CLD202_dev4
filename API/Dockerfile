@@ -16,16 +16,16 @@ ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["MVC/MVC.csproj", "MVC/"]
-RUN dotnet restore "./MVC/MVC.csproj"
+COPY ["API/API.csproj", "API/"]
+RUN dotnet restore "./API/API.csproj"
 COPY . .
-WORKDIR "/src/MVC"
-RUN dotnet build "./MVC.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/API"
+RUN dotnet build "./API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./MVC.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
@@ -37,5 +37,4 @@ ENV AZURE_CLIENT_ID="722815e8-ef2b-4564-9179-f0ba95afd86e"
 ENV AZURE_CLIENT_SECRET="lNR8Q~A2VdolzCe2dFdobHhc2hG4zotSStuFuaOf"
 ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
 
-ENTRYPOINT ["dotnet", "MVC.dll"]
-
+ENTRYPOINT ["dotnet", "API.dll"]

@@ -4,6 +4,7 @@ using MVC.Models;
 using MVC.Data;
 using MVC.Business;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace MVC.Controllers
 {
@@ -68,7 +69,7 @@ namespace MVC.Controllers
                 await _repo.Add(postForm);
 
                 // Envoie des messages dans le Service Bus
-                await _serviceBusController.SendImageToResize(postForm.FileToUpload.FileName);
+                await _serviceBusController.SendImageToResize(postForm.FileToUpload.FileName, postForm.Id);
                 await _serviceBusController.SendContentImageToValidation(postForm.FileToUpload.FileName, postForm.Id);
 
                 return RedirectToAction(nameof(Index));

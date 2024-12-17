@@ -4,6 +4,8 @@
     ViewData["Title"] = "Create";
 }
 
+@using MVC.Controllers;
+
 <h1>Create</h1>
 
 <h4>Post</h4>
@@ -29,11 +31,15 @@
                 <span asp-validation-for="Category" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="User" class="control-label"></label>
-                <input asp-for="User" class="form-control" />
-                <span asp-validation-for="User" class="text-danger"></span>
-            </div>
+            @{
+                var getUser = @HomeController.GetUserOnAzureAd(User);
+
+                <div class="mb-3">
+                    <label asp-for="User" class="control-label"></label>
+                    <input asp-for="User" class="form-control" value="@getUser.user_email" readonly />
+                    <span asp-validation-for="User" class="text-danger"></span>
+                </div>
+            }
 
             <div class="mb-3">
                 <label asp-for="FileToUpload" class="control-label"></label>

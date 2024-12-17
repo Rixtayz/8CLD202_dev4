@@ -22,7 +22,7 @@
     <p>This can only be seen if 'FeatureC' is enabled.</p>
 </feature> *@
 
-@if (User.Identity.IsAuthenticated)
+@if (User.Identity!.IsAuthenticated)
 {
     var getUser = @HomeController.GetUserOnAzureAd(User);
 

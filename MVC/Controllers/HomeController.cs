@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using MVC.Models;
 using System.Diagnostics;
 
@@ -54,12 +53,12 @@ namespace MVC.Controllers
             {
                 return new UserAzureAD
                 {
-                    user_name = user.Claims.FirstOrDefault(p => p.Type.Equals("name")).Value,
+                    user_name = user.Claims.FirstOrDefault(p => p.Type.Equals("name"))!.Value,
                     user_email = preferredUsernameClaim.Value,
                     user_domain = string.Format(@"Domain\{0}", preferredUsernameClaim.Value.Split('@')[0])
                 };
             }
-            return null;
+            return null!;
         }
     }
 }

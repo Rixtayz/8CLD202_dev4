@@ -23,12 +23,6 @@
     "NoSQLname": {
       "value": "gurocosmo"
     },
-    "LocalDBsql": {
-      "value": ""
-    },
-    "LocalDBnosql": {
-      "value": ""
-    },
     "storageAccountName": {
       "value": "guroblobstore"
     },

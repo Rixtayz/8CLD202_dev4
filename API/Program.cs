@@ -22,7 +22,13 @@ string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:App
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
     // Besoin du "App Configuration Data Reader" role
-    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential())
+    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential(new DefaultAzureCredentialOptions
+    {
+        ExcludeSharedTokenCacheCredential = true,
+        ExcludeVisualStudioCredential = true,
+        ExcludeVisualStudioCodeCredential = true,
+        ExcludeEnvironmentCredential = false
+    }))
 
     // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
@@ -87,6 +93,9 @@ builder.Services.AddSwaggerGen(c =>
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance
 builder.Services.AddScoped<BlobController>();
+
+// Ajouter le ServiceBusController du BsinessLayer dans nos Injection ..
+builder.Services.AddScoped<ServiceBusController>();
 
 var app = builder.Build();
 
