@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using Azure.Messaging.ServiceBus;
 using System.Text.Json;
-using NuGet.Protocol;
 
 namespace MVC.Business
 {
@@ -34,53 +33,43 @@ namespace MVC.Business
             };
         }
 
-        private async Task SendMessageAsync(string queueName, ServiceBusMessage message)
+        private async Task SendMessageAsync(string queueName, ServiceBusMessage message, int Defer = 0)
         {
             await using ServiceBusClient serviceBusClient = new ServiceBusClient(_applicationConfiguration.ServiceBusConnectionString, _serviceBusClientOptions);
             ServiceBusSender serviceBusSender = serviceBusClient.CreateSender(queueName);
-            await serviceBusSender.SendMessageAsync(message);
+
+            if (Defer != 0)
+            {
+                DateTimeOffset scheduleTime = DateTimeOffset.UtcNow.AddMinutes(5);
+                await serviceBusSender.ScheduleMessageAsync(message, scheduleTime);
+            }
+            else 
+                await serviceBusSender.SendMessageAsync(message);
         }
 
-        public async Task SendImageToResize(string imageName, Guid Id)
+        public async Task SendImageToResize(Guid imageName, Guid Id)
         {
             Console.WriteLine("Envoi d'un message pour ImageResize : " + DateTime.Now.ToString());
-            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new Tuple<string,Guid> (imageName,Id)));
+            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new Tuple<Guid,Guid> (imageName,Id)));
             await SendMessageAsync(_applicationConfiguration.SB_resizeQueueName, message);
         }
 
-        public async Task SendContentTextToValidation(string text, Guid Id)
+        public async Task SendContentTextToValidation(string text, Guid CommentId, Guid PostId)
         {
             Console.WriteLine("Envoi d'un message pour Text Content Validation : " + DateTime.Now.ToString());
-            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new ContentTypeValidation(ContentType.Text, text, Id)));
+            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new ContentTypeValidation(ContentType.Text, text, CommentId, PostId)));
             await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message);
         }
 
-        public async Task SendContentImageToValidation(string imageName, Guid Id)
+        public async Task SendContentImageToValidation(Guid imageName, Guid CommentId, Guid PostId)
         {
             Console.WriteLine("Envoi d'un message pour Image Content Validation : " + DateTime.Now.ToString());
-            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new ContentTypeValidation(ContentType.Image, imageName, Id)));
-            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message);
+            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new ContentTypeValidation(ContentType.Image, imageName.ToString(), CommentId, PostId)));
+
+            // Messsage planifier dans 5 minutes, le but étant de laisser le temps au Resize de passé avant.
+            // Ceci n'est vraiment pas un design idéal.
+
+            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message, 5);
         }
-    }
-
-    [Serializable]
-    public class ContentTypeValidation
-    { 
-        public ContentType ContentType { get; set; }
-        public string Content { get; set; }
-        public Guid ContentId { get; set; }
-
-        public ContentTypeValidation(ContentType contentType, string content, Guid ContentId)
-        {
-            ContentType = contentType;
-            Content = content;
-            this.ContentId = ContentId;
-        }   
-    }
-
-    public enum ContentType
-    { 
-        Image = 0,
-        Text = 1,
     }
 }

@@ -8,16 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\API\Models\CommentDTO.cs" Link="Models\CommentDTO.cs" />
-    <Compile Include="..\API\Models\PostDTO.cs" Link="Models\PostDTO.cs" />
-    <Compile Include="..\MVC\Models\Comment.cs" Link="Models\Comment.cs" />
-    <Compile Include="..\MVC\Models\Post.cs" Link="Models\Post.cs" />
+    <Compile Include="..\Worker_Image\Worker.cs" Link="Worker.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Business\" />
     <Folder Include="Controllers\" />
-    <Folder Include="Models\NewFolder\" />
   </ItemGroup>
 
 </Project>

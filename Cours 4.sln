@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassDiagram", "ClassDiagra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worker_Image", "Worker_Image\Worker_Image.csproj", "{98C64259-C680-43E4-A112-C38A6CA5D07B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worker_Content", "Worker_Content\Worker_Content.csproj", "{8E273041-9116-41CA-B1F6-9F64A0C71423}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{5961F457-BAE8-41D7-8997-A14AE88A2161}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{98C64259-C680-43E4-A112-C38A6CA5D07B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98C64259-C680-43E4-A112-C38A6CA5D07B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98C64259-C680-43E4-A112-C38A6CA5D07B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E273041-9116-41CA-B1F6-9F64A0C71423}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E273041-9116-41CA-B1F6-9F64A0C71423}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E273041-9116-41CA-B1F6-9F64A0C71423}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E273041-9116-41CA-B1F6-9F64A0C71423}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5961F457-BAE8-41D7-8997-A14AE88A2161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5961F457-BAE8-41D7-8997-A14AE88A2161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5961F457-BAE8-41D7-8997-A14AE88A2161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5961F457-BAE8-41D7-8997-A14AE88A2161}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

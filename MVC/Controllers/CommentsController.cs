@@ -50,7 +50,7 @@ namespace MVC.Controllers
             {
                 await _repo.AddComments(comment);
 
-                await _serviceBusController.SendContentTextToValidation(comment.Commentaire, comment.Id);
+                await _serviceBusController.SendContentTextToValidation(comment.Commentaire, comment.Id, comment.PostId);
 
                 // la fonction Index s'attend a un object nommé id ...
                 return RedirectToAction(nameof(Index), new { id = comment.PostId } );

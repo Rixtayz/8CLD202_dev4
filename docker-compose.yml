@@ -1,0 +1,41 @@
+services:
+  mvc:
+    build:
+      context: MVC
+    ports:
+      - "7182:8080"
+    networks:
+        - app_vlan
+
+  api:
+    build:
+      context: API
+    ports:
+      - "7101:443"
+    networks:
+        - app_vlan
+    depends_on:
+      mvc:
+        condition: service_healthy
+
+  worker_image:
+    build:
+      context: Worker_Image
+    networks:
+        - app_vlan
+    depends_on:
+      mvc:
+        condition: service_healthy
+
+  worker_content:
+    build:
+       context: Worker_Content
+    networks:
+        - app_vlan
+    depends_on:
+      mvc:
+        condition: service_healthy
+
+networks:
+  app_vlan:
+    driver: bridge

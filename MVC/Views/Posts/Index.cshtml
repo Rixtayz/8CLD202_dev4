@@ -35,10 +35,10 @@
                 <td>
                     <form asp-action="Dislike" asp-route-id="@item.Id" method="post">
                         <button type="submit" class="btn btn-outline-secondary d-inline-flex align-items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1" />
-                        </svg>
-                        @item.Dislike.ToString()
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1" />
+                            </svg>
+                            @item.Dislike.ToString()
                         </button>
                     </form>
                 </td>
@@ -51,6 +51,18 @@
                         @item.Comments.Count()
                     </a>
                 </td>
+                <td>
+                    @{
+                        if (item.IsApproved)
+                        {
+                                <span class="badge bg-success">Validated</span>
+                        }
+                        else
+                        {
+                                <span class="badge bg-warning text-dark">UnValidated</span>
+                        }
+                    }
+               </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Created)
                 </td>

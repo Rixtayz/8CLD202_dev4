@@ -69,8 +69,8 @@ namespace MVC.Controllers
                 await _repo.Add(postForm);
 
                 // Envoie des messages dans le Service Bus
-                await _serviceBusController.SendImageToResize(postForm.FileToUpload.FileName, postForm.Id);
-                await _serviceBusController.SendContentImageToValidation(postForm.FileToUpload.FileName, postForm.Id);
+                await _serviceBusController.SendImageToResize((Guid)postForm.BlobImage!, postForm.Id);
+                await _serviceBusController.SendContentImageToValidation((Guid)postForm.BlobImage!, Guid.NewGuid(), postForm.Id);
 
                 return RedirectToAction(nameof(Index));
             }

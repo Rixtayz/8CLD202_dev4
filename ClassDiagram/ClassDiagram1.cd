@@ -1,67 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="MVC.Models.PostForm">
-    <Position X="2.25" Y="0.75" Width="1.5" />
+  <Class Name="Worker_Image.Worker">
+    <Position X="0.5" Y="0.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\MVC\Models\Post.cs</FileName>
+      <HashCode>AEAAQQAAiQCAAAgCAAgIACAAISggAAgAAAAAAQAAAEA=</HashCode>
+      <FileName>C:\Users\gui44\source\repos\Cours 4\Worker_Image\Worker.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MVC.Models.PostIndexViewModel">
-    <Position X="6" Y="0.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAgAAAAAAAAAABAAAAAAAAAAAAAAAAAAAEAAAAAI=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\MVC\Models\Post.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="MVC.Models.Post">
-    <Position X="0.5" Y="0.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AghDAAAAAAAAAEAEAAAAAAAAAAGAAAQCCAAAgQABKAA=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\MVC\Models\Post.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="MVC.Models.Comment">
-    <Position X="10" Y="1" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AghDABAAAAAAAAEEAAAAAAAACAEAAAQCAAAAgQABAAA=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\MVC\Models\Comment.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="MVC.Models.CommentReadDTO">
-    <Position X="11.75" Y="3.25" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AgADABAAAAAAAAEAAAAAAAAAAAAAAAQAAAAAAAABAAA=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\API\Models\CommentDTO.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="MVC.Models.CommentCreateDTO">
-    <Position X="11.75" Y="1" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAABABAAAAAAAAEAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\API\Models\CommentDTO.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="MVC.Models.PostReadDTO">
-    <Position X="2.25" Y="2.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AgADAAAAAAAAAEAAAAAAAAAAAAAAAAQACAAAAAABCAA=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\API\Models\PostDTO.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="MVC.Models.PostCreateDTO">
-    <Position X="4" Y="2.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAABAAAAAAAAAEAAAAAAAAAAAAAAABAAAAAAAAAACAA=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\API\Models\PostDTO.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Enum Name="MVC.Models.Category">
-    <Position X="6" Y="2.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAIAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
-      <FileName>C:\Users\gui44\source\repos\Cours 3\MVC\Models\Post.cs</FileName>
-    </TypeIdentifier>
-  </Enum>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

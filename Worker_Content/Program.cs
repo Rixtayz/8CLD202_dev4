@@ -4,12 +4,13 @@ using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using OpenTelemetry;
 
-namespace Worker_Image
+namespace Worker_Content
 {
-    public class Worker_Image
+    public class Worker_Content
     {
         public static void Main(string[] args)
         {
+
             var builder = Host.CreateApplicationBuilder(args);
             builder.Services.AddHostedService<Worker>();
 
@@ -27,6 +28,7 @@ namespace Worker_Image
 
             // Création du Client App Config
             ConfigurationClient appConfigClient = new ConfigurationClient(new Uri(AppConfigEndPoint), defaultAzureCredential);
+            ConfigurationSetting contentsafetyEndPoint = appConfigClient.GetConfigurationSetting("Endpoints:ContentSafety");
             ConfigurationSetting container1 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:UnvalidatedBlob");
             ConfigurationSetting container2 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:ValidatedBlob");
 
@@ -37,6 +39,8 @@ namespace Worker_Image
             KeyVaultSecret blobKeyVault = keyVaultClient.GetSecret("ConnectionStringBlob");
             KeyVaultSecret servicebusKeyVault = keyVaultClient.GetSecret("ConnectionStringSB");
             KeyVaultSecret applicationinsightKeyVault = keyVaultClient.GetSecret("ConnectionStringApplicationInsight");
+            KeyVaultSecret cosmosdbKeyVault = keyVaultClient.GetSecret("ConnectionStringCosmosDB");
+            KeyVaultSecret contentsafetyKeyVault = keyVaultClient.GetSecret("ConnectionStringContentSafety");
 
             // Ajout de secrets a la configuration du worker
             builder.Services.Configure<WorkerOptions>(options =>
@@ -45,6 +49,9 @@ namespace Worker_Image
                 options.BlobContainer1 = container1.Value;
                 options.BlobContainer2 = container2.Value;
                 options.ServiceBusKey = servicebusKeyVault.Value;
+                options.CosmosDbKey = cosmosdbKeyVault.Value;
+                options.ContentSafetyKey = contentsafetyKeyVault.Value;
+                options.ContentSafetyEndpoint = contentsafetyEndPoint.Value;
             });
 
             // Application Insight trace/log/metrics
@@ -65,7 +72,6 @@ namespace Worker_Image
             });
 
             var host = builder.Build();
-
             host.Run();
         }
     }
@@ -76,8 +82,8 @@ namespace Worker_Image
         public required string BlobContainer1 { get; set; }
         public required string BlobContainer2 { get; set; }
         public required string ServiceBusKey { get; set; }
+        public required string CosmosDbKey { get; set; }
+        public required string ContentSafetyKey { get; set; }
+        public required string ContentSafetyEndpoint { get; set; }
     }
 }
-
-
-

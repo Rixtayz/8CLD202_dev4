@@ -15,54 +15,32 @@ using Azure.Storage.Blobs.Specialized;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
-//Serialization
+//Json
 using System.Text.Json;
-using Microsoft.Azure.Cosmos;
 
 namespace Worker_Image
 {
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly ServiceBusClient _serviceBusClient;
-        private readonly ServiceBusProcessor _processor;
-        private readonly ConcurrentQueue<ServiceBusReceivedMessage> _messageQueue;
-        private readonly WorkerOptions _options;
-        private readonly SemaphoreSlim _semaphore;
-        private readonly BlobServiceClient _blobServiceClient;
-        private CosmosClient _cosmosClient;
-        private Container _container;
+        private ILogger<Worker> _logger;
+        private ServiceBusClient _serviceBusClient;
+        private ServiceBusProcessor _processor;
+        private ConcurrentQueue<ServiceBusReceivedMessage> _messageQueue;
+        private WorkerOptions _options;
+        private BlobServiceClient _blobServiceClient;
+        private SemaphoreSlim _semaphore;
 
+        private const int ConcurentJobLimit = 1;
+
+        /// <summary>
+        /// Constructeur, il initialize tout les services qui seront utiliser de facon asynchrone par nos functions.
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="options"></param>
         public Worker(ILogger<Worker> logger, IOptions<WorkerOptions> options)
         {
             _logger = logger;
             _options = options.Value;
-
-            // CosmosDb ...
-            CosmosClientOptions cosmosClientOptions = new CosmosClientOptions
-            {
-                MaxRetryAttemptsOnRateLimitedRequests = 9,      // MaxRetryAttemptsOnThrottledRequests: Maximum number of retry attempts on throttled requests
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30),   // MaxRetryWaitTimeOnThrottledRequests: Maximum wait time for the retry attempts
-                RequestTimeout = TimeSpan.FromSeconds(60),      // RequestTimeout: Sets the request timeout for network operations
-                ConnectionMode = ConnectionMode.Direct,         // ConnectionMode: Use Direct mode for better performance and Gateway mode for improved resilience
-                EnableTcpConnectionEndpointRediscovery = true   // EnableTcpConnectionEndpointRediscovery: Enable endpoint rediscovery in the case of connection failures
-            };
-
-            _cosmosClient = new CosmosClient(_options.CosmosDbKey, cosmosClientOptions);
-
-            // Pour créer la connection au CosmosDB nous devons avoir le DatabaseId et le ContainerID, étant donner que 
-            // Ceux-ci sont créer par le MVC lors de sont initialization, nous n'avons pas cette information.
-            // Nous pouvons donc lister les ID, et assumer que ce sont les premier. Nous devrons également s'assurer que 
-            // notre worker service démarre un coup ceux-ci créer pour ne pas avoir de problème de concurence.
-
-            string databaseId = _cosmosClient.CreateDatabaseIfNotExistsAsync("ApplicationDB").Result.Database.Id;
-            
-            var database = _cosmosClient.GetDatabase(databaseId);
-
-            var containerId = database.CreateContainerIfNotExistsAsync("Posts","/id").Result.Container.Id;
-            //var containerId = database.CreateContainerIfNotExistsAsync("Comments","/PostId").Result.Container.Id;
-
-            _container = _cosmosClient.GetContainer(databaseId, containerId);
 
             // Blob ...
             BlobClientOptions blobClientOptions = new BlobClientOptions
@@ -76,7 +54,7 @@ namespace Worker_Image
                         },
             };
 
-            BlobServiceClient _blobServiceClient = new BlobServiceClient(_options.BlobStorageKey, blobClientOptions);
+            _blobServiceClient = new BlobServiceClient(_options.BlobStorageKey, blobClientOptions);
 
             // Service Bus ...
             _messageQueue = new ConcurrentQueue<ServiceBusReceivedMessage>();
@@ -107,9 +85,14 @@ namespace Worker_Image
             _processor.ProcessMessageAsync += MessageHandler;
             _processor.ProcessErrorAsync += ErrorHandler;
 
-            _semaphore = new SemaphoreSlim(5); // Limit to 5 concurrent messages
+            _semaphore = new SemaphoreSlim(ConcurentJobLimit); // Limit le nombre de job concurente.
         }
 
+        /// <summary>
+        /// Fonctions activé lors de la réceptions d'un message, ils sont mit en queue, la semaphore sert a synchroniser le nombre maximum de tache.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         private async Task MessageHandler(ProcessMessageEventArgs args)
         {
             await _semaphore.WaitAsync();
@@ -117,93 +100,133 @@ namespace Worker_Image
 
             _ = ProcessMessagesAsync(args);
         }
+
+        /// <summary>
+        /// Fonction de gestion des messages
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private async Task ProcessMessagesAsync(ProcessMessageEventArgs args)
         {
             try
             {
+                // Deserialize the message
                 // Nous avions passé un Tuple ici lors de la sérialization ...
-                var message = JsonSerializer.Deserialize<Tuple<string, Guid>>(args.Message.Body.ToString());
-                
-                
-                _logger.LogInformation($"Processing message: {args.Message.MessageId}");
-
-                // Travail sur l'image
-
-                // j'ai envoyer l'URL complet, je dois raccourcir pour juste avoir le filename
-                var blob = _blobServiceClient.GetBlobContainerClient(_options.BlobContainer1).GetBlockBlobClient(Path.GetFileName(message!.Item1));
-
-                MemoryStream ms = new MemoryStream();
-
-                try
+                // Guid ImageId, Guid Id
+                var message = JsonSerializer.Deserialize<Tuple<Guid, Guid>>(args.Message.Body.ToString());
+                if (message == null)
                 {
-                    await blob.DownloadToAsync(ms);
-                    ms.Position = 0;
+                    throw new InvalidOperationException("Message deserialization failed.");
+                }
 
-                    // https://docs.sixlabors.com/articles/imagesharp/resize.html
-                    // If you pass 0 as any of the values for width and height dimensions then ImageSharp will automatically determine the correct opposite dimensions size to preserve the original aspect ratio.
-                    using (Image image = Image.Load(ms))
-                    {
-                        image.Mutate(c => c.Resize(500, 0));
-                        await image.SaveAsPngAsync(ms);
-                        ms.Position = 0;
-                    }
+                _logger.LogInformation($"Processing message: {args.Message.MessageId}, PostId : {message.Item2}, Image : {message.Item1}");
 
-                    // Retourne l'image sur le second blob
-                    await _blobServiceClient.GetBlobContainerClient(_options.BlobContainer2).UploadBlobAsync(Path.GetFileName(message!.Item1), ms);
-
-                    // Destruction de l'image orignal
-                    // await blob.DeleteAsync();
-
-                    //Update Database
-                    //Ajuster l'erreur management
+                using (MemoryStream ms = new MemoryStream())
+                {
                     try
                     {
-                        ItemResponse<dynamic> response = await _container.ReadItemAsync<dynamic>(message!.Item2.ToString(), new Microsoft.Azure.Cosmos.PartitionKey());
-                        var item = response.Resource;
+                        await ProcessImageAsync(message.Item1, ms);
 
-                        // Update fields
-                        item.Url = _blobServiceClient.Uri.AbsoluteUri + "/" + message!.Item1;
-
-                        // Replace the item in the container
-                        await _container.ReplaceItemAsync(item, message!.Item2.ToString(), new Microsoft.Azure.Cosmos.PartitionKey());
-
-                        _logger.LogInformation($"Item with ID: {message!.Item2} updated successfully.");
+                        // Complete the message
+                        await args.CompleteMessageAsync(args.Message);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error updating item.");
+                        _logger.LogError(ex, $"Error processing image for message: {args.Message.MessageId}");
+                        await HandleMessageProcessingErrorAsync(args);
                     }
-
-                    // Simulate work
-                    await Task.Delay(5000);
-
-                    // Complete the message
-                    await args.CompleteMessageAsync(args.Message);
                 }
-                catch (Exception ex)
-                {
-                    // Si dans le traitement de l'image
-                    await args.DeadLetterMessageAsync(args.Message);
-                }
-                finally
-                {
-                    ms.Dispose();
-                }
-
-                _semaphore.Release();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error processing message: {args.Message.MessageId}");
+
+                await HandleMessageErrorAsync(args);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        /// <summary>
+        /// Fonction pour Recevoir l'images du Blob et la redimenssionner
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <param name="ms"></param>
+        /// <returns></returns>
+        private async Task ProcessImageAsync(Guid imageId, MemoryStream ms)
+        {
+            // Valide sur quel blob est l'image a redimenssionner.
+            // Retourne True si sur le container1, sinon il va etre sur le 2
+            bool Container1 = await _blobServiceClient.GetBlobContainerClient(_options.BlobContainer1).GetBlobClient(imageId.ToString()).ExistsAsync();
+
+            // Si Container1 = true, utilise _options.BlobContainer1, sinon _options.BlobContainer2
+            // Container1 ? _options.BlobContainer1 : _options.BlobContainer2
+            var blob = _blobServiceClient.GetBlobContainerClient(Container1 ? _options.BlobContainer1 : _options.BlobContainer2).GetBlockBlobClient(imageId.ToString());
+            await blob.DownloadToAsync(ms);
+            ms.Position = 0;
+
+            // https://docs.sixlabors.com/articles/imagesharp/resize.html
+            // If you pass 0 as any of the values for width and height dimensions then ImageSharp will automatically determine the correct opposite dimensions size to preserve the original aspect ratio.
+            using (var image = Image.Load(ms))
+            {
+                image.Mutate(c => c.Resize(500, 0));
+                ms.Position = 0;
+                await image.SaveAsPngAsync(ms);
+                ms.Position = 0;
+            }
+
+            //Upload l'image sur le même container.
+            await blob.UploadAsync(ms);
+        }
+
+        /// <summary>
+        /// Fonction de gestion d'erreur
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private async Task HandleMessageProcessingErrorAsync(ProcessMessageEventArgs args)
+        {
+            if (args.Message.DeliveryCount > 5)
+            {
+                await args.DeadLetterMessageAsync(args.Message, "Image Processing Errror", "Exceed Maximum retries");
+            }
+            else
+            {
                 await args.AbandonMessageAsync(args.Message);
             }
         }
+
+        /// <summary>
+        /// Seconde fonction de gestion d'erreur
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private async Task HandleMessageErrorAsync(ProcessMessageEventArgs args)
+        {
+            if (args.Message.DeliveryCount > 5)
+            {
+                await args.DeadLetterMessageAsync(args.Message, "Processing Error", "Exceed Maximum retries"); 
+            }
+            else
+            {
+                await args.AbandonMessageAsync(args.Message);
+            }
+        }
+
         private Task ErrorHandler(ProcessErrorEventArgs args)
         {
             _logger.LogError(args.Exception, "Error processing messages.");
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Fonction principale de loop interne.
+        /// </summary>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _processor.StartProcessingAsync(stoppingToken);
@@ -214,7 +237,7 @@ namespace Worker_Image
                 {
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(5000, stoppingToken);
             }
 
             await _processor.StopProcessingAsync(stoppingToken);

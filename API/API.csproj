@@ -19,6 +19,7 @@
     <Compile Include="..\MVC\Models\ApplicationConfiguration.cs" Link="Models\ApplicationConfiguration.cs" />
     <Compile Include="..\MVC\Models\ApplicationFeatures.cs" Link="Models\ApplicationFeatures.cs" />
     <Compile Include="..\MVC\Models\Comment.cs" Link="Models\Comment.cs" />
+    <Compile Include="..\MVC\Models\ContentTypeValidation.cs" Link="Models\ContentTypeValidation.cs" />
     <Compile Include="..\MVC\Models\Post.cs" Link="Models\Post.cs" />
   </ItemGroup>
 

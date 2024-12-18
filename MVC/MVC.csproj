@@ -7,6 +7,7 @@
     <ApplicationInsightsResourceId>/subscriptions/970fcef5-9c23-4f7d-a11b-5a96d104f066/resourceGroups/Guro/providers/microsoft.insights/components/ApplicationInsights</ApplicationInsightsResourceId>
     <UserSecretsId>0b85fc40-6c28-40a8-a57c-956ef088eae3</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
