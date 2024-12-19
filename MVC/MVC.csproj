@@ -11,6 +11,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Cert\cert.pfx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Cert\cert.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.18.2" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.2.0" />
@@ -32,6 +42,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.0" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="4.0.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.5.0" />

@@ -219,6 +219,7 @@ namespace Worker_Content
         private async Task<Uri> UploadImageAsync(string imageId, MemoryStream ms)
         {
             var blob2 = _blobServiceClient.GetBlobContainerClient(_options.BlobContainer2).GetBlockBlobClient(imageId.ToString());
+            ms.Position = 0;
             await blob2.UploadAsync(ms);
             return blob2.Uri;
         }
@@ -313,14 +314,18 @@ namespace Worker_Content
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await _processor.StartProcessingAsync(stoppingToken);
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(5000, stoppingToken);
             }
+
+            await _processor.StopProcessingAsync(stoppingToken);
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)

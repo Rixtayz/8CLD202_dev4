@@ -1,7 +1,8 @@
 services:
   mvc:
     build:
-      context: MVC
+      context: .
+      dockerfile: MVC/Dockerfile
     ports:
       - "7182:8080"
     networks:
@@ -9,7 +10,8 @@ services:
 
   api:
     build:
-      context: API
+      context: .
+      dockerfile: API/Dockerfile
     ports:
       - "7101:443"
     networks:
@@ -20,7 +22,8 @@ services:
 
   worker_image:
     build:
-      context: Worker_Image
+      context: .
+      dockerfile: Worker_Image/Dockerfile
     networks:
         - app_vlan
     depends_on:
@@ -29,7 +32,8 @@ services:
 
   worker_content:
     build:
-       context: Worker_Content
+       context: .
+       dockerfile: Worker_Content/Dockerfile
     networks:
         - app_vlan
     depends_on:

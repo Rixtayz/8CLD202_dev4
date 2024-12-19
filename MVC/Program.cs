@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,6 +114,8 @@ builder.Services.AddControllersWithViews(options =>
 });
 builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
 
+// Add health checks services
+builder.Services.AddHealthChecks().AddCheck<CustomHealthCheck>("Healthz");
 
 var app = builder.Build();
 
@@ -170,6 +173,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map health checks endpoint
+app.MapHealthChecks("/healthz");
 
 app.MapRazorPages();
 

@@ -41,6 +41,18 @@
                     </form>
                 </td>
                 <td>
+                    @{
+                        if (item.IsApproved)
+                        {
+                            <span class="badge bg-success">Validated</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">UnValidated</span>
+                        }
+                    }
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.Created)
                 </td>
                 <td>
