@@ -7,6 +7,8 @@ using Microsoft.FeatureManagement;
 using MVC.Business;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.DependencyInjection;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,6 +60,8 @@ builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSe
 
 // Application Insight Service & OpenTelemetry
 // https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
+// https://learn.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core
+builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("API", "Instance1"));
 builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;

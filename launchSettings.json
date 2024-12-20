@@ -5,7 +5,7 @@
       "commandVersion": "1.0",
       "composeLaunchAction": "LaunchBrowser",
       "composeLaunchServiceName": "mvc",
-      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
+      "composeLaunchUrl": "https://localhost:{ServicePort}",
       "serviceActions": {
         "mvc": "StartDebugging",
         "api": "StartDebugging",

@@ -12,10 +12,14 @@
 
   <ItemGroup>
     <None Remove="Cert\cert.pfx" />
+    <None Remove="Cert\composecert.pfx" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Cert\cert.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Cert\composecert.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

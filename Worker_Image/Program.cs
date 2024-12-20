@@ -1,8 +1,10 @@
 using Azure.Security.KeyVault.Secrets;
 using Azure.Data.AppConfiguration;
 using Azure.Identity;
-using Azure.Monitor.OpenTelemetry.Exporter;
-using OpenTelemetry;
+using Microsoft.ApplicationInsights.DependencyCollector;
+using Microsoft.Extensions.Logging.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using MVC.Business;
 
 namespace Worker_Image
 {
@@ -48,20 +50,24 @@ namespace Worker_Image
             });
 
             // Application Insight trace/log/metrics
-            // https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=net#enable-azure-monitor-opentelemetry-for-net-nodejs-python-and-java-applications
-
-            var tracerProvider = Sdk.CreateTracerProviderBuilder()
-                .AddAzureMonitorTraceExporter(options => options.ConnectionString = applicationinsightKeyVault.Value);
-
-            var metricsProvider = Sdk.CreateMeterProviderBuilder()
-                .AddAzureMonitorMetricExporter(options => options.ConnectionString = applicationinsightKeyVault.Value);
-
-            var loggerFactory = LoggerFactory.Create(builder =>
+            // https://medium.com/@chuck.beasley/how-to-instrument-a-net-5537ea851763
+            builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("Worker_Image", "Instance1"));
+            builder.Services.AddLogging(logging =>
             {
-                builder.AddOpenTelemetry(logging =>
-                {
-                    logging.AddAzureMonitorLogExporter(options => options.ConnectionString = applicationinsightKeyVault.Value);
-                });
+                logging.ClearProviders();
+                logging.AddApplicationInsights(
+                    configureTelemetryConfiguration: (config) =>
+                    config.ConnectionString = applicationinsightKeyVault.Value,
+                    configureApplicationInsightsLoggerOptions: (options) => { }
+                    );
+                logging.AddFilter<ApplicationInsightsLoggerProvider>("Worker_Image", LogLevel.Trace);
+
+            });
+            builder.Services.AddApplicationInsightsTelemetryWorkerService();
+            builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
+            {
+                module.EnableSqlCommandTextInstrumentation = true;
+                o.ConnectionString = applicationinsightKeyVault.Value;
             });
 
             var host = builder.Build();

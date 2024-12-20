@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace MVC.Controllers
 {
-    [Authorize]
+// [Authorize]
     public class PostsController : Controller
     {
         private IRepository _repo;

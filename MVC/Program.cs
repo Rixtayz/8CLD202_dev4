@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ApplicationInsights.Extensibility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ builder.Services.AddControllersWithViews();
 // https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
 // Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
+
+Console.WriteLine(AppConfigEndPoint);
 
 // Initialize AppConfig
 builder.Configuration.AddAzureAppConfiguration(options =>
@@ -66,6 +69,7 @@ builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSe
 
 // Application Insight Service & OpenTelemetry
 // https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
+builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("MVC", "Instance1"));
 builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
@@ -103,6 +107,7 @@ builder.Services.AddScoped<ServiceBusController>();
 
 // Service d'identité avec AzureAD
 // L'information de la section AD peut venir du AppConfig
+
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews(options =>
@@ -115,18 +120,9 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
 
 // Add health checks services
-builder.Services.AddHealthChecks().AddCheck<CustomHealthCheck>("Healthz");
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
-
-// Pour rebuild des database SQL
-//using (var scope = app.Services.CreateScope())
-//{
-//    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
-
-//    dbContext.Database.EnsureDeleted();
-//    dbContext.Database.Migrate();
-//}
 
 // Configuration de la BD ( SQL ou NoSQL )
 switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))

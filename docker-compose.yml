@@ -3,8 +3,22 @@ services:
     build:
       context: .
       dockerfile: MVC/Dockerfile
-    ports:
-      - "7182:8080"
+    environment:
+      # Pour le certificat SSL
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/Cert/composecert.pfx 
+      - Logging__Loglevel__Default=Debug 
+      - Logging__Loglevel__Microsoft.AspNetCore=Debug
+    env_file:
+      - 'secrets.env'
+    volumes:
+      # Pour le certificat SSL
+      - ./MVC/Cert:/Cert:ro 
+    healthcheck:
+      test: ["CMD", "curl", "-k", "https://mvc:8081/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
     networks:
         - app_vlan
 
@@ -12,8 +26,8 @@ services:
     build:
       context: .
       dockerfile: API/Dockerfile
-    ports:
-      - "7101:443"
+    env_file:
+      - 'secrets.env'
     networks:
         - app_vlan
     depends_on:
@@ -24,6 +38,8 @@ services:
     build:
       context: .
       dockerfile: Worker_Image/Dockerfile
+    env_file:
+      - 'secrets.env'
     networks:
         - app_vlan
     depends_on:
@@ -34,6 +50,8 @@ services:
     build:
        context: .
        dockerfile: Worker_Content/Dockerfile
+    env_file:
+      - 'secrets.env'
     networks:
         - app_vlan
     depends_on:
