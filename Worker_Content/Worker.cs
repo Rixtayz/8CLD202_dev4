@@ -253,6 +253,7 @@ namespace Worker_Content
                     return true;
                 }
             }
+            _logger.LogInformation($"Severity check completed.");
             return false;
         }
 
