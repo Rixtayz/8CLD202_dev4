@@ -1,15 +1,16 @@
+using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.FeatureManagement;
+using System.Reflection;
+
+// Business
 using MVC.Models;
 using MVC.Data;
-using Azure.Identity;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
-using Microsoft.FeatureManagement;
 using MVC.Business;
-using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.DependencyInjection;
 
+// Monitoring
+using Microsoft.AspNetCore.Http.HttpResults;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,34 +21,25 @@ builder.Services.AddOpenApi();
 // Lecture du AppConfig Endpoint
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 
+// Option pour le credential recu des variables d'environement.
+DefaultAzureCredential defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+{
+    ExcludeSharedTokenCacheCredential = true,
+    ExcludeVisualStudioCredential = true,
+    ExcludeVisualStudioCodeCredential = true,
+    ExcludeEnvironmentCredential = false
+});
+
 // Initialize AppConfig
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
     // Besoin du "App Configuration Data Reader" role
-    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential(new DefaultAzureCredentialOptions
-    {
-        ExcludeSharedTokenCacheCredential = true,
-        ExcludeVisualStudioCredential = true,
-        ExcludeVisualStudioCodeCredential = true,
-        ExcludeEnvironmentCredential = false
-    }))
-
-    // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
-    // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
-    .Select("*")
-
-    // Requis pour l'ajout des Feature Flag ...
-    // https://learn.microsoft.com/en-us/azure/azure-app-configuration/use-feature-flags-dotnet-core
-    .UseFeatureFlags()
-
-    .ConfigureRefresh(refreshOptions =>
-    refreshOptions.Register("ApplicationConfiguration:Sentinel", refreshAll: true)
-        .SetRefreshInterval(new TimeSpan(0, 0, 10)));
+    options.Connect(new Uri(AppConfigEndPoint), defaultAzureCredential);
 
     options.ConfigureKeyVault(keyVaultOptions =>
     {
         // Besoin du "Key Vault Secrets Officer" role
-        keyVaultOptions.SetCredential(new DefaultAzureCredential());
+        keyVaultOptions.SetCredential(defaultAzureCredential);
     });
 });
 
@@ -58,13 +50,13 @@ builder.Services.AddFeatureManagement();
 // Liaison de la Configuration "ApplicationConfiguration" a la class
 builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
 
-// Application Insight Service & OpenTelemetry
-// https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
-// https://learn.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core
-builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("API", "Instance1"));
-builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
-{
-    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
+// Add Application Insights telemetry
+// I don't like this ...
+// Environment.GetEnvironmentVariable("HOSTNAME")!
+builder.Services.AddOpenTelemetry().UseAzureMonitor(options => 
+{ 
+    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight"); 
+    options.EnableLiveMetrics = true;
 });
 
 //Add DbContext
@@ -120,22 +112,15 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         using (var scope = app.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
-            await context.Database.EnsureCreatedAsync();
+            //await context.Database.EnsureCreatedAsync();
         }
         break;
 }
 
-// Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
-app.UseAzureAppConfiguration();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{ 
-    // Configuration des services Swagger
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Configuration des services Swagger
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
@@ -146,7 +131,7 @@ app.MapGet("/Posts/{id}", async (IRepositoryAPI repo, Guid id) => await repo.Get
 
 // https://andrewlock.net/reading-json-and-binary-data-from-multipart-form-data-sections-in-aspnetcore/
 // J'ai laisser cette fonction la car je voulais m'assurer de la séparation des concern, sinon j'aurais ajouté de la logique business dans le data layer.
-app.MapPost("/Posts/Add", async (IRepositoryAPI repo, [FromForm] IFormFile Image, HttpRequest request, BlobController blob) =>
+app.MapPost("/Posts/Add", async (IRepositoryAPI repo,  IFormFile Image, HttpRequest request, BlobController blob, ServiceBusController sb) =>
 {
     try
     {
@@ -154,7 +139,21 @@ app.MapPost("/Posts/Add", async (IRepositoryAPI repo, [FromForm] IFormFile Image
         Guid guid = Guid.NewGuid();
         string Url = await blob.PushImageToBlob(post.Image!, guid);
         Post Post = new Post { Title = post.Title!, Category = post.Category, User = post.User!, BlobImage = guid, Url = Url };
-        return await repo.CreateAPIPost(Post);
+
+        // Sauvegarde du post pour avoir l'Id
+        var Result = await repo.CreateAPIPost(Post);
+
+        // Si créer, envoyer dans les services bus
+        if (Result.Result is Created<PostReadDTO> CreatedResult)
+        {
+            PostReadDTO postReadDTO = CreatedResult.Value!;
+
+            // Envoie des messages dans le Service Bus
+            await sb.SendImageToResize((Guid)Post.BlobImage!, postReadDTO.Id);
+            await sb.SendContentImageToValidation((Guid)Post.BlobImage!, Guid.NewGuid(), postReadDTO.Id);
+        }
+
+        return Result;
     }
     catch (ExceptionFilesize)
     {
@@ -169,7 +168,21 @@ app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepositoryAPI repo, Guid
 //Comment
 //Id or PostId ( va retourner 1 ou plusieurs comments)
 app.MapGet("/Comments/{id}", async (IRepositoryAPI repo, Guid id) => await repo.GetAPIComment(id));
-app.MapPost("/Comments/Add", async (IRepositoryAPI repo, CommentCreateDTO commentDTO) => await repo.CreateAPIComment(commentDTO));
+app.MapPost("/Comments/Add", async (IRepositoryAPI repo, CommentCreateDTO commentDTO, ServiceBusController sb) =>
+{
+    var Result = await repo.CreateAPIComment(commentDTO);
+
+    // Si créer, envoyer dans les services bus
+    if (Result.Result is Created<CommentReadDTO> CreatedResult)
+    {
+        CommentReadDTO commentReadDTO = CreatedResult.Value!;
+
+        // Envoie du message dans le Service Bus
+        await sb.SendContentTextToValidation(commentReadDTO.Commentaire, commentReadDTO.Id, commentReadDTO.PostId);
+    }
+
+    return Result;
+});
 app.MapPost("/Comments/IncrementCommentLike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentLike(id));
 app.MapPost("/Comments/IncrementCommentsDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentDislike(id));
 

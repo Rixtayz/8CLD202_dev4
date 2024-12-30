@@ -51,10 +51,9 @@ namespace Worker_Image
 
             // Application Insight trace/log/metrics
             // https://medium.com/@chuck.beasley/how-to-instrument-a-net-5537ea851763
-            builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("Worker_Image", "Instance1"));
+            builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("Worker_Image", Environment.GetEnvironmentVariable("HOSTNAME")!));
             builder.Services.AddLogging(logging =>
             {
-                logging.ClearProviders();
                 logging.AddApplicationInsights(
                     configureTelemetryConfiguration: (config) =>
                     config.ConnectionString = applicationinsightKeyVault.Value,

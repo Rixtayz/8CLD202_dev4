@@ -53,14 +53,22 @@
                 </td>
                 <td>
                     @{
-                        if (item.IsApproved)
+                        if (item.IsApproved.HasValue)
                         {
+                            if (item.IsApproved.GetValueOrDefault(false))
+                            {
                                 <span class="badge bg-success">Validated</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger text-dark">UnApproved</span>
+                            }
                         }
                         else
                         {
-                                <span class="badge bg-warning text-dark">UnValidated</span>
+                              <span class="badge bg-warning text-dark">UnValidated</span>
                         }
+
                     }
                </td>
                 <td>

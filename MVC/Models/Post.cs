@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MVC.Models
@@ -75,7 +76,7 @@ namespace MVC.Models
         public DateTime Created { get; init; } = DateTime.Now;
 
         [Display(Name = "Contenue revisé ?")]
-        public bool IsApproved { get; private set; } = false;
+        public bool? IsApproved { get; private set; } = null;
 
         public bool IsDeleted { get; private set; } = false;
 

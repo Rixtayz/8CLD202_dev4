@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Azure.Identity;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.FeatureManagement;
 
 // Project
@@ -14,8 +13,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Microsoft.Extensions.DependencyInjection;
+
+// Monitoring
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.Logging.ApplicationInsights;
+using Microsoft.ApplicationInsights.DependencyCollector;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,19 +29,21 @@ builder.Services.AddControllersWithViews();
 // Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 
-Console.WriteLine(AppConfigEndPoint);
+// Option pour le credential recu des variables d'environement.
+DefaultAzureCredential defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+{
+    ExcludeSharedTokenCacheCredential = true,
+    ExcludeVisualStudioCredential = true,
+    ExcludeVisualStudioCodeCredential = true,
+    ExcludeEnvironmentCredential = false
+});
 
 // Initialize AppConfig
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
     // Besoin du "App Configuration Data Reader" role
     // Ajout du defaultAzureCredentialOptions pour obtenir les Cred passer dans le docker.
-    options.Connect(new Uri(AppConfigEndPoint), new DefaultAzureCredential(new DefaultAzureCredentialOptions{
-        ExcludeSharedTokenCacheCredential = true,
-        ExcludeVisualStudioCredential = true,
-        ExcludeVisualStudioCodeCredential = true,
-        ExcludeEnvironmentCredential = false
-    }))
+    options.Connect(new Uri(AppConfigEndPoint), defaultAzureCredential)
 
     // Ajout de la configuration du sentinel pour rafraichir la configuration si il y a changement
     // https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-aspnet-core
@@ -56,7 +60,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     options.ConfigureKeyVault(keyVaultOptions =>
     {
         // Besoin du "Key Vault Secrets Officer" role
-        keyVaultOptions.SetCredential(new DefaultAzureCredential());
+        keyVaultOptions.SetCredential(defaultAzureCredential);
     });
 });
 
@@ -68,17 +72,30 @@ builder.Services.AddFeatureManagement();
 builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
 
 // Application Insight Service & OpenTelemetry
-// https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore
-builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("MVC", "Instance1"));
-builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
+// https://learn.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core
+builder.Services.AddSingleton<ITelemetryInitializer>(new CustomTelemetryInitializer("MVC", Environment.GetEnvironmentVariable("HOSTNAME")!));
+builder.Services.AddLogging(logging =>
+{
+    //logging.ClearProviders();
+    logging.AddApplicationInsights(
+        configureTelemetryConfiguration: (config) =>
+        config.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!,
+        configureApplicationInsightsLoggerOptions: (options) => { }
+        );
+    logging.AddFilter<ApplicationInsightsLoggerProvider>("MVC", LogLevel.Trace);
+});
+
+builder.Services.AddApplicationInsightsTelemetry(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
 
-// Pour rebuild des database SQL
-// Ceci est requis si nous changeons la configuration de la BD.
-// builder.Services.AddDbContext<ApplicationDbContextSQL>();
-// builder.Services.AddScoped<IRepository, EFRepositorySQL>();
+builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
+{
+    module.EnableSqlCommandTextInstrumentation = true;
+    o.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
+});
+
 
 // Ajouter la BD ( SQL ou NoSQL )
 switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
@@ -106,8 +123,6 @@ builder.Services.AddScoped<BlobController>();
 builder.Services.AddScoped<ServiceBusController>();
 
 // Service d'identité avec AzureAD
-// L'information de la section AD peut venir du AppConfig
-
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews(options =>

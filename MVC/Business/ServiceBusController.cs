@@ -69,7 +69,7 @@ namespace MVC.Business
             // Messsage planifier dans 5 minutes, le but étant de laisser le temps au Resize de passé avant.
             // Ceci n'est vraiment pas un design idéal.
 
-            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message, 5);
+            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message, 1);
         }
     }
 }
