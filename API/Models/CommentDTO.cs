@@ -1,6 +1,9 @@
 ﻿using MVC.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace MVC.Models
 {
@@ -9,9 +12,9 @@ namespace MVC.Models
     {
         public Guid Id { get; init; }
 
-        public string Commentaire { get; init; }
+        public string Commentaire { get; init; } = string.Empty;
 
-        public string User { get; init; }
+        public string User { get; init; } = string.Empty;
 
         public int Like { get; init; } 
 
@@ -31,8 +34,13 @@ namespace MVC.Models
             Created = comment.Created;
             PostId = comment.PostId;
         }
-    }
 
+        //constructeur standard pour la deserialization
+        public CommentReadDTO()
+        {
+
+        }
+    }
     public class CommentCreateDTO
     {
         public string? Commentaire { get; init; }

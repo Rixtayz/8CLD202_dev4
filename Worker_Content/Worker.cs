@@ -247,7 +247,7 @@ namespace Worker_Content
             foreach (var category in categories)
             {
                 int severity = analysis.FirstOrDefault(a => a.Category == category)?.Severity ?? 0;
-                _logger.LogError($"{category} severity: {severity}");
+                _logger.LogInformation($"{category} severity: {severity}");
                 if (severity > 0)
                 {
                     return true;
@@ -270,7 +270,7 @@ namespace Worker_Content
             try
             {
                 response = await _contentSafetyClient.AnalyzeImageAsync(request);
-                _logger.LogError("\nAnalyze image succeeded:");
+                _logger.LogInformation("\nAnalyze image succeeded:");
                 return CheckImageSeverity(response.Value.CategoriesAnalysis, ImageCategory.Hate.ToString(), ImageCategory.SelfHarm.ToString(), ImageCategory.Sexual.ToString(), ImageCategory.Violence.ToString());
             }
             catch (RequestFailedException ex)

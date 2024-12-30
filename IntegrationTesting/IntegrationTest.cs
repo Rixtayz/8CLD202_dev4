@@ -7,7 +7,7 @@ namespace IntegrationTesting
 {
     public class IntegrationTest
     {
-        private const string HostURL = "http://localhost:60593";
+        private const string HostURL = "http://localhost:50002";
 
         // créer une fixture pour garder les PostId et CommentId pour ensuite looper des Like
 
