@@ -140,11 +140,8 @@
         "autoRenew": true
       }
     },
-    "EventGridName": {
-      "value": "GuroEventGrid"
-    },
-    "EventGridTopicName": {
-      "value": "Event"
+    "EventHubName": {
+      "value": "GuroEventHub"
     }
 
   }
