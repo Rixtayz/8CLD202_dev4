@@ -353,7 +353,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]",
-        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('EventHubName'), '/RootManageSharedAccessKey'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey')]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
       //this provide connectionString for the EventHub
@@ -374,7 +374,7 @@
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]",
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]",
-        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('EventHubName'), '/RootManageSharedAccessKey'))]"
+        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey')]"
       ],
       "properties": {
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringEventHub'), '2019-09-01').secretUriWithVersion, '\"}')]",
