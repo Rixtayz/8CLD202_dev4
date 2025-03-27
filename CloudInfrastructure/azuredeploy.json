@@ -1110,7 +1110,7 @@
         "zoneRedundant": true,
         "minimumTlsVersion": "1.2",
         "disableLocalAuth": "false",
-        "publicNetworkAccess": "enable"
+        "publicNetworkAccess": true
       }
     },
     {
@@ -1159,7 +1159,7 @@
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
       ],
       "properties": {
-        "publicNetworkAccess": "Enabled",
+        "publicNetworkAccess": true,
         "defaultAction": "Allow",
         "virtualNetworkRules": [],
         "ipRules": [],
