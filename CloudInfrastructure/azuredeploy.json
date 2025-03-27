@@ -358,7 +358,7 @@
       ],
       //this provide connectionString for the EventHub
       "properties": {
-        "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), '/RootManageSharedAccessKey'), '2024-05-01-preview').primaryKey]",
+        "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey'), '2024-05-01-preview').primaryConnectionString]",
         "attributes": {
           "enabled": true
         }
