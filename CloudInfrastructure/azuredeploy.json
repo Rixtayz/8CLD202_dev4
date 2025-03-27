@@ -1110,7 +1110,7 @@
         "zoneRedundant": true,
         "minimumTlsVersion": "1.2",
         "disableLocalAuth": "false",
-        "publicNetworkAccess": true
+        "publicNetworkAccess": "Enabled"
       }
     },
     {
@@ -1133,7 +1133,7 @@
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2024-05-01-preview",
       "name": "[concat(parameters('EventHubName'), '/event')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
       ],
@@ -1154,12 +1154,12 @@
       "type": "Microsoft.EventHub/namespaces/networkrulesets",
       "apiVersion": "2024-05-01-preview",
       "name": "[concat(parameters('EventHubName'), '/default')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
       ],
       "properties": {
-        "publicNetworkAccess": true,
+        "publicNetworkAccess": "Enabled",
         "defaultAction": "Allow",
         "virtualNetworkRules": [],
         "ipRules": [],
@@ -1170,7 +1170,7 @@
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2024-05-01-preview",
       "name": "[concat(parameters('EventHubName'), '/event/$Default')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('EventHubName'), 'event')]",
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
@@ -1181,7 +1181,7 @@
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2024-05-01-preview",
       "name": "[concat(parameters('EventHubName'), '/event/consumer')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('EventHubName'), 'event')]",
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
