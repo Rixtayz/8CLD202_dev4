@@ -30,7 +30,7 @@ namespace Worker_Image
         private BlobServiceClient _blobServiceClient;
         private SemaphoreSlim _semaphore;
 
-        private const int ConcurentJobLimit = 5;
+        private const int ConcurentJobLimit = 1;
         private const int ProcessingDelayMS = 30000;        //Delais pour ralentir le traitement pour load testing.
 
         /// <summary>

@@ -18,6 +18,7 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using Microsoft.ApplicationInsights.DependencyCollector;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -106,7 +107,16 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         break;
 
     case "NoSQL":
-        builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
+        builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
+            options.UseCosmos(
+                    connectionString: builder.Configuration.GetConnectionString("CosmosDB")!,
+                    databaseName: "ApplicationDB",
+                    cosmosOptionsAction: options =>
+                    {
+                        options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
+                        //options.MaxRequestsPerTcpConnection(16);
+                        //options.MaxTcpConnectionsPerEndpoint(32);
+                    }));
         builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
         break;
 
@@ -121,6 +131,14 @@ builder.Services.AddScoped<BlobController>();
 
 // Ajouter le ServiceBusController du BsinessLayer dans nos Injection ..
 builder.Services.AddScoped<ServiceBusController>();
+
+// Exclusion du Healthz chech
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AllowHealthCheck", policy =>
+    policy.RequireAssertion(context =>
+        context.Resource is HttpContext http && http.Request.Path.StartsWithSegments("/healthz")));
+});
 
 // Service d'identité avec AzureAD
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
@@ -185,8 +203,10 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapControllers();
+
 // Map health checks endpoint
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/healthz").AllowAnonymous();
 
 app.MapRazorPages();
 

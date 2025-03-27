@@ -15,10 +15,11 @@ services:
       # Pour le certificat SSL
       - ./MVC/Cert:/Cert:ro 
     healthcheck:
-      test: ["CMD", "curl", "-k", "https://mvc:8081/healthz"]
+      test: ["CMD", "curl", "-k", "http://mvc:8080/healthz"]
       interval: 10s
       timeout: 3s
       retries: 3
+      start_period: 20s
     networks:
         - app_vlan
 
@@ -30,9 +31,9 @@ services:
       - 'secrets.env'
     networks:
         - app_vlan
-    depends_on:
-      mvc:
-        condition: service_healthy
+    # depends_on:
+    #   mvc:
+    #     condition: service_healthy
 
   worker_image:
     build:
@@ -42,9 +43,9 @@ services:
       - 'secrets.env'
     networks:
         - app_vlan
-    depends_on:
-      mvc:
-        condition: service_healthy
+    # depends_on:
+    #   mvc:
+    #     condition: service_healthy
 
   worker_content:
     build:
@@ -54,9 +55,9 @@ services:
       - 'secrets.env'
     networks:
         - app_vlan
-    depends_on:
-      mvc:
-        condition: service_healthy
+    # depends_on:
+    #   mvc:
+    #     condition: service_healthy
 
 networks:
   app_vlan:

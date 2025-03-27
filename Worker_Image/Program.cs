@@ -13,6 +13,7 @@ namespace Worker_Image
         public static void Main(string[] args)
         {
             var builder = Host.CreateApplicationBuilder(args);
+
             builder.Services.AddHostedService<Worker>();
 
             // Code différent pour le Azure.Data.AppConfiguration

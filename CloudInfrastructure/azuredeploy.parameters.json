@@ -21,7 +21,7 @@
       "value": "GuroSb"
     },
     "NoSQLname": {
-      "value": "gurocosmo"
+      "value": "gurocosmos"
     },
     "storageAccountName": {
       "value": "guroblobstore"
@@ -139,6 +139,12 @@
         "planType": "Lenovo",
         "autoRenew": true
       }
+    },
+    "EventGridName": {
+      "value": "GuroEventGrid"
+    },
+    "EventGridTopicName": {
+      "value": "Event"
     }
 
   }

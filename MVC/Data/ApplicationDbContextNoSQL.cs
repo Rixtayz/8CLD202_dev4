@@ -15,16 +15,7 @@ namespace MVC.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseCosmos(
-                    connectionString: Configuration.GetConnectionString("CosmosDB")!,
-                    databaseName: "ApplicationDB",
-                    cosmosOptionsAction: options =>
-                    {
-                        options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Direct);
-                        options.MaxRequestsPerTcpConnection(16);
-                        options.MaxTcpConnectionsPerEndpoint(32);
-                    });
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

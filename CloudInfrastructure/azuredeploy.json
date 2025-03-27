@@ -149,6 +149,12 @@
     "uniqueId": {
       "defaultValue": "[newGuid()]",
       "type": "String"
+    },
+    "EventGridName": {
+      "type": "string"
+    },
+    "EventGridTopicName": {
+      "type": "string"
     }
   },
   "variables": {
@@ -337,6 +343,42 @@
       ],
       "properties": {
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringCosmosDB'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+     // EVENT HUB ---------------------------------------
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ConnectionStringEventHub')]",
+      "location": "eastus",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.EventGrid/topics', parameters('EventGridTopicName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      //this provide connectionString for the EventGrid
+      "properties": {
+        "value": "[listKeys(resourceId('Microsoft.EventGrid/topics', parameters('EventGridTopicName')), '2021-12-01').key1]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ConnectionStrings:EventHub')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ConnectionStringEventHub')]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]",
+        "[resourceId('Microsoft.EventGrid/topics', parameters('EventGridTopicName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringEventHub'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
     },
@@ -1051,6 +1093,37 @@
       "tags": {
         "defaultExperience": "Core (SQL)",
         "hidden-cosmos-mmspecial": ""
+      }
+    },
+    {
+      "type": "Microsoft.EventGrid/namespaces",
+      "apiVersion": "2023-12-15-preview",
+      "name": "[parameters('EventGridName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard",
+        "capacity": 1
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "publicNetworkAccess": "Enabled",
+        "isZoneRedundant": true,
+        "inboundIpRules": [],
+        "minimumTlsVersionAllowed": "1.2"
+      }
+    },
+    {
+      "type": "Microsoft.EventGrid/topics",
+      "apiVersion": "2021-12-01",
+      "name": "[parameters('EventGridTopicName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventGrid/namespaces', parameters('EventGridName'))]"
+      ],
+      "properties": {
+        "inputSchema": "EventGridSchema"
       }
     }
   ],
