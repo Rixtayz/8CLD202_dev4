@@ -257,7 +257,7 @@
       "apiVersion": "2024-04-01-preview",
       //semi hardcoded
       "name": "[concat(parameters('VaultName'), '/ConnectionStringBlob')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
@@ -276,7 +276,7 @@
       "apiVersion": "2024-04-01-preview",
       //semi hardcoded
       "name": "[concat(parameters('VaultName'), '/ConnectionStringSB')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]",
@@ -295,7 +295,7 @@
       "apiVersion": "2024-04-01-preview",
       //semi hardcoded
       "name": "[concat(parameters('VaultName'), '/ConnectionStringContentSafety')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[parameters('ContentSafetyname')]",
@@ -314,7 +314,7 @@
       "apiVersion": "2024-04-01-preview",
       //semi hardcoded
       "name": "[concat(parameters('VaultName'), '/ConnectionStringCosmosDB')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('NoSQLname'))]",
@@ -349,7 +349,7 @@
       "apiVersion": "2024-04-01-preview",
       //semi hardcoded
       "name": "[concat(parameters('VaultName'), '/ConnectionStringEventHub')]",
-      "location": "eastus",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]",
@@ -358,7 +358,7 @@
       ],
       //this provide connectionString for the EventHub
       "properties": {
-        "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey'), '2024-05-01-preview').primaryKey]",
+        "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), '/RootManageSharedAccessKey'), '2024-05-01-preview').primaryKey]",
         "attributes": {
           "enabled": true
         }
