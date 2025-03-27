@@ -1097,7 +1097,7 @@
     {
       "type": "Microsoft.EventHub/namespaces",
       "apiVersion": "2024-05-01-preview",
-      "name": "[parameters('EventGridName')]",
+      "name": "[parameters('EventHubName')]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard",
