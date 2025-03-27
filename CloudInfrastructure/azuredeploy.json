@@ -1110,8 +1110,7 @@
       "properties": {
         "publicNetworkAccess": "Enabled",
         "isZoneRedundant": true,
-        "inboundIpRules": [],
-        "minimumTlsVersionAllowed": "1.2"
+        "inboundIpRules": []
       }
     },
     {
