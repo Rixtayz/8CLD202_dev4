@@ -43,10 +43,13 @@ namespace MVC.Models
     }
     public class CommentCreateDTO
     {
+        [Required]
         public required string Commentaire { get; init; }
 
+        [Required]
         public required string User { get; init; }
 
+        [Required]
         public required Guid PostId { get; init; }
 
         public static Comment GetComment(CommentCreateDTO comment)

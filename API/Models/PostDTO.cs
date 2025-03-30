@@ -99,5 +99,19 @@ namespace MVC.Models
             this.User = User;
             this.Image = Image;
         }
+
+        // Binding pour le MultiForm format
+        public static ValueTask<PostCreateDTO> BindAsync(HttpContext context)
+        {
+            var form = context.Request.ReadFormAsync().Result;
+            var image = form.Files["Image"]!;
+            var title = form["Title"]!;
+            var category = form["Category"]!;
+            var user = form["User"]!;
+
+            return new ValueTask<PostCreateDTO>(new PostCreateDTO(title, category, user, image));
+        }
+
+
     }
 }

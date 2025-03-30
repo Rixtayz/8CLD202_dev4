@@ -16,6 +16,8 @@ namespace MVC.Data
 
         Task<Results<Accepted, InternalServerError>> APIIncrementPostDislike(Guid id);
 
+        Task<Results<Ok<List<CommentReadDTO>>, NotFound, InternalServerError>> GetAPIComments();
+
         Task<Results<Ok<List<CommentReadDTO>>, NotFound, InternalServerError>> GetAPIComment(Guid id);
 
         Task<Results<Accepted, InternalServerError>> CreateAPIComment(Comment comment);

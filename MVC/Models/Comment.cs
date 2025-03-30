@@ -25,7 +25,7 @@ namespace MVC.Models
         // Ajouter pour NoSQL
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         // Utilisation du Guid pour etre mieux aligner avec NoSQL
-        public Guid Id { get; init; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "SVP entrer votre commentaire")]
         [MaxLength(128)]

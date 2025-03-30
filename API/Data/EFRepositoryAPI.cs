@@ -95,6 +95,27 @@ namespace MVC.Data
             }
         }
 
+        public virtual async Task<Results<Ok<List<CommentReadDTO>>, NotFound, InternalServerError>> GetAPIComments()
+        {
+            try
+            {
+                Comment[] comments = await _context.Set<Comment>().OrderByDescending(o => o.Created).ToArrayAsync();
+                if (comments.Length > 0)
+                {
+                    // Converstion dans le DTO
+                    List<CommentReadDTO> commentsDTO = comments.Select(x => new CommentReadDTO(x)).ToList();
+                    return TypedResults.Ok(commentsDTO);
+                }
+                return TypedResults.NotFound();
+            }
+            catch
+            {
+                return TypedResults.InternalServerError();
+            }
+        }
+
+
+
         public virtual async Task<Results<Ok<List<CommentReadDTO>>, NotFound, InternalServerError>> GetAPIComment(Guid id)
         {
             try
@@ -118,6 +139,7 @@ namespace MVC.Data
         {
             try
             {
+                comment.Id = Guid.NewGuid();
                 await _eventController.SendEvent(new Event(comment));
 
                 return TypedResults.Accepted($"/Comments/{comment.Id}");

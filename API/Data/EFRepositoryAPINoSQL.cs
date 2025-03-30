@@ -1,4 +1,6 @@
-﻿using MVC.Business;
+﻿using Microsoft.EntityFrameworkCore;
+using MVC.Business;
+using MVC.Models;
 
 namespace MVC.Data
 {

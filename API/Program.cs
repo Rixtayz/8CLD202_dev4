@@ -70,7 +70,16 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         break;
 
     case "NoSQL":
-        builder.Services.AddDbContext<ApplicationDbContextNoSQL>();
+        builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
+            options.UseCosmos(
+                    connectionString: builder.Configuration.GetConnectionString("CosmosDB")!,
+                    databaseName: "ApplicationDB",
+                    cosmosOptionsAction: options =>
+                    {
+                        options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
+                        //options.MaxRequestsPerTcpConnection(16);
+                        //options.MaxTcpConnectionsPerEndpoint(32);
+                    }));
         builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPINoSQL>();
         break;
 
@@ -119,7 +128,7 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         using (var scope = app.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
-            //await context.Database.EnsureCreatedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
         break;
 }
@@ -140,29 +149,23 @@ app.MapGet("/Posts/{id}", async (IRepositoryAPI repo, Guid id) => await repo.Get
 
 // https://andrewlock.net/reading-json-and-binary-data-from-multipart-form-data-sections-in-aspnetcore/
 // J'ai laisser cette fonction la car je voulais m'assurer de la séparation des concern, sinon j'aurais ajouté de la logique business dans le data layer.
-app.MapPost("/Posts/Add", async (HttpContext context, IRepositoryAPI repo, BlobController blob, ServiceBusController sb) =>
+app.MapPost("/Posts/Add", async (HttpContext context, PostCreateDTO postcreateDTO, IRepositoryAPI repo, BlobController blob, ServiceBusController sb) =>
 {
     try
     {
         // Access form data and the image from the request
-        var request = context.Request;
-        var form = await request.ReadFormAsync();
-        IFormFile image = form.Files["Image"]!;
-        string title = form["Title"]!;
-        string category = form["Category"]!;
-        string user = form["User"]!;
+        postcreateDTO = await PostCreateDTO.BindAsync(context);
 
         // Construct the post DTO
-        PostCreateDTO post = new PostCreateDTO(title, category, user, image);
         Guid guid = Guid.NewGuid();
 
         Post postEntity = new Post
         {
-            Title = post.Title!,
-            Category = post.Category,
-            User = post.User!,
+            Title = postcreateDTO.Title!,
+            Category = postcreateDTO.Category,
+            User = postcreateDTO.User!,
             BlobImage = guid,
-            Url = await blob.PushImageToBlob(post.Image!, guid)
+            Url = await blob.PushImageToBlob(postcreateDTO.Image!, guid)
         };
 
         // Save the post and check the result
@@ -182,17 +185,20 @@ app.MapPost("/Posts/Add", async (HttpContext context, IRepositoryAPI repo, BlobC
     }
 
     // DisableAntiforgery car .net 9.0 l'ajoute automatiquement.
-}).DisableAntiforgery();
+})
+.Accepts<IFormFile>("multipart/form-data")
+.DisableAntiforgery();
 
 app.MapPost("/Posts/IncrementPostLike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementPostLike(id));
 app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementPostDislike(id));
 
 //Comment
 //Id or PostId ( va retourner 1 ou plusieurs comments)
+app.MapGet("/Comments/", async (IRepositoryAPI repo) => await repo.GetAPIComments());
 app.MapGet("/Comments/{id}", async (IRepositoryAPI repo, Guid id) => await repo.GetAPIComment(id));
-app.MapPost("/Comments/Add", async (IRepositoryAPI repo, CommentCreateDTO commentDTO, ServiceBusController sb) =>
+app.MapPost("/Comments/Add", async (CommentCreateDTO commentDTO, IRepositoryAPI repo, ServiceBusController sb) =>
 {
-    Comment comment = new Comment { Commentaire = commentDTO.Commentaire, User = commentDTO.User };
+    Comment comment = new Comment { Commentaire = commentDTO.Commentaire, User = commentDTO.User, PostId = commentDTO.PostId };
 
     var Result = await repo.CreateAPIComment(comment);
 
@@ -205,7 +211,8 @@ app.MapPost("/Comments/Add", async (IRepositoryAPI repo, CommentCreateDTO commen
     }
 
     return Result;
-});
+}).Accepts<CommentCreateDTO>("application/json");
+
 app.MapPost("/Comments/IncrementCommentLike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentLike(id));
 app.MapPost("/Comments/IncrementCommentsDislike/{id}", async (IRepositoryAPI repo, Guid id) => await repo.APIIncrementCommentDislike(id));
 
@@ -213,3 +220,5 @@ app.Run();
 
 // Pour les xUnit test ...
 public partial class Program { }
+
+//Custom Binder
