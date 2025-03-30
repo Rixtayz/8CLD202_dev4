@@ -746,6 +746,23 @@
         "denyEncryptionScopeOverride": false,
         "publicAccess": "Blob"
       }
+    },
+    { // Fix container for Synchro of EventHub
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-05-01",
+      "name": "[concat(parameters('storageAccountName'), '/default/', 'synchro')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "Blob"
+      }
     }, // SB
     {
       "type": "Microsoft.ServiceBus/namespaces",

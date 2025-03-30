@@ -1,16 +1,20 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using MVC.Models;
+using MVC.Business;
+using Microsoft.Extensions.Hosting;
 
 namespace MVC.Data
 {
     public abstract class EFRepositoryAPI<TContext> : IRepositoryAPI where TContext : DbContext
     {
         protected readonly TContext _context;
+        private EventHubController _eventController;
 
-        protected EFRepositoryAPI(TContext context)
+        protected EFRepositoryAPI(TContext context, EventHubController eventHubController)
         {
             _context = context;
+            _eventController = eventHubController;
         }
 
         //API
@@ -48,18 +52,14 @@ namespace MVC.Data
         }
 
         // Normallement cette méthode ne devrait pas être Post, cette object est interne, mais nous avons géré la conversion dans une autre méthode interne avant ...
-        public virtual async Task<Results<Created<PostReadDTO>, BadRequest, InternalServerError>> CreateAPIPost(Post post)
+        public virtual async Task<Results<Accepted, InternalServerError>> CreateAPIPost(Post post)
         {
             try
             {
-                _context.Add(post);
-                await _context.SaveChangesAsync();
-                return TypedResults.Created($"/Posts/{post.Id}", new PostReadDTO(post));
+                post.Id = Guid.NewGuid();
+                await _eventController.SendEvent(new Event(post));
 
-            }
-            catch (Exception ex) when (ex is DbUpdateException)
-            {
-                return TypedResults.BadRequest();
+                return TypedResults.Accepted($"/Posts/{post.Id}");
             }
             catch (Exception)
             {
@@ -67,19 +67,13 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Ok, NotFound, InternalServerError>> APIIncrementPostLike(Guid id)
+        public virtual async Task<Results<Accepted, InternalServerError>> APIIncrementPostLike(Guid id)
         {
             try
             {
-                var post = await _context.Set<Post>().FindAsync(id);
-                if (post == null)
-                    return TypedResults.NotFound();
-                else
-                {
-                    post!.IncrementLike();
-                    await _context.SaveChangesAsync();
-                    return TypedResults.Ok();
-                }
+                await _eventController.SendEvent(new Event(ItemType.Post, Models.Action.Like, id));
+
+                return TypedResults.Accepted($"/Posts/{id}");
             }
             catch
             {
@@ -87,19 +81,13 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Ok, NotFound, InternalServerError>> APIIncrementPostDislike(Guid id)
+        public virtual async Task<Results<Accepted, InternalServerError>> APIIncrementPostDislike(Guid id)
         {
             try
             {
-                var post = await _context.Set<Post>().FindAsync(id);
-                if (post == null)
-                    return TypedResults.NotFound();
-                else
-                {
-                    post!.IncrementDislike();
-                    await _context.SaveChangesAsync();
-                    return TypedResults.Ok();
-                }
+                await _eventController.SendEvent(new Event(ItemType.Post, Models.Action.Dislike, id));
+
+                return TypedResults.Accepted($"/Posts/{id}");
             }
             catch
             {
@@ -126,24 +114,13 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Created<CommentReadDTO>, NoContent, BadRequest, InternalServerError>> CreateAPIComment(CommentCreateDTO commentDTO)
+        public virtual async Task<Results<Accepted, InternalServerError>> CreateAPIComment(Comment comment)
         {
             try
             {
-                var post = await _context.Set<Post>().FindAsync(commentDTO.PostId);
-                if (post == null)
-                    return TypedResults.NoContent();
-                else
-                {
-                    Comment comment = CommentCreateDTO.GetComment(commentDTO);
-                    post!.Comments.Add(comment);
-                    await _context.SaveChangesAsync();
-                    return TypedResults.Created($"/Comments/{comment.Id}", new CommentReadDTO(comment));
-                }
-            }
-            catch (Exception ex) when (ex is DbUpdateException)
-            {
-                return TypedResults.BadRequest();
+                await _eventController.SendEvent(new Event(comment));
+
+                return TypedResults.Accepted($"/Comments/{comment.Id}");
             }
             catch (Exception)
             {
@@ -151,19 +128,13 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Ok, NotFound, InternalServerError>> APIIncrementCommentLike(Guid id)
+        public virtual async Task<Results<Accepted, InternalServerError>> APIIncrementCommentLike(Guid id)
         {
             try
             {
-                var Comment = await _context.Set<Comment>().FindAsync(id);
-                if (Comment == null)
-                    return TypedResults.NotFound();
-                else
-                {
-                    Comment!.IncrementLike();
-                    await _context.SaveChangesAsync();
-                    return TypedResults.Ok();
-                }
+                await _eventController.SendEvent(new Event(ItemType.Comment, Models.Action.Like, id));
+
+                return TypedResults.Accepted($"/Comments/{id}");
             }
             catch
             {
@@ -171,19 +142,13 @@ namespace MVC.Data
             }
         }
 
-        public virtual async Task<Results<Ok, NotFound, InternalServerError>> APIIncrementCommentDislike(Guid id)
+        public virtual async Task<Results<Accepted, InternalServerError>> APIIncrementCommentDislike(Guid id)
         {
             try
             {
-                var Comment = await _context.Set<Comment>().FindAsync(id);
-                if (Comment == null)
-                    return TypedResults.NotFound();
-                else
-                {
-                    Comment!.IncrementDislike();
-                    await _context.SaveChangesAsync();
-                    return TypedResults.Ok();
-                }
+                await _eventController.SendEvent(new Event(ItemType.Comment, Models.Action.Dislike, id));
+
+                return TypedResults.Accepted($"/Comments/{id}");
             }
             catch
             {

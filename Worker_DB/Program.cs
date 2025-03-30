@@ -17,7 +17,12 @@ using Azure.Security.KeyVault.Secrets;
 using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
+
+//Database
+using Microsoft.EntityFrameworkCore;
+
 using MVC.Business;
+using MVC.Data;
 
 namespace Worker_DB
 {
@@ -48,14 +53,30 @@ namespace Worker_DB
             ConfigurationSetting endpointKeyVault = appConfigClient.GetConfigurationSetting("Endpoints:KeyVault");
             SecretClient keyVaultClient = new SecretClient(new Uri(endpointKeyVault.Value), defaultAzureCredential);
 
-            KeyVaultSecret EventHubString = keyVaultClient.GetSecret("ConnectionStringEventHub");
+            KeyVaultSecret blobKeyVault = keyVaultClient.GetSecret("ConnectionStringBlob");
+            KeyVaultSecret EventHubKey = keyVaultClient.GetSecret("ConnectionStringEventHub");
             KeyVaultSecret applicationinsightKeyVault = keyVaultClient.GetSecret("ConnectionStringApplicationInsight");
+            KeyVaultSecret CosmosDB = keyVaultClient.GetSecret("ConnectionStringCosmosDB");
 
             // Ajout de secrets a la configuration du worker
             builder.Services.Configure<WorkerOptions>(options =>
             {
-                options.EventHubKey = EventHubString.Value;
+                options.EventHubKey = EventHubKey.Value;
+                options.BlobStorageKey = blobKeyVault.Value;
             });
+
+            // Ajout des bases de données
+            builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
+                options.UseCosmos(
+                        connectionString: CosmosDB.Value,
+                        databaseName: "ApplicationDB",
+                        cosmosOptionsAction: options =>
+                        {
+                            options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
+                        }));
+
+            builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
+
 
             // Application Insight trace/log/metrics
             // https://medium.com/@chuck.beasley/how-to-instrument-a-net-5537ea851763
@@ -78,6 +99,7 @@ namespace Worker_DB
             });
 
             var host = builder.Build();
+
             host.Run();
         }
     }
@@ -86,4 +108,5 @@ namespace Worker_DB
 public class WorkerOptions
 {
     public required string EventHubKey { get; set; }
+    public required string BlobStorageKey { get; set; }
 }

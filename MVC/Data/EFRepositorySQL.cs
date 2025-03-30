@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MVC.Business;
 using MVC.Models;
 
 namespace MVC.Data
 {
     public class EFRepositorySQL : EFRepository<ApplicationDbContextSQL>
     {
-        public EFRepositorySQL(ApplicationDbContextSQL context) : base(context) { }
+        public EFRepositorySQL(ApplicationDbContextSQL context, EventHubController eventHub) : base(context, eventHub) { }
 
         public override async Task<List<Post>> GetPostsIndex(int pageNumber, int pageSize)
         {

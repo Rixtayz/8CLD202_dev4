@@ -16,11 +16,15 @@ using Azure.AI.ContentSafety;
 
 //Serialization
 using System.Text.Json;
-using Microsoft.Azure.Cosmos;
 
 //ContentTypeValidation model
 using MVC.Models;
 using Azure;
+
+//Event Hub
+using MVC.Business;
+
+
 
 namespace Worker_Content
 {
@@ -32,38 +36,24 @@ namespace Worker_Content
         private ConcurrentQueue<ServiceBusReceivedMessage> _messageQueue;
         private WorkerOptions _options;
         private BlobServiceClient _blobServiceClient;
-        private CosmosClient _cosmosClient;
-        private Container _containerPosts;
-        private Container _containerComments;
+
+        private EventHubController _eventHubController;
+
         private ContentSafetyClient _contentSafetyClient;
         private SemaphoreSlim _semaphore;
 
-        private const int ConcurentJobLimit = 1;
+        private const int ConcurentJobLimit = 5;
 
         public Worker(ILogger<Worker> logger, IOptions<WorkerOptions> options)
         {
             _logger = logger;
             _options = options.Value;
 
+            //Ajouter le EventHubController
+            _eventHubController = new EventHubController(logger, _options.EventHubKey);
+
             // Content Safety
             _contentSafetyClient = new ContentSafetyClient(new Uri(_options.ContentSafetyEndpoint), new AzureKeyCredential(_options.ContentSafetyKey));
-
-            // CosmosDb ...
-            CosmosClientOptions cosmosClientOptions = new CosmosClientOptions
-            {
-                MaxRetryAttemptsOnRateLimitedRequests = 9,      // MaxRetryAttemptsOnThrottledRequests: Maximum number of retry attempts on throttled requests
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30),   // MaxRetryWaitTimeOnThrottledRequests: Maximum wait time for the retry attempts
-                RequestTimeout = TimeSpan.FromSeconds(60),      // RequestTimeout: Sets the request timeout for network operations
-                ConnectionMode = ConnectionMode.Direct,         // ConnectionMode: Use Direct mode for better performance and Gateway mode for improved resilience
-                EnableTcpConnectionEndpointRediscovery = true   // EnableTcpConnectionEndpointRediscovery: Enable endpoint rediscovery in the case of connection failures
-            };
-
-            // Pour créer la connection au CosmosDB nous devons avoir le DatabaseId et le ContainerID
-            // DatabaseId = ApplicationDb
-            // ContainerId = Posts et Comments
-            _cosmosClient = new CosmosClient(_options.CosmosDbKey, cosmosClientOptions);
-            _containerPosts = _cosmosClient.GetContainer("ApplicationDB", "Posts");
-            _containerComments = _cosmosClient.GetContainer("ApplicationDB", "Comments");
 
             // Blob ...
             BlobClientOptions blobClientOptions = new BlobClientOptions
@@ -141,7 +131,7 @@ namespace Worker_Content
                 {
                     case MVC.Models.ContentType.Text:
                         Approved = await ProcessTextValidationAsync(message.Content);
-                        await UpdateCommentDatabaseAsync(message.CommentId, message.PostId, Approved);
+                        await UpdateCommentDatabaseAsync((Guid)message.CommentId!, Approved);
                         break;
 
                     case MVC.Models.ContentType.Image:
@@ -177,17 +167,13 @@ namespace Worker_Content
             await blob.DeleteAsync();
         }
 
-        private async Task UpdateCommentDatabaseAsync(Guid commentId, Guid postId, bool Approved)
+        private async Task UpdateCommentDatabaseAsync(Guid commentId, bool Approved)
         {
             try
             {
-                var response = await _containerComments.ReadItemAsync<dynamic>(commentId.ToString(), new PartitionKey(postId.ToString()));
-                var item = response.Resource;
+                await _eventHubController.SendEvent(new Event(ItemType.Comment, (Approved ? MVC.Models.Action.Approve : MVC.Models.Action.Rejected), commentId));
 
-                item.IsApproved = Approved;
-
-                await _containerComments.ReplaceItemAsync(item, commentId.ToString(), new PartitionKey(postId.ToString()));
-                _logger.LogInformation($"Item with ID: {postId} updated successfully.");
+                _logger.LogInformation($"Item with ID: {commentId} update event sent successfully.");
             }
             catch (Exception ex)
             {
@@ -200,14 +186,9 @@ namespace Worker_Content
         {
             try
             {
-                var response = await _containerPosts.ReadItemAsync<dynamic>(postId.ToString(), new PartitionKey(postId.ToString()));
-                var item = response.Resource;
+                await _eventHubController.SendEvent(new Event(ItemType.Post, (Approved ? MVC.Models.Action.Approve : MVC.Models.Action.Rejected), postId, blobUri.ToString()));
 
-                item.Url = blobUri.ToString();
-                item.IsApproved = Approved;
-
-                await _containerPosts.ReplaceItemAsync(item, postId.ToString(), new PartitionKey(postId.ToString()));
-                _logger.LogInformation($"Item with ID: {postId} updated successfully.");
+                _logger.LogInformation($"Item with ID: {postId} update event sent successfully.");
             }
             catch (Exception ex)
             {

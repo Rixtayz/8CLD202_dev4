@@ -40,7 +40,7 @@ namespace MVC.Business
 
             if (Defer != 0)
             {
-                DateTimeOffset scheduleTime = DateTimeOffset.UtcNow.AddMinutes(5);
+                DateTimeOffset scheduleTime = DateTimeOffset.UtcNow.AddMinutes(1);
                 await serviceBusSender.ScheduleMessageAsync(message, scheduleTime);
             }
             else 
@@ -61,15 +61,17 @@ namespace MVC.Business
             await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message);
         }
 
-        public async Task SendContentImageToValidation(Guid imageName, Guid CommentId, Guid PostId)
+        public async Task SendContentImageToValidation(Guid imageName, Guid PostId)
         {
             Console.WriteLine("Envoi d'un message pour Image Content Validation : " + DateTime.Now.ToString());
-            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new ContentTypeValidation(ContentType.Image, imageName.ToString(), CommentId, PostId)));
+            ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new ContentTypeValidation(ContentType.Image, imageName.ToString(), PostId)));
 
-            // Messsage planifier dans 5 minutes, le but étant de laisser le temps au Resize de passé avant.
+            // Messsage planifier dans 1 minutes, le but étant de laisser le temps au Resize de passé avant.
             // Ceci n'est vraiment pas un design idéal.
 
-            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message, 1);
+            // await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message, 1);
+
+            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message);
         }
     }
 }

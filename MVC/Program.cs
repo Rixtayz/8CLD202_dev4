@@ -19,6 +19,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using Microsoft.ApplicationInsights.DependencyCollector;
 using System.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -131,6 +132,13 @@ builder.Services.AddScoped<BlobController>();
 
 // Ajouter le ServiceBusController du BsinessLayer dans nos Injection ..
 builder.Services.AddScoped<ServiceBusController>();
+
+// Ajotuer le EventHubController du businessLayer dans nos Injection ...
+builder.Services.AddScoped<EventHubController>(serviceProvider =>
+{ 
+    var logger = serviceProvider.GetRequiredService<ILogger<EventHubController>>();
+    return new EventHubController(logger, builder.Configuration.GetConnectionString("EventHub")!);
+});
 
 // Exclusion du Healthz chech
 builder.Services.AddAuthorization(options =>

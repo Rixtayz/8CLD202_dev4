@@ -11,6 +11,7 @@ using MVC.Business;
 // Monitoring
 using Microsoft.AspNetCore.Http.HttpResults;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Azure.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +94,12 @@ builder.Services.AddScoped<BlobController>();
 // Ajouter le ServiceBusController du BsinessLayer dans nos Injection ..
 builder.Services.AddScoped<ServiceBusController>();
 
+// Ajotuer le EventHubController du businessLayer dans nos Injection ...
+builder.Services.AddScoped<EventHubController>(serviceProvider => { 
+    var logger = serviceProvider.GetRequiredService<ILogger<EventHubController>>(); 
+    return new EventHubController(logger, builder.Configuration.GetConnectionString("EventHub")!); 
+});
+
 var app = builder.Build();
 
 // Configuration de la BD ( SQL ou NoSQL )
@@ -133,34 +140,47 @@ app.MapGet("/Posts/{id}", async (IRepositoryAPI repo, Guid id) => await repo.Get
 
 // https://andrewlock.net/reading-json-and-binary-data-from-multipart-form-data-sections-in-aspnetcore/
 // J'ai laisser cette fonction la car je voulais m'assurer de la séparation des concern, sinon j'aurais ajouté de la logique business dans le data layer.
-app.MapPost("/Posts/Add", async (IRepositoryAPI repo,  IFormFile Image, HttpRequest request, BlobController blob, ServiceBusController sb) =>
+app.MapPost("/Posts/Add", async (HttpContext context, IRepositoryAPI repo, BlobController blob, ServiceBusController sb) =>
 {
     try
     {
-        PostCreateDTO post = new PostCreateDTO(request.Form["Title"]!, request.Form["Category"]!, request.Form["User"]!, Image);
+        // Access form data and the image from the request
+        var request = context.Request;
+        var form = await request.ReadFormAsync();
+        IFormFile image = form.Files["Image"]!;
+        string title = form["Title"]!;
+        string category = form["Category"]!;
+        string user = form["User"]!;
+
+        // Construct the post DTO
+        PostCreateDTO post = new PostCreateDTO(title, category, user, image);
         Guid guid = Guid.NewGuid();
-        string Url = await blob.PushImageToBlob(post.Image!, guid);
-        Post Post = new Post { Title = post.Title!, Category = post.Category, User = post.User!, BlobImage = guid, Url = Url };
 
-        // Sauvegarde du post pour avoir l'Id
-        var Result = await repo.CreateAPIPost(Post);
-
-        // Si créer, envoyer dans les services bus
-        if (Result.Result is Created<PostReadDTO> CreatedResult)
+        Post postEntity = new Post
         {
-            PostReadDTO postReadDTO = CreatedResult.Value!;
+            Title = post.Title!,
+            Category = post.Category,
+            User = post.User!,
+            BlobImage = guid,
+            Url = await blob.PushImageToBlob(post.Image!, guid)
+        };
 
-            // Envoie des messages dans le Service Bus
-            await sb.SendImageToResize((Guid)Post.BlobImage!, postReadDTO.Id);
-            await sb.SendContentImageToValidation((Guid)Post.BlobImage!, Guid.NewGuid(), postReadDTO.Id);
+        // Save the post and check the result
+        var result = await repo.CreateAPIPost(postEntity);
+
+        if (result.Result is Accepted)
+        {
+            await sb.SendImageToResize((Guid)postEntity.BlobImage!, postEntity.Id);
+            await sb.SendContentImageToValidation((Guid)postEntity.BlobImage!, postEntity.Id);
         }
 
-        return Result;
+        return result;
     }
-    catch (ExceptionFilesize)
+    catch (Exception ex)
     {
-        return TypedResults.BadRequest();
+        return Results.BadRequest(ex.Message); // More explicit error handling
     }
+
     // DisableAntiforgery car .net 9.0 l'ajoute automatiquement.
 }).DisableAntiforgery();
 
@@ -172,15 +192,16 @@ app.MapPost("/Posts/IncrementPostDislike/{id}", async (IRepositoryAPI repo, Guid
 app.MapGet("/Comments/{id}", async (IRepositoryAPI repo, Guid id) => await repo.GetAPIComment(id));
 app.MapPost("/Comments/Add", async (IRepositoryAPI repo, CommentCreateDTO commentDTO, ServiceBusController sb) =>
 {
-    var Result = await repo.CreateAPIComment(commentDTO);
+    Comment comment = new Comment { Commentaire = commentDTO.Commentaire, User = commentDTO.User };
+
+    var Result = await repo.CreateAPIComment(comment);
 
     // Si créer, envoyer dans les services bus
-    if (Result.Result is Created<CommentReadDTO> CreatedResult)
+    // Ceci pourrait être bouger dans le Worker_DB ou laisser ici ...
+    if (Result.Result is Accepted)
     {
-        CommentReadDTO commentReadDTO = CreatedResult.Value!;
-
         // Envoie du message dans le Service Bus
-        await sb.SendContentTextToValidation(commentReadDTO.Commentaire, commentReadDTO.Id, commentReadDTO.PostId);
+        await sb.SendContentTextToValidation(comment.Commentaire, comment.Id, comment.PostId);
     }
 
     return Result;

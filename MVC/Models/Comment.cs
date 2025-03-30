@@ -47,7 +47,7 @@ namespace MVC.Models
         public DateTime Created { get; init; } = DateTime.Now;
 
         [Display(Name = "Contenue revisé ?")]
-        public bool? IsApproved { get; private set; } = null;
+        public bool? IsApproved { get; set; } = null;
 
         public bool IsDeleted { get; private set; } = false;
 

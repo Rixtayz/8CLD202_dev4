@@ -41,7 +41,11 @@ namespace Worker_Content
             KeyVaultSecret blobKeyVault = keyVaultClient.GetSecret("ConnectionStringBlob");
             KeyVaultSecret servicebusKeyVault = keyVaultClient.GetSecret("ConnectionStringSB");
             KeyVaultSecret applicationinsightKeyVault = keyVaultClient.GetSecret("ConnectionStringApplicationInsight");
-            KeyVaultSecret cosmosdbKeyVault = keyVaultClient.GetSecret("ConnectionStringCosmosDB");
+
+            KeyVaultSecret EventHubKey = keyVaultClient.GetSecret("ConnectionStringEventHub");
+            //KeyVaultSecret cosmosdbKeyVault = keyVaultClient.GetSecret("ConnectionStringCosmosDB");
+
+
             KeyVaultSecret contentsafetyKeyVault = keyVaultClient.GetSecret("ConnectionStringContentSafety");
 
             // Ajout de secrets a la configuration du worker
@@ -51,7 +55,7 @@ namespace Worker_Content
                 options.BlobContainer1 = container1.Value;
                 options.BlobContainer2 = container2.Value;
                 options.ServiceBusKey = servicebusKeyVault.Value;
-                options.CosmosDbKey = cosmosdbKeyVault.Value;
+                options.EventHubKey = EventHubKey.Value;
                 options.ContentSafetyKey = contentsafetyKeyVault.Value;
                 options.ContentSafetyEndpoint = contentsafetyEndPoint.Value;
             });
@@ -76,6 +80,14 @@ namespace Worker_Content
                 o.ConnectionString = applicationinsightKeyVault.Value;
             });
 
+
+            //// Ajotuer le EventHubController du businessLayer dans nos Injection ...
+            //builder.Services.AddScoped<EventHubController>(serviceProvider =>
+            //{
+            //    var logger = serviceProvider.GetRequiredService<ILogger<EventHubController>>();
+            //    return new EventHubController(logger, EventHubKey.Value);
+            //});
+
             var host = builder.Build();
             host.Run();
         }
@@ -87,7 +99,7 @@ namespace Worker_Content
         public required string BlobContainer1 { get; set; }
         public required string BlobContainer2 { get; set; }
         public required string ServiceBusKey { get; set; }
-        public required string CosmosDbKey { get; set; }
+        public required string EventHubKey { get; set; }
         public required string ContentSafetyKey { get; set; }
         public required string ContentSafetyEndpoint { get; set; }
     }

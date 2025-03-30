@@ -43,9 +43,9 @@ namespace MVC.Models
     }
     public class CommentCreateDTO
     {
-        public string? Commentaire { get; init; }
+        public required string Commentaire { get; init; }
 
-        public string? User { get; init; }
+        public required string User { get; init; }
 
         public required Guid PostId { get; init; }
 

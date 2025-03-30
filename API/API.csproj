@@ -21,11 +21,13 @@
     <Compile Include="..\MVC\Models\ApplicationFeatures.cs" Link="Models\ApplicationFeatures.cs" />
     <Compile Include="..\MVC\Models\Comment.cs" Link="Models\Comment.cs" />
     <Compile Include="..\MVC\Models\ContentTypeValidation.cs" Link="Models\ContentTypeValidation.cs" />
+    <Compile Include="..\MVC\Models\Event.cs" Link="Models\Event.cs" />
     <Compile Include="..\MVC\Models\Post.cs" Link="Models\Post.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
+    <PackageReference Include="Azure.Messaging.EventHubs" Version="5.11.6" />
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.18.2" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.2.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
@@ -45,10 +47,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="7.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Business\" />
   </ItemGroup>
 
 </Project>

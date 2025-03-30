@@ -49,7 +49,7 @@ namespace MVC.Models
         // Ajouter pour NoSQL
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         // Utilisation du Guid pour être mieux aligner avec NoSQL
-        public Guid Id { get; init; }
+        public Guid Id { get; set; } 
 
         [Required(ErrorMessage = "SVP entrer un titre que personne ne lira")]
         [MaxLength(128)]
@@ -76,7 +76,7 @@ namespace MVC.Models
         public DateTime Created { get; init; } = DateTime.Now;
 
         [Display(Name = "Contenue revisé ?")]
-        public bool? IsApproved { get; private set; } = null;
+        public bool? IsApproved { get; set; } = null;
 
         public bool IsDeleted { get; private set; } = false;
 

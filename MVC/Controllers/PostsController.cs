@@ -70,7 +70,7 @@ namespace MVC.Controllers
 
                 // Envoie des messages dans le Service Bus
                 await _serviceBusController.SendImageToResize((Guid)postForm.BlobImage!, postForm.Id);
-                await _serviceBusController.SendContentImageToValidation((Guid)postForm.BlobImage!, Guid.NewGuid(), postForm.Id);
+                await _serviceBusController.SendContentImageToValidation((Guid)postForm.BlobImage!, postForm.Id);
 
                 return RedirectToAction(nameof(Index));
             }
