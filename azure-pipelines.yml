@@ -65,7 +65,5 @@ steps:
       command: 'buildAndPush'
       Dockerfile: './API/Dockerfile'
       buildContext: '$(Build.SourcesDirectory)'
-      tags: '|
-      $(Build.BuildId)
-      latest'
+      tags: '$(Build.BuildId) latest'
 
