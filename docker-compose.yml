@@ -61,10 +61,10 @@ services:
 
   worker_db:
     build:
-       context: .
-       dockerfile: Worker_DB/Dockerfile
+        context: .
+        dockerfile: Worker_DB/Dockerfile
     env_file:
-      - 'secrets.env'
+        - 'secrets.env'
     networks:
         - app_vlan
     # depends_on:

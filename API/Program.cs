@@ -109,9 +109,6 @@ builder.Services.AddScoped<EventHubController>(serviceProvider => {
     return new EventHubController(logger, builder.Configuration.GetConnectionString("EventHub")!); 
 });
 
-// Set URLs for both development and production environments
-builder.WebHost.UseUrls("http://*:8080", "https://*:8081");
-
 var app = builder.Build();
 
 // Configuration de la BD ( SQL ou NoSQL )
