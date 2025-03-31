@@ -65,11 +65,11 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $dockerRegistryUrl = "$(Deployment1.dockerRegistryUrl.value)"
-        $dockerUsername = "$(Deployment1.dockerUsername.value)"
-        $dockerPassword = "$(Deployment1.dockerPassword.value)"
-        $serviceConnectionName = "$(DockerRegistryServiceConnectionName)"
-        $jsonFilePath = "$(System.DefaultWorkingDirectory)\service-endpoint-config.json"
+        $dockerRegistryUrl = $(Deployment1.dockerRegistryUrl.value)
+        $dockerUsername = $(Deployment1.dockerUsername.value)
+        $dockerPassword = $(Deployment1.dockerPassword.value)
+        $serviceConnectionName = $(DockerRegistryServiceConnectionName)
+        $jsonFilePath = $(System.DefaultWorkingDirectory)\service-endpoint-config.json
 
         $serviceEndpointJson = @{
             data = @{
