@@ -64,7 +64,7 @@ steps:
     displayName: 'Create Docker Registry Service Connection (Dynamic)'
     inputs:
       azureSubscription: $(AzureSubscription)
-      scriptType: 'bash'
+      scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
         az devops service-endpoint create \
@@ -80,7 +80,7 @@ steps:
     displayName: 'Grant Permissions for Service Connection'
     inputs:
       azureSubscription: $(AzureSubscription)
-      scriptType: 'bash'
+      scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
         # Grant access to Project Collection Build Service account
