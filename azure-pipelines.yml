@@ -70,9 +70,9 @@ steps:
         az devops service-endpoint create `
           --name "$(DockerRegistryServiceConnectionName)" `
           --project "$(System.TeamProject)" `
-          --docker-username "$(Deployment1.outputs.dockerUsername.value)" `
-          --docker-password "$(Deployment1.outputs.dockerPassword.value)" `
-          --docker-registry-url "$(Deployment1.outputs.dockerRegistryUrl.value)" `
+          --docker-username "$(Deployment1.dockerUsername.value)" `
+          --docker-password "$(Deployment1.dockerPassword.value)" `
+          --docker-registry-url "$(Deployment1.dockerRegistryUrl.value)" `
           --organization "$(System.CollectionUri)" `
           --enable-for-all
 
