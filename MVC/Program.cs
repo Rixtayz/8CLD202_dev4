@@ -18,8 +18,6 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using Microsoft.ApplicationInsights.DependencyCollector;
-using System.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
