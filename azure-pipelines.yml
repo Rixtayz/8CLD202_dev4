@@ -98,6 +98,8 @@ steps:
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
+        az extension add --name azure-devops
+        az config set extension.dynamic_install_allow_preview=true
         az devops service-endpoint create `
           --service-endpoint-configuration "$(System.DefaultWorkingDirectory)\service-endpoint-config.json" `
           --project "$(System.TeamProject)" `
