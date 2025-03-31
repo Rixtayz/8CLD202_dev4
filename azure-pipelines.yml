@@ -73,7 +73,8 @@ steps:
           --docker-username $(Deployment1.outputs.dockerUsername.value) \
           --docker-password $(Deployment1.outputs.dockerPassword.value) \
           --docker-registry-url $(Deployment1.outputs.dockerRegistryUrl.value) \
-          --organization $(System.CollectionUri)
+          --organization $(System.CollectionUri) \
+          --enable-for-all
 
   - task: AzureCLI@2
     displayName: 'Grant Permissions for Service Connection'
@@ -89,62 +90,62 @@ steps:
           --organization $(System.CollectionUri) \
           --enable-for-all
 
-  - task: Docker@2
-    displayName: 'Packaging API'
-    inputs:
-      containerRegistry: $(DockerRegistryServiceConnectionName)
-      repository: 'API'
-      command: 'buildAndPush'
-      Dockerfile: './API/Dockerfile'
-      buildContext: '$(Build.SourcesDirectory)'
-      tags: |
-        $(Build.BuildId)
-        latest
+  # - task: Docker@2
+  #   displayName: 'Packaging API'
+  #   inputs:
+  #     containerRegistry: $(DockerRegistryServiceConnectionName)
+  #     repository: 'API'
+  #     command: 'buildAndPush'
+  #     Dockerfile: './API/Dockerfile'
+  #     buildContext: '$(Build.SourcesDirectory)'
+  #     tags: |
+  #       $(Build.BuildId)
+  #       latest
 
-  - task: Docker@2
-    displayName: 'Packaging MVC'
-    inputs:
-      containerRegistry: $(DockerRegistryServiceConnectionName)
-      repository: 'MVC'
-      command: 'buildAndPush'
-      Dockerfile: './MVC/Dockerfile'
-      buildContext: '$(Build.SourcesDirectory)'
-      tags: |
-        $(Build.BuildId)
-        latest
+  # - task: Docker@2
+  #   displayName: 'Packaging MVC'
+  #   inputs:
+  #     containerRegistry: $(DockerRegistryServiceConnectionName)
+  #     repository: 'MVC'
+  #     command: 'buildAndPush'
+  #     Dockerfile: './MVC/Dockerfile'
+  #     buildContext: '$(Build.SourcesDirectory)'
+  #     tags: |
+  #       $(Build.BuildId)
+  #       latest
 
-  - task: Docker@2
-    displayName: 'Packaging Worker_Content'
-    inputs:
-      containerRegistry: $(DockerRegistryServiceConnectionName)
-      repository: 'Worker_Content'
-      command: 'buildAndPush'
-      Dockerfile: './Worker_Content/Dockerfile'
-      buildContext: '$(Build.SourcesDirectory)'
-      tags: |
-        $(Build.BuildId)
-        latest
+  # - task: Docker@2
+  #   displayName: 'Packaging Worker_Content'
+  #   inputs:
+  #     containerRegistry: $(DockerRegistryServiceConnectionName)
+  #     repository: 'Worker_Content'
+  #     command: 'buildAndPush'
+  #     Dockerfile: './Worker_Content/Dockerfile'
+  #     buildContext: '$(Build.SourcesDirectory)'
+  #     tags: |
+  #       $(Build.BuildId)
+  #       latest
 
-  - task: Docker@2
-    displayName: 'Packaging Worker_DB'
-    inputs:
-      containerRegistry: $(DockerRegistryServiceConnectionName)
-      repository: 'Worker_DB'
-      command: 'buildAndPush'
-      Dockerfile: './Worker_DB/Dockerfile'
-      buildContext: '$(Build.SourcesDirectory)'
-      tags: |
-        $(Build.BuildId)
-        latest
+  # - task: Docker@2
+  #   displayName: 'Packaging Worker_DB'
+  #   inputs:
+  #     containerRegistry: $(DockerRegistryServiceConnectionName)
+  #     repository: 'Worker_DB'
+  #     command: 'buildAndPush'
+  #     Dockerfile: './Worker_DB/Dockerfile'
+  #     buildContext: '$(Build.SourcesDirectory)'
+  #     tags: |
+  #       $(Build.BuildId)
+  #       latest
 
-  - task: Docker@2
-    displayName: 'Packaging Worker_Image'
-    inputs:
-      containerRegistry: $(DockerRegistryServiceConnectionName)
-      repository: 'Worker_Image'
-      command: 'buildAndPush'
-      Dockerfile: './Worker_Image/Dockerfile'
-      buildContext: '$(Build.SourcesDirectory)'
-      tags: |
-        $(Build.BuildId)
-        latest
+  # - task: Docker@2
+  #   displayName: 'Packaging Worker_Image'
+  #   inputs:
+  #     containerRegistry: $(DockerRegistryServiceConnectionName)
+  #     repository: 'Worker_Image'
+  #     command: 'buildAndPush'
+  #     Dockerfile: './Worker_Image/Dockerfile'
+  #     buildContext: '$(Build.SourcesDirectory)'
+  #     tags: |
+  #       $(Build.BuildId)
+  #       latest
