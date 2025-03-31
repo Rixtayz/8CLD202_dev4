@@ -58,9 +58,14 @@ steps:
   
 
   - task: Docker@2
+    displayName: 'Packaging API'
     inputs:
       containerRegistry: 'Docker Registry'
       repository: 'Guro'
       command: 'buildAndPush'
       Dockerfile: './API/Dockerfile'
       buildContext: '$(Build.SourcesDirectory)'
+      tags: '|
+      $(Build.BuildId)
+      latest'
+
