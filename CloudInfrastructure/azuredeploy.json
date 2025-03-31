@@ -152,6 +152,9 @@
     },
     "EventHubName": {
       "type": "string"
+    },
+    "ContainerRegistryName": {
+      "type": "string"
     }
   },
   "variables": {
@@ -1204,6 +1207,20 @@
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
       ],
       "properties": {}
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2022-02-01-preview",
+      "name": "[parameters('ContainerRegistryName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [],
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicNetworkAccess": "Enabled",
+        "zoneRedundancy": "disabled"
+      }
     }
 
   ],

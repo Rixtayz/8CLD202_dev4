@@ -37,6 +37,8 @@ variables:
   value: 'gurocosmo'
 - name: ContentName
   value: 'GuroContentSafety'
+- name: ContainerRegistryName
+  value: 'GuroRegistry'
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
@@ -50,7 +52,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -EventHubName $(EventHubName)'
+      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
