@@ -1272,6 +1272,18 @@
 
   ],
   "outputs": {
+    "dockerRegistryUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', parameters('ContainerRegistryName')), '2022-02-01-preview').loginServer]"
+    },
+    "dockerUsername": {
+      "type": "string",
+      "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('ContainerRegistryName')), '2022-02-01-preview').username]"
+    },
+    "dockerPassword": {
+      "type": "string",
+      "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('ContainerRegistryName')), '2022-02-01-preview').passwords[0].value]"
+    },
     "AppConfigName": {
       "type": "String",
       "value": "[parameters('AppConfigName')]"
