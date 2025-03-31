@@ -39,6 +39,9 @@ variables:
   value: 'GuroContentSafety'
 - name: ContainerRegistryName
   value: 'GuroRegistry'
+- name: DockerRegistryServiceConnectionName
+  value: 'Docker Registry (Dynamic)'
+
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
@@ -56,10 +59,39 @@ steps:
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
+  - task: AzureCLI@2
+    displayName: 'Create Docker Registry Service Connection (Dynamic)'
+    inputs:
+      azureSubscription: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az devops service-endpoint create \
+          --name $(DockerRegistryServiceConnectionName) \
+          --project $(System.TeamProject) \
+          --docker-username $(Deployment1.outputs.dockerUsername.value) \
+          --docker-password $(Deployment1.outputs.dockerPassword.value) \
+          --docker-registry-url $(Deployment1.outputs.dockerRegistryUrl.value) \
+          --organization $(System.CollectionUri)
+
+  - task: AzureCLI@2
+    displayName: 'Grant Permissions for Service Connection'
+    inputs:
+      azureSubscription: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Grant access to Project Collection Build Service account
+        az devops service-endpoint update \
+          --name "$(DockerRegistryServiceConnectionName)" \
+          --project "$(System.TeamProject)" \
+          --organization "$(System.CollectionUri)" \
+          --enable-for-all
+
   - task: Docker@2
     displayName: 'Packaging API'
     inputs:
-      containerRegistry: 'Docker Registry'
+      containerRegistry: '$(DockerRegistryServiceConnectionName)'
       repository: 'API'
       command: 'buildAndPush'
       Dockerfile: './API/Dockerfile'
@@ -71,7 +103,7 @@ steps:
   - task: Docker@2
     displayName: 'Packaging MVC'
     inputs:
-      containerRegistry: 'Docker Registry'
+      containerRegistry: '$(DockerRegistryServiceConnectionName)'
       repository: 'MVC'
       command: 'buildAndPush'
       Dockerfile: './MVC/Dockerfile'
@@ -83,7 +115,7 @@ steps:
   - task: Docker@2
     displayName: 'Packaging Worker_Content'
     inputs:
-      containerRegistry: 'Docker Registry'
+      containerRegistry: '$(DockerRegistryServiceConnectionName)'
       repository: 'Worker_Content'
       command: 'buildAndPush'
       Dockerfile: './Worker_Content/Dockerfile'
@@ -95,7 +127,7 @@ steps:
   - task: Docker@2
     displayName: 'Packaging Worker_DB'
     inputs:
-      containerRegistry: 'Docker Registry'
+      containerRegistry: '$(DockerRegistryServiceConnectionName)'
       repository: 'Worker_DB'
       command: 'buildAndPush'
       Dockerfile: './Worker_DB/Dockerfile'
@@ -107,7 +139,7 @@ steps:
   - task: Docker@2
     displayName: 'Packaging Worker_Image'
     inputs:
-      containerRegistry: 'Docker Registry'
+      containerRegistry: '$(DockerRegistryServiceConnectionName)'
       repository: 'Worker_Image'
       command: 'buildAndPush'
       Dockerfile: './Worker_Image/Dockerfile'
