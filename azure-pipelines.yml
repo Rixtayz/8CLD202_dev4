@@ -69,7 +69,7 @@ steps:
         $dockerUsername = $(Deployment1.dockerUsername.value)
         $dockerPassword = $(Deployment1.dockerPassword.value)
         $serviceConnectionName = $(DockerRegistryServiceConnectionName)
-        $jsonFilePath = $(System.DefaultWorkingDirectory)\service-endpoint-config.json
+        $jsonFilePath = '$(System.DefaultWorkingDirectory)\service-endpoint-config.json'
 
         $serviceEndpointJson = @{
             data = @{
