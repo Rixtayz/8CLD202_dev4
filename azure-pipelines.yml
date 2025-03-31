@@ -56,5 +56,9 @@ steps:
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
-  - script: |
-      echo $(Deployment1)
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'Guro'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
