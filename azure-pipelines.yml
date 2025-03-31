@@ -62,3 +62,4 @@ steps:
       repository: 'Guro'
       command: 'buildAndPush'
       Dockerfile: './API/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
