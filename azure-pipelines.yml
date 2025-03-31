@@ -92,3 +92,27 @@ steps:
       tags: |
         $(Build.BuildId)
         latest
+
+  - task: Docker@2
+    displayName: 'Packaging Worker_DB'
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'Worker_DB'
+      command: 'buildAndPush'
+      Dockerfile: './Worker_DB/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
+      tags: |
+        $(Build.BuildId)
+        latest
+
+  - task: Docker@2
+    displayName: 'Packaging Worker_Image'
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'Worker_Image'
+      command: 'buildAndPush'
+      Dockerfile: './Worker_Image/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
+      tags: |
+        $(Build.BuildId)
+        latest
