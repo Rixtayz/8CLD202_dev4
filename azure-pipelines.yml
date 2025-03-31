@@ -56,9 +56,63 @@ steps:
   #     deploymentMode: 'Incremental'
   #     deploymentOutputs: 'Deployment1'
   
+
   - task: Docker@2
+    displayName: 'Packaging API'
     inputs:
       containerRegistry: 'Docker Registry'
-      repository: 'Guro'
+      repository: 'API'
       command: 'buildAndPush'
       Dockerfile: './API/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
+      tags: |
+        $(Build.BuildId)
+        latest
+
+  - task: Docker@2
+    displayName: 'Packaging MVC'
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'MVC'
+      command: 'buildAndPush'
+      Dockerfile: './MVC/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
+      tags: |
+        $(Build.BuildId)
+        latest
+
+  - task: Docker@2
+    displayName: 'Packaging Worker_Content'
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'Worker_Content'
+      command: 'buildAndPush'
+      Dockerfile: './Worker_Content/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
+      tags: |
+        $(Build.BuildId)
+        latest
+
+  - task: Docker@2
+    displayName: 'Packaging Worker_DB'
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'Worker_DB'
+      command: 'buildAndPush'
+      Dockerfile: './Worker_DB/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
+      tags: |
+        $(Build.BuildId)
+        latest
+
+  - task: Docker@2
+    displayName: 'Packaging Worker_Image'
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'Worker_Image'
+      command: 'buildAndPush'
+      Dockerfile: './Worker_Image/Dockerfile'
+      buildContext: '$(Build.SourcesDirectory)'
+      tags: |
+        $(Build.BuildId)
+        latest
