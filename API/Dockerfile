@@ -16,11 +16,11 @@ ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./API/API.csproj", "./API/"]
-COPY ["./MVC", "./MVC/"]
+COPY ["API/API.csproj", "API/"]
+COPY ["MVC", "MVC/"]
 
 RUN dotnet restore "./API/API.csproj"
-COPY ./API ./API/
+COPY ./API ./API
 WORKDIR "/src/API"
 RUN dotnet build "API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
