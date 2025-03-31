@@ -61,11 +61,11 @@ steps:
     displayName: 'Packaging API'
     inputs:
       containerRegistry: 'Docker Registry'
-      repository: 'Guro'
+      repository: 'API'
       command: 'buildAndPush'
       Dockerfile: './API/Dockerfile'
       buildContext: '$(Build.SourcesDirectory)'
       tags: |
-        API:$(Build.BuildId)
-        API:latest
+        $(Build.BuildId)
+        latest
 
