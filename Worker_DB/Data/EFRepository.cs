@@ -65,7 +65,8 @@ namespace MVC.Data
             var post = await _context.Set<Post>().FindAsync(comment.PostId);
             if (post != null)
             {
-                post!.Comments.Add(comment);
+                _context.Add(comment);
+                //post!.Comments.Add(comment);
                 await _context.SaveChangesAsync();
             }
         }
@@ -90,12 +91,20 @@ namespace MVC.Data
 
         public virtual async Task ApproveComment(Guid id, Boolean approved)
         {
-            var comment = await _context.Set<Comment>().FindAsync(id);
-            if (comment != null)
+            try
             {
-                comment!.IsApproved = approved;
-                await _context.SaveChangesAsync();
+                var comment = await _context.Set<Comment>().FindAsync(id);
+                if (comment != null)
+                {
+                    comment!.IsApproved = approved;
+                    await _context.SaveChangesAsync();
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
 
         }
     }

@@ -56,7 +56,6 @@ namespace MVC.Data
         {
             try
             {
-                post.Id = Guid.NewGuid();
                 await _eventController.SendEvent(new Event(post));
 
                 return TypedResults.Accepted($"/Posts/{post.Id}");
@@ -139,7 +138,6 @@ namespace MVC.Data
         {
             try
             {
-                comment.Id = Guid.NewGuid();
                 await _eventController.SendEvent(new Event(comment));
 
                 return TypedResults.Accepted($"/Comments/{comment.Id}");

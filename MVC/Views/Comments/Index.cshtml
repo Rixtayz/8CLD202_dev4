@@ -44,7 +44,7 @@
                     @{
                         if (item.IsApproved.HasValue)
                         {
-                            if (item.IsApproved.GetValueOrDefault(false))
+                            if ((bool)item.IsApproved)
                             {
                                 <span class="badge bg-success">Validated</span>
                             }

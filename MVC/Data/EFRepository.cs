@@ -20,8 +20,6 @@ namespace MVC.Data
         public virtual async Task<int> GetPostsCount() { return await _context.Set<Post>().CountAsync(); }
         public virtual async Task Add(Post post) 
         { 
-            post.Id = Guid.NewGuid();
-
             //_context.Add(post); 
             //await _context.SaveChangesAsync(); 
 
