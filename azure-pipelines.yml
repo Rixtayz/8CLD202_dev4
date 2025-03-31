@@ -61,4 +61,4 @@ steps:
       containerRegistry: 'Docker Registry'
       repository: 'Guro'
       command: 'buildAndPush'
-      Dockerfile: '**/Dockerfile'
+      Dockerfile: './API/Dockerfile'
