@@ -60,6 +60,37 @@ steps:
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   
+  - task: PowerShell@2
+    displayName: 'Generate Service Connection JSON'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $dockerRegistryUrl = "$(Deployment1.dockerRegistryUrl.value)"
+        $dockerUsername = "$(Deployment1.dockerUsername.value)"
+        $dockerPassword = "$(Deployment1.dockerPassword.value)"
+        $serviceConnectionName = "$(DockerRegistryServiceConnectionName)"
+        $jsonFilePath = "$(System.DefaultWorkingDirectory)\service-endpoint-config.json"
+
+        $serviceEndpointJson = @{
+            data = @{
+                registrytype = "Others"
+                url = $dockerRegistryUrl
+            }
+            authorization = @{
+                parameters = @{
+                    username = $dockerUsername
+                    password = $dockerPassword
+                }
+                scheme = "UsernamePassword"
+            }
+            name = $serviceConnectionName
+            type = "dockerregistry"
+        }
+
+        $serviceEndpointJsonString = $serviceEndpointJson | ConvertTo-Json -Depth 10
+        $serviceEndpointJsonString | Out-File -FilePath $jsonFilePath -Encoding utf8
+        Write-Host "JSON file generated at: $jsonFilePath"
+
   - task: AzureCLI@2
     displayName: 'Create Docker Registry Service Connection (Dynamic)'
     inputs:
@@ -68,13 +99,9 @@ steps:
       scriptLocation: 'inlineScript'
       inlineScript: |
         az devops service-endpoint create `
-          --name "$(DockerRegistryServiceConnectionName)" `
+          --service-endpoint-configuration "$(System.DefaultWorkingDirectory)\service-endpoint-config.json" `
           --project "$(System.TeamProject)" `
-          --docker-username "$(Deployment1.dockerUsername.value)" `
-          --docker-password "$(Deployment1.dockerPassword.value)" `
-          --docker-registry-url "$(Deployment1.dockerRegistryUrl.value)" `
-          --organization "$(System.CollectionUri)" `
-          --enable-for-all
+          --organization "$(System.CollectionUri)"
 
   - task: AzureCLI@2
     displayName: 'Grant Permissions for Service Connection'
@@ -89,63 +116,3 @@ steps:
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)" `
           --enable-for-all
-
-  # - task: Docker@2
-  #   displayName: 'Packaging API'
-  #   inputs:
-  #     containerRegistry: $(DockerRegistryServiceConnectionName)
-  #     repository: 'API'
-  #     command: 'buildAndPush'
-  #     Dockerfile: './API/Dockerfile'
-  #     buildContext: '$(Build.SourcesDirectory)'
-  #     tags: |
-  #       $(Build.BuildId)
-  #       latest
-
-  # - task: Docker@2
-  #   displayName: 'Packaging MVC'
-  #   inputs:
-  #     containerRegistry: $(DockerRegistryServiceConnectionName)
-  #     repository: 'MVC'
-  #     command: 'buildAndPush'
-  #     Dockerfile: './MVC/Dockerfile'
-  #     buildContext: '$(Build.SourcesDirectory)'
-  #     tags: |
-  #       $(Build.BuildId)
-  #       latest
-
-  # - task: Docker@2
-  #   displayName: 'Packaging Worker_Content'
-  #   inputs:
-  #     containerRegistry: $(DockerRegistryServiceConnectionName)
-  #     repository: 'Worker_Content'
-  #     command: 'buildAndPush'
-  #     Dockerfile: './Worker_Content/Dockerfile'
-  #     buildContext: '$(Build.SourcesDirectory)'
-  #     tags: |
-  #       $(Build.BuildId)
-  #       latest
-
-  # - task: Docker@2
-  #   displayName: 'Packaging Worker_DB'
-  #   inputs:
-  #     containerRegistry: $(DockerRegistryServiceConnectionName)
-  #     repository: 'Worker_DB'
-  #     command: 'buildAndPush'
-  #     Dockerfile: './Worker_DB/Dockerfile'
-  #     buildContext: '$(Build.SourcesDirectory)'
-  #     tags: |
-  #       $(Build.BuildId)
-  #       latest
-
-  # - task: Docker@2
-  #   displayName: 'Packaging Worker_Image'
-  #   inputs:
-  #     containerRegistry: $(DockerRegistryServiceConnectionName)
-  #     repository: 'Worker_Image'
-  #     command: 'buildAndPush'
-  #     Dockerfile: './Worker_Image/Dockerfile'
-  #     buildContext: '$(Build.SourcesDirectory)'
-  #     tags: |
-  #       $(Build.BuildId)
-  #       latest
