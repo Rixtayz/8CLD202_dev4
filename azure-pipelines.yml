@@ -40,23 +40,22 @@ variables:
 - name: ContainerRegistryName
   value: 'GuroRegistry'
 steps:
-  # - task: AzureResourceManagerTemplateDeployment@3
-  #   displayName: ARM Deployment
-  #   inputs:
-  #     deploymentScope: 'Resource Group'
-  #     azureResourceManagerConnection: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
-  #     subscriptionId: '970fcef5-9c23-4f7d-a11b-5a96d104f066'
-  #     action: 'Create Or Update Resource Group'
-  #     resourceGroupName: '$(RG)'
-  #     location: '$(RG_Location)'
-  #     templateLocation: 'Linked artifact'
-  #     csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
-  #     csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-  #     overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
-  #     deploymentMode: 'Incremental'
-  #     deploymentOutputs: 'Deployment1'
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: ARM Deployment
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+      subscriptionId: '970fcef5-9c23-4f7d-a11b-5a96d104f066'
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: '$(RG)'
+      location: '$(RG_Location)'
+      templateLocation: 'Linked artifact'
+      csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
+      csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
+      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
+      deploymentMode: 'Incremental'
+      deploymentOutputs: 'Deployment1'
   
-
   - task: Docker@2
     displayName: 'Packaging API'
     inputs:
