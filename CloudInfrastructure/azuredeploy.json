@@ -366,7 +366,7 @@
           "enabled": true
         }
       }
-    }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
+    },
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -382,6 +382,52 @@
       "properties": {
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringEventHub'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-04-01-preview",
+      //semi hardcoded
+      "name": "[concat(parameters('VaultName'), '/ContainerRegistry')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.ContainerRegistry/registries', parameters('ContainerRegistryName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('ContainerRegistryName')), '2022-02-01-preview').passwords[0].value]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'Password:ContainerRegistry')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ContainerRegistry')]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ContainerRegistry'), '2019-09-01').secretUriWithVersion, '\"}')]",
+        "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'Username:ContainerRegistry')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets',  parameters('VaultName'), 'ContainerRegistry')]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('ContainerRegistryName')), '2022-02-01-preview').username]"
       }
     },
     {
@@ -1218,6 +1264,7 @@
         "name": "Standard"
       },
       "properties": {
+        "adminUserEnabled": true,
         "publicNetworkAccess": "Enabled",
         "zoneRedundancy": "disabled"
       }
