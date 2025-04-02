@@ -66,6 +66,9 @@ steps:
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
+          # Import Azure CLI authentication context into PowerShell
+          Import-AzContext -Profile (Get-AzProfileFromAzureCli)
+
           # Get the current tenant ID
           $tenantId = (Get-AzTenant).TenantId
 
