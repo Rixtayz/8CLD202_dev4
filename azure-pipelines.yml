@@ -116,22 +116,22 @@ steps:
               $subscriptionId=$(az account show --query id -o tsv)    # Subscription ID
 
               # Assign "App Compliance Automation Administrator" role
-              az role assignment create --assignee $appId --role "App Compliance Automation Administrator" --subscription $subscriptionId
+              az role assignment create --assignee $appId --role "App Compliance Automation Administrator" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
               # Assign "Key Vault Secrets Officer" role
-              az role assignment create --assignee $appId --role "Key Vault Secrets Officer" --subscription $subscriptionId
+              az role assignment create --assignee $appId --role "Key Vault Secrets Officer" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
               # Assign "App Configuration Data Reader" role
-              az role assignment create --assignee $appId --role "App Configuration Data Reader" --subscription $subscriptionId
+              az role assignment create --assignee $appId --role "App Configuration Data Reader" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
               # Assign "Cosmos DB Account Reader Role"
-              az role assignment create --assignee $appId --role "Cosmos DB Account Reader Role" --subscription $subscriptionId
+              az role assignment create --assignee $appId --role "Cosmos DB Account Reader Role" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
               # Assign "Cosmos DB Operator" role
-              az role assignment create --assignee $appId --role "Cosmos DB Operator" --subscription $subscriptionId
+              az role assignment create --assignee $appId --role "Cosmos DB Operator" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
               # Assign "Storage Blob Data Contributor" role
-              az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --subscription $subscriptionId
+              az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
               Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
               Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
