@@ -94,13 +94,35 @@ steps:
           if (-not $appId) {
               Write-Host "Creating a new app registration..."
 
+              # Create the app registration with redirect URL, single-tenant type, and ID tokens enabled
+              $appOutput = az ad app create `
+                  --display-name "$(AppRegistrationName)" `
+                  --identifier-uris "api://$tenantId/$(AppRegistrationName)" `
+                  --sign-in-audience AzureADMyOrg ` # This sets single-tenant account type
+                  --web-redirect-uris "https://localhost:7182/signin-oidc,https://localhost:7182" ` # Add your redirect URI here
+                  --enable-id-token-issuance true ` # Enable ID tokens
+                  --output json
+
               # Create the app registration
-              $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --output json
               $appId = ($appOutput | ConvertFrom-Json).appId
 
               # Create a new client secret
               $clientSecretOutput = az ad app credential reset --id $appId --end-date (Get-Date).AddYears(2).ToString("yyyy-MM-dd") --query password -o tsv
               $clientSecret = $clientSecretOutput.Trim()
+
+              # Grant Microsoft Graph API permissions
+              Write-Host "Adding API permissions..."
+              az ad app permission add `
+                  --id $appId `
+                  --api "00000003-0000-0000-c000-000000000000" ` # Microsoft Graph API ID
+                  --api-permissions "User.Read"=Scope "openid"=Scope "profile"=Scope
+
+              # Grant admin consent for the permissions
+              Write-Host "Granting admin consent for API permissions..."
+              az ad app permission grant `
+                  --id $appId --tenant $tenantId
+              az ad app permission admin-consent `
+                  --id $appId
 
               Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
               Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
