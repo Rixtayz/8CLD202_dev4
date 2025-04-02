@@ -46,6 +46,10 @@ variables:
 - name: AzureDevOpsPAT #https://learn.microsoft.com/en-us/azure/devops/cli/log-in-via-pat?view=azure-devops&tabs=windows
   value: 'r9UMg3Jrr1NwuFXXZx7k8VMirDz2ezTKJVoocbBUS7yiurpvPen2JQQJ99BDACAAAAAAAAAAAAASAZDOrV1D'
 
+- name: ServiceConnectionExists
+  value: false
+- name: ServiceConnectionId
+  
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
@@ -61,9 +65,35 @@ steps:
       overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
-  
+  - task: AzureCLI@2
+    displayName: 'Check Existing Service Connection'
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az extension add --name azure-devops
+        az config set extension.dynamic_install_allow_preview=true
+        $serviceConnectionName = "$(DockerRegistryServiceConnectionName)"
+        $existingServiceConnection = az devops service-endpoint list `
+          --project "$(System.TeamProject)" `
+          --organization "$(System.CollectionUri)" `
+          --query "[?name=='$serviceConnectionName']" `
+          --output json
+
+        if ($existingServiceConnection -eq "[]") {
+          Write-Host "Service connection does not exist."
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]false"
+        } else {
+          $serviceConnectionId = ($existingServiceConnection | ConvertFrom-Json)[0].id
+          Write-Host "Service connection already exists with ID: $serviceConnectionId"
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]true"
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
+        }
+
   - task: PowerShell@2
     displayName: 'Generate Service Connection JSON'
+    condition: eq(variables['ServiceConnectionExists'], 'false')
     inputs:
       targetType: 'inline'
       script: |
@@ -95,6 +125,7 @@ steps:
 
   - task: AzureCLI@2
     displayName: 'Create Docker Registry Service Connection (Dynamic)'
+    condition: eq(variables['ServiceConnectionExists'], 'false')
     inputs:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
@@ -112,6 +143,7 @@ steps:
 
   - task: AzureCLI@2
     displayName: 'Grant Permissions for Service Connection'
+    condition: eq(variables['ServiceConnectionExists'], 'false')
     inputs:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
@@ -119,6 +151,7 @@ steps:
       inlineScript: |
         # Grant access to Project Collection Build Service account
         az devops service-endpoint update `
+          --id "$(ServiceConnectionId)" `
           --name "$(DockerRegistryServiceConnectionName)" `
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)" `
