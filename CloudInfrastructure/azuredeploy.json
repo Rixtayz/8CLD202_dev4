@@ -436,6 +436,18 @@
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
       // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:SynchroBlob')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('storageBlobContainerName3')]"
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
       "name": "[format('{0}/{1}', parameters('AppConfigName'), 'Endpoints:AppConfiguration')]",
       "dependsOn": [
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"

@@ -30,7 +30,9 @@ namespace MVC.Models
         // Nom du blob pour les images non valider
         public required string UnvalidatedBlob { get; set; } 
         // Nom du blob pour les images valider
-        public required string ValidatedBlob { get; set; } 
+        public required string ValidatedBlob { get; set; }
+
+        public required string SynchroBlob { get; set; }
 
         // Connection String pour le Service Bus qui sera acquis du AppConfig
         public required string ServiceBusConnectionString { get; set; }

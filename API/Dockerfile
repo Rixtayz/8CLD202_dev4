@@ -1,4 +1,6 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+ARG Client_ID = "722815e8-ef2b-4564-9179-f0ba95afd86e"
+ARG Tenant_ID = "2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
+ARG Secret_ID = "lNR8Q~A2VdolzCe2dFdobHhc2hG4zotSStuFuaOf" #To be sent in as Secrets
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
@@ -8,9 +10,9 @@ EXPOSE 8080
 EXPOSE 8081
 
 # Pour le managed identity pour dev seulement.
-ENV AZURE_CLIENT_ID="722815e8-ef2b-4564-9179-f0ba95afd86e"
-ENV AZURE_CLIENT_SECRET="lNR8Q~A2VdolzCe2dFdobHhc2hG4zotSStuFuaOf"
-ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
+ENV AZURE_CLIENT_ID=$Client_ID
+ENV AZURE_TENANT_ID=$Tenant_ID
+ENV AZURE_CLIENT_SECRET=$Secret_ID
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
