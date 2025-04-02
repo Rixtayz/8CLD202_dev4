@@ -47,37 +47,6 @@
     "resourceGroupName": {
       "value": "Guro"
     },
-    "tagValues": {
-      "value": {}
-    },
-    "virtualNetworkType": {
-      "value": "None"
-    },
-    "vnet": {
-      "value": {}
-    },
-    "ipRules": {
-      "value": []
-    },
-    "privateEndpoints": {
-      "value": []
-    },
-    "privateDnsZone": {
-      "value": "[$item.privateDnsZoneConfiguration.integrateWithPrivateDnsZone]"
-    },
-    "isCommitmentPlanForDisconnectedContainerEnabled": {
-      "value": false
-    },
-    "commitmentPlanForDisconnectedContainer": {
-      "value": {
-        "current": {
-          "count": 9
-        },
-        "hostingModel": "DisconnectedContainer",
-        "planType": "Lenovo",
-        "autoRenew": true
-      }
-    },
     "EventHubName": {
       "value": "GuroEventHub"
     },
