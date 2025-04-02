@@ -39,6 +39,8 @@ variables:
   value: 'unvalidated'
 - name: BlobContainer2
   value: 'validated'
+- name: BlobContainer3
+  value: 'synchro'
 - name: SBusName
   value: 'GuroSb'
 - name: EventHubName
@@ -107,7 +109,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
+      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   - task: AzureCLI@2
