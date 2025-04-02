@@ -140,6 +140,7 @@ steps:
   
               Write-Host "App registration created with Application ID: $appId"
           } else {
+              # Si le app registration exist déja, mais que les informations n'ont pas été sauvegarder dans le Keyvault il serait probablement préférable de l'effacer ...
               Write-Host "App registration already exists with Application ID: $appId"
           }
 
