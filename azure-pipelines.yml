@@ -137,10 +137,20 @@ steps:
       inlineScript: |
         az extension add --name azure-devops
         az config set extension.dynamic_install_allow_preview=true
-        az devops service-endpoint create `
+
+        # Create the service connection and capture the output
+        $serviceConnectionOutput = az devops service-endpoint create `
           --service-endpoint-configuration "$(System.DefaultWorkingDirectory)\service-endpoint-config.json" `
           --project "$(System.TeamProject)" `
-          --organization "$(System.CollectionUri)"
+          --organization "$(System.CollectionUri)" `
+          --output json
+
+        # Extract the 'id' field from the output
+        $serviceConnectionId = ($serviceConnectionOutput | ConvertFrom-Json).id
+        Write-Host "Service connection created with ID: $serviceConnectionId"
+
+        # Set the ID as a pipeline variable
+        Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
 
     env:
       AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
