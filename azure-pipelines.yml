@@ -106,7 +106,7 @@ steps:
 
               # Grant Microsoft Graph API permissions
               Write-Host "Adding API permissions..."
-              az ad app permission add --id $appId --api "00000003-0000-0000-c000-000000000000" --api-permissions "User.Read"=Scope "openid"=Scope "profile"=Scope
+              az ad app permission add --id $appId --api "00000003-0000-0000-c000-000000000000" --api-permissions "User.Read=Scope" "openid=Scope" "profile=Scope"
 
               # Grant admin consent for the permissions
               Write-Host "Granting admin consent for API permissions..."
