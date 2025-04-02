@@ -49,6 +49,7 @@ variables:
 - name: ServiceConnectionExists
   value: false
 - name: ServiceConnectionId
+  value: ''
   
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
@@ -89,6 +90,7 @@ steps:
           Write-Host "Service connection already exists with ID: $serviceConnectionId"
           Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]true"
           Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
+          Write-Host $serviceConnectionId
         }
     env:
       AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
@@ -153,7 +155,7 @@ steps:
       inlineScript: |
         # Grant access to Project Collection Build Service account
         az devops service-endpoint update `
-          --id "$(ServiceConnectionId)" `
+          --id $(ServiceConnectionId) `
           --name "$(DockerRegistryServiceConnectionName)" `
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)" `
