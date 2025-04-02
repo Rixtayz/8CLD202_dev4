@@ -166,7 +166,6 @@ steps:
         # Grant access to Project Collection Build Service account
         az devops service-endpoint update `
           --id $(ServiceConnectionId) `
-          --name "$(DockerRegistryServiceConnectionName)" `
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)" `
           --enable-for-all
