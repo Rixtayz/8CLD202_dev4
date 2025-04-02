@@ -129,13 +129,7 @@ steps:
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        # Fetch the service principal ID from the service connection
-        $spId = $(az ad sp list --filter "displayName eq '$(AzureSubscription)'" --query "[0].id" -o tsv)
-
-        Write-Host "Service Principal ID: $spId"
-
-        # Set pipeline variable for later use
-        Write-Host "##vso[task.setvariable variable=ServicePrincipalId]$spId"
+        az ad sp show --id $(AZURE_CLIENT_ID) --query "id"
 
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
