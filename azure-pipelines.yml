@@ -113,7 +113,7 @@ steps:
               #az ad app permission admin-consent --id $appId
 
               #Assign rights to App Registration
-              subscriptionId=$(az account show --query id -o tsv)    # Subscription ID
+              $subscriptionId=$(az account show --query id -o tsv)    # Subscription ID
 
               # Assign "App Compliance Automation Administrator" role
               az role assignment create --assignee $appId --role "App Compliance Automation Administrator" --subscription $subscriptionId
