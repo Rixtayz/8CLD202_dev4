@@ -108,10 +108,28 @@ steps:
               Write-Host "Adding API permissions..."
               az ad app permission add --id $appId --api "00000003-0000-0000-c000-000000000000" --api-permissions "e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope" "37f7f235-527c-4136-accd-4a02d197296e=Scope" "14dad69e-099b-42c9-810b-d002981feec1=Scope"
 
-              # Grant admin consent for the permissions
-              Write-Host "Granting admin consent for API permissions..."
-              az ad app permission grant --id 4bf7298a-7ca0-41d6-acda-ae41d3bda669 --api 00000003-0000-0000-c000-000000000000 --scope "User.Read" "openid" "profile"
+              # List permissions to retrieve permission grant information
+              Write-Host "Fetching app permission details..."
+              $permissions = az ad app permission list --id $appId --output json | ConvertFrom-Json
+
+              # Iterate through permissions and apply admin consent (or grant permissions)
+              foreach ($permission in $permissions) {
+                  $resourceId = $permission.resourceId
+                  $scope = $permission.scope -join " "  # Convert scope array to a space-separated string if needed
+                  Write-Host "Granting permission for API ID: $resourceId with Scopes: $scope"
+
+                  # Grant permissions for each API
+                  az ad app permission grant --id $appId --api $resourceId --scope $scope
+              }
+
+              # Admin Consent (optional, for all permissions at once)
+              Write-Host "Granting admin consent for all permissions..."
               az ad app permission admin-consent --id $appId
+
+              # Grant admin consent for the permissions
+              # Write-Host "Granting admin consent for API permissions..."
+              # az ad app permission grant --id 4bf7298a-7ca0-41d6-acda-ae41d3bda669 --api 00000003-0000-0000-c000-000000000000 --scope "User.Read" "openid" "profile"
+              # az ad app permission admin-consent --id $appId
 
               Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
               Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
