@@ -19,8 +19,6 @@ variables:
 - name: TenantId
 - name: ClientSecret
 
-- name: ServicePrincipalId
-
 # To automate
 - name: AzureAdDomainName 
   value: 'guillaumerouthieruihotmail.onmicrosoft.com'
@@ -121,21 +119,6 @@ steps:
           } else {
               Write-Host "App registration already exists with Application ID: $appId"
           }
-
-  - task: AzureCLI@2
-    displayName: Get Service Principal ID of the Pipeline
-    inputs:
-      azureSubscription: $(AzureSubscription)
-      scriptType: 'ps'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # Get the Client ID of the authenticated service principal
-        $clientId = $(az account get-access-token --query user --output tsv)
-
-        Write-Host "Service Principal Client ID: $clientId"
-
-        # Set the Client ID as a pipeline variable
-        Write-Host "##vso[task.setvariable variable=ServicePrincipalClientId]$clientId"
 
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
