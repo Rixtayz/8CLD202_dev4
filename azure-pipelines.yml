@@ -66,8 +66,14 @@ steps:
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
-          # Import Azure CLI authentication context into PowerShell
-          Import-AzContext -Profile (Get-AzProfileFromAzureCli)
+          # Authenticate to Azure using the service principal credentials provided by the service connection
+          $spClientId = "$(servicePrincipalId)"  # Automatically injected by the Azure subscription service connection
+          $spClientSecret = "$(servicePrincipalKey)"  # Automatically injected
+          $tenantId = "$(tenantId)"  # Automatically injected
+
+          Connect-AzAccount -ServicePrincipal -ApplicationId $spClientId -TenantId $tenantId -Credential (New-Object System.Management.Automation.PSCredential($spClientId, (ConvertTo-SecureString $spClientSecret -AsPlainText -Force)))
+
+          Write-Host "Authenticated to Azure with Tenant ID: $tenantId"
 
           # Get the current tenant ID
           $tenantId = (Get-AzTenant).TenantId
