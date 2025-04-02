@@ -891,7 +891,9 @@
         "name": "F0"
       },
       "kind": "ContentSafety",
-      "identity": "SystemAssigned",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "properties": {
         "customSubDomainName": "[toLower(parameters('ContentSafetyname'))]",
         "publicNetworkAccess": "[if(equals(parameters('virtualNetworkType'), 'Internal'), 'Disabled', 'Enabled')]",
