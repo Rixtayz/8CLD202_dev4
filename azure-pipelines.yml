@@ -95,13 +95,7 @@ steps:
               Write-Host "Creating a new app registration..."
 
               # Create the app registration with redirect URL, single-tenant type, and ID tokens enabled
-              $appOutput = az ad app create `
-                  --display-name "$(AppRegistrationName)" `
-                  --identifier-uris "api://$tenantId/$(AppRegistrationName)" `
-                  --sign-in-audience AzureADMyOrg ` # This sets single-tenant account type
-                  --web-redirect-uris "https://localhost:7182/signin-oidc,https://localhost:7182" ` # Add your redirect URI here
-                  --enable-id-token-issuance true ` # Enable ID tokens
-                  --output json
+              $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --sign-in-audience AzureADMyOrg --web-redirect-uris "https://localhost:7182/signin-oidc,https://localhost:7182" --enable-id-token-issuance true --output json
 
               # Create the app registration
               $appId = ($appOutput | ConvertFrom-Json).appId
