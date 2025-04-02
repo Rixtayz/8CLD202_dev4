@@ -110,7 +110,7 @@ steps:
         $serviceEndpointJson = @{
             data = @{
                 registrytype = 'Others'
-                url = $dockerRegistryUrl
+                registry = $dockerRegistryUrl
             }
             authorization = @{
                 parameters = @{
