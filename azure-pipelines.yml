@@ -9,6 +9,13 @@
 pool: "default"
 
 variables:
+- name: AppRegistrationName
+  value: 'MVC_Dynamic'
+
+- name: ApplicationId
+- name: TenantId
+- name: ClientSecret
+
 - name: RG
   value: 'Guro'
 - name: RG_Location
@@ -52,6 +59,38 @@ variables:
   value: ''
   
 steps:
+  - task: AzureCLI@2
+    displayName: Création de l'App Registration
+    inputs:
+      azureSubscription: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+          # Get the current tenant ID
+          $tenantId = (Get-AzTenant).TenantId
+
+          # Check if the app registration already exists
+          $app = Get-AzADApplication -Filter "DisplayName eq '$(AppRegistrationName)'" -ErrorAction SilentlyContinue
+
+          if ($null -eq $app) {
+              Write-Host "Creating a new app registration..."
+              # Create the app registration
+              $app = New-AzADApplication -DisplayName $(AppRegistrationName) -IdentifierUris "api://$($tenantId)/$appName"
+
+              # Create a new client secret
+              $startDate = (Get-Date)
+              $endDate = $startDate.AddYears(2)
+              $secret = New-AzADAppCredential -ApplicationId $app.appId -StartDate $startDate -EndDate $endDate
+
+              Write-Host "##vso[task.setvariable variable=ApplicationId]$($app.ApplicationId)"
+              Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
+              Write-Host "##vso[task.setvariable variable=ClientSecret]$($secret.SecretText)"
+
+              Write-Host "App registration created with Application ID: $($app.appId)"
+          } else {
+              Write-Host "App registration already exists with Application ID: $($app.appId)"
+          }
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
     inputs:
