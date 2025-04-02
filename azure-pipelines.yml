@@ -110,12 +110,12 @@ steps:
         $serviceEndpointJson = @{
             data = @{
                 registrytype = 'Others'
-                registry = $dockerRegistryUrl
             }
             authorization = @{
                 parameters = @{
                     username = $dockerUsername
                     password = $dockerPassword
+                    registry = $dockerRegistryUrl
                 }
                 scheme = 'UsernamePassword'
             }
