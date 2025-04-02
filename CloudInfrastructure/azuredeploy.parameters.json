@@ -32,63 +32,9 @@
     "storageBlobContainerName2": {
       "value": "validated"
     },
-    "accountType": {
-      "value": "Standard_LRS"
-    },
-    "kind": {
-      "value": "StorageV2"
-    },
-    "minimumTlsVersion": {
-      "value": "TLS1_2"
-    },
-    "supportsHttpsTrafficOnly": {
-      "value": true
-    },
-    "allowBlobPublicAccess": {
-      "value": true
-    },
-    "allowSharedKeyAccess": {
-      "value": true
-    },
-    "defaultOAuth": {
-      "value": false
-    },
-    "accessTier": {
-      "value": "Hot"
-    },
-    "publicNetworkAccess": {
-      "value": "Enabled"
-    },
-    "allowCrossTenantReplication": {
-      "value": false
-    },
-    "networkAclsBypass": {
-      "value": "AzureServices"
-    },
-    "networkAclsDefaultAction": {
-      "value": "Allow"
-    },
-    "networkAclsIpRules": {
-      "value": []
-    },
-    "dnsEndpointType": {
-      "value": "Standard"
-    },
-    "largeFileSharesState": {
-      "value": "Enabled"
-    },
-    "keySource": {
-      "value": "Microsoft.Storage"
-    },
-    "encryptionEnabled": {
-      "value": true
-    },
-    "keyTypeForTableAndQueueEncryption": {
-      "value": "Account"
-    },
-    "infrastructureEncryptionEnabled": {
-      "value": false
-    },
+    "storageBlobContainerName3": {
+      "value": "synchro"
+    }
     "AzureAdClientId": {
       "value": "c11d2628-cd67-4e13-8cbf-9a12c7fc5fd9"
     },
@@ -101,9 +47,6 @@
     "resourceGroupName": {
       "value": "Guro"
     },
-    "sku": {
-      "value": "F0"
-    },
     "tagValues": {
       "value": {}
     },
@@ -115,11 +58,6 @@
     },
     "ipRules": {
       "value": []
-    },
-    "identity": {
-      "value": {
-        "type": "SystemAssigned"
-      }
     },
     "privateEndpoints": {
       "value": []

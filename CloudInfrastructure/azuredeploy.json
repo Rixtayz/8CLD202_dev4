@@ -44,62 +44,8 @@
     "storageBlobContainerName2": {
       "type": "String"
     },
-    "accountType": {
+    "storageBlobContainerName3": {
       "type": "String"
-    },
-    "kind": {
-      "type": "String"
-    },
-    "minimumTlsVersion": {
-      "type": "String"
-    },
-    "supportsHttpsTrafficOnly": {
-      "type": "Bool"
-    },
-    "allowBlobPublicAccess": {
-      "type": "Bool"
-    },
-    "allowSharedKeyAccess": {
-      "type": "Bool"
-    },
-    "defaultOAuth": {
-      "type": "Bool"
-    },
-    "accessTier": {
-      "type": "String"
-    },
-    "publicNetworkAccess": {
-      "type": "String"
-    },
-    "allowCrossTenantReplication": {
-      "type": "Bool"
-    },
-    "networkAclsBypass": {
-      "type": "String"
-    },
-    "networkAclsDefaultAction": {
-      "type": "String"
-    },
-    "networkAclsIpRules": {
-      "type": "Array"
-    },
-    "dnsEndpointType": {
-      "type": "String"
-    },
-    "largeFileSharesState": {
-      "type": "String"
-    },
-    "keySource": {
-      "type": "String"
-    },
-    "encryptionEnabled": {
-      "type": "Bool"
-    },
-    "keyTypeForTableAndQueueEncryption": {
-      "type": "String"
-    },
-    "infrastructureEncryptionEnabled": {
-      "type": "Bool"
     },
     "AzureAdClientId": {
       "type": "string"
@@ -116,9 +62,6 @@
     "resourceGroupName": {
       "type": "String"
     },
-    "sku": {
-      "type": "String"
-    },
     "tagValues": {
       "type": "Object"
     },
@@ -130,9 +73,6 @@
     },
     "ipRules": {
       "type": "Array"
-    },
-    "identity": {
-      "type": "Object"
     },
     "privateEndpoints": {
       "type": "Array"
@@ -702,42 +642,42 @@
       "dependsOn": [],
       "tags": {},
       "sku": {
-        "name": "[parameters('accountType')]"
+        "name": "Standard_LRS"
       },
-      "kind": "[parameters('kind')]",
+      "kind": "StorageV2",
       "properties": {
-        "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
-        "supportsHttpsTrafficOnly": "[parameters('supportsHttpsTrafficOnly')]",
-        "allowBlobPublicAccess": "[parameters('allowBlobPublicAccess')]",
-        "allowSharedKeyAccess": "[parameters('allowSharedKeyAccess')]",
-        "defaultToOAuthAuthentication": "[parameters('defaultOAuth')]",
-        "accessTier": "[parameters('accessTier')]",
-        "publicNetworkAccess": "[parameters('publicNetworkAccess')]",
-        "allowCrossTenantReplication": "[parameters('allowCrossTenantReplication')]",
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true,
+        "allowBlobPublicAccess": true,
+        "allowSharedKeyAccess": true,
+        "defaultToOAuthAuthentication": true,
+        "accessTier": "Hot",
+        "publicNetworkAccess": "Enabled",
+        "allowCrossTenantReplication": false,
         "networkAcls": {
-          "bypass": "[parameters('networkAclsBypass')]",
-          "defaultAction": "[parameters('networkAclsDefaultAction')]",
-          "ipRules": "[parameters('networkAclsIpRules')]"
+          "bypass": "AzureServices",
+          "defaultAction": "Allow",
+          "ipRules": []
         },
-        "dnsEndpointType": "[parameters('dnsEndpointType')]",
-        "largeFileSharesState": "[parameters('largeFileSharesState')]",
+        "dnsEndpointType": "Standard",
+        "largeFileSharesState": "Enabled",
         "encryption": {
-          "keySource": "[parameters('keySource')]",
+          "keySource": "Microsoft.Storage",
           "services": {
             "blob": {
-              "enabled": "[parameters('encryptionEnabled')]"
+              "enabled": true
             },
             "file": {
-              "enabled": "[parameters('encryptionEnabled')]"
+              "enabled": true
             },
             "table": {
-              "enabled": "[parameters('encryptionEnabled')]"
+              "enabled": true
             },
             "queue": {
-              "enabled": "[parameters('encryptionEnabled')]"
+              "enabled": true
             }
           },
-          "requireInfrastructureEncryption": "[parameters('infrastructureEncryptionEnabled')]"
+          "requireInfrastructureEncryption": "Account"
         }
       }
     },
@@ -799,7 +739,7 @@
     { // Fix container for Synchro of EventHub
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-05-01",
-      "name": "[concat(parameters('storageAccountName'), '/default/', 'synchro')]",
+      "name": "[concat(parameters('storageAccountName'), '/default/', parameters('storageBlobContainerName3'))]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]",
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
@@ -948,10 +888,10 @@
       ],
       "tags": "[if(contains(parameters('tagValues'), 'Microsoft.CognitiveServices/accounts'), parameters('tagValues')['Microsoft.CognitiveServices/accounts'], json('{}'))]",
       "sku": {
-        "name": "[parameters('sku')]"
+        "name": "F0"
       },
       "kind": "ContentSafety",
-      "identity": "[parameters('identity')]",
+      "identity": "SystemAssigned",
       "properties": {
         "customSubDomainName": "[toLower(parameters('ContentSafetyname'))]",
         "publicNetworkAccess": "[if(equals(parameters('virtualNetworkType'), 'Internal'), 'Disabled', 'Enabled')]",
