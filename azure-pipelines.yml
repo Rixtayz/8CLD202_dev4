@@ -63,7 +63,7 @@ steps:
     displayName: Création de l'App Registration
     inputs:
       azureSubscription: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
-      scriptType: 'ps'
+      scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
           # Get the current tenant ID
