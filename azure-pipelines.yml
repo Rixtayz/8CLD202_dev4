@@ -116,7 +116,7 @@ steps:
               Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
               Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
               Write-Host "##vso[task.setvariable variable=ClientSecret]$clientSecret"
-
+  
               Write-Host "App registration created with Application ID: $appId"
           } else {
               Write-Host "App registration already exists with Application ID: $appId"
@@ -136,6 +136,19 @@ steps:
       overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName) -AzureAdDomainName $(AzureAdDomainName) -AzureAdClientId $(AzureAdClientId)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
+
+  - task: AzureCLI@2
+    displayName: Write secrets to Azure Key Vault
+    inputs:
+      azureSubscription: $(AzureSubscription)  # Your service connection name
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Add secrets to the Key Vault
+        az keyvault secret set --vault-name $(Vault) --name "ClientID" --value "$(ApplicationId)"
+        az keyvault secret set --vault-name $(Vault)  --name "TenantID" --value "$(TenantId)"
+        az keyvault secret set --vault-name $(Vault)  --name "ClientSecret" --value "$(ClientSecret)"
+
   - task: AzureCLI@2
     displayName: 'Check Existing Service Connection'
     inputs:
