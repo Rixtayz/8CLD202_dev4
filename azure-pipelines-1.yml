@@ -17,6 +17,13 @@ variables:
   value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
 
 steps:
+  - task: AzureKeyVault@2
+    displayName: 'Reading Secrets'
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      KeyVaultName: 'GuroKeyVault'
+      SecretsFilter: 'ClientID,TenantID,ClientSecret'
+      RunAsPreJob: false
 
   - task: Docker@2
     displayName: 'Packaging API'
@@ -29,6 +36,10 @@ steps:
       tags: |
         $(Build.BuildId)
         latest
+      arguments: |
+            --build-arg Client_ID=$(ClientID)
+            --build-arg Tenant_ID=$(TenantID)
+            --build-arg Secret_ID=$(ClientSecret)
 
   - task: Docker@2
     displayName: 'Packaging MVC'
