@@ -90,8 +90,7 @@ steps:
         }
 
         $serviceEndpointJsonString = $serviceEndpointJson | ConvertTo-Json -Depth 10 -Compress
-        [System.Text.Encoding]::UTF8.GetBytes($serviceEndpointJsonString) | `
-        [System.IO.File]::WriteAllBytes($jsonFilePath)
+        [System.IO.File]::WriteAllBytes($jsonFilePath, [System.Text.Encoding]::UTF8.GetBytes($serviceEndpointJsonString))
         Write-Host "JSON file generated at: $jsonFilePath"
 
   - task: AzureCLI@2
