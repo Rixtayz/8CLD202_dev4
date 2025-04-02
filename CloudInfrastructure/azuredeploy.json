@@ -677,7 +677,7 @@
               "enabled": true
             }
           },
-          "requireInfrastructureEncryption": "Account"
+          "requireInfrastructureEncryption": true
         }
       }
     },
