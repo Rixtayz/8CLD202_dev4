@@ -676,8 +676,7 @@
             "queue": {
               "enabled": true
             }
-          },
-          "requireInfrastructureEncryption": true
+          }
         }
       }
     },
