@@ -112,6 +112,27 @@ steps:
               #Write-Host "Granting API permissions..."
               #az ad app permission admin-consent --id $appId
 
+              #Assign rights to App Registration
+              subscriptionId=$(az account show --query id -o tsv)    # Subscription ID
+
+              # Assign "App Compliance Automation Administrator" role
+              az role assignment create --assignee $appId --role "App Compliance Automation Administrator" --subscription $subscriptionId
+
+              # Assign "Key Vault Secrets Officer" role
+              az role assignment create --assignee $appId --role "Key Vault Secrets Officer" --subscription $subscriptionId
+
+              # Assign "App Configuration Data Reader" role
+              az role assignment create --assignee $appId --role "App Configuration Data Reader" --subscription $subscriptionId
+
+              # Assign "Cosmos DB Account Reader Role"
+              az role assignment create --assignee $appId --role "Cosmos DB Account Reader Role" --subscription $subscriptionId
+
+              # Assign "Cosmos DB Operator" role
+              az role assignment create --assignee $appId --role "Cosmos DB Operator" --subscription $subscriptionId
+
+              # Assign "Storage Blob Data Contributor" role
+              az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --subscription $subscriptionId
+
               Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
               Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
               Write-Host "##vso[task.setvariable variable=ClientSecret]$clientSecret"
