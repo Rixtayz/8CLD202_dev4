@@ -110,7 +110,7 @@ steps:
 
               # Grant admin consent for the permissions
               Write-Host "Granting admin consent for API permissions..."
-              #az ad app permission grant --id $appId --tenant $tenantId
+              az ad app permission grant --id $appId --tenant $tenantId
               az ad app permission admin-consent --id $appId
 
               Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
