@@ -114,6 +114,7 @@ steps:
 
               #Assign rights to App Registration
               $subscriptionId=$(az account show --query id -o tsv)    # Subscription ID
+              az ad sp create --id $appId                             # create Service Principale
 
               # Assign "App Compliance Automation Administrator" role
               az role assignment create --assignee $appId --role "App Compliance Automation Administrator" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
