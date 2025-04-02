@@ -8,7 +8,17 @@
 
 pool: "default"
 
+# Add Owner roles to pipeline service principale !!!!
+# Add Global Administrator in AD to pipeline service principale !!!!
+
 variables:
+- name: AppRegistrationName
+  value: 'MVC_Dynamic'
+
+- name: ApplicationId
+- name: TenantId
+- name: ClientSecret
+
 - name: RG
   value: 'Guro'
 - name: RG_Location
@@ -43,8 +53,49 @@ variables:
   value: 'Docker Registry Dynamic'
 - name: AzureSubscription
   value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+- name: AzureDevOpsPAT #https://learn.microsoft.com/en-us/azure/devops/cli/log-in-via-pat?view=azure-devops&tabs=windows
+  value: 'r9UMg3Jrr1NwuFXXZx7k8VMirDz2ezTKJVoocbBUS7yiurpvPen2JQQJ99BDACAAAAAAAAAAAAASAZDOrV1D'
 
+- name: ServiceConnectionExists
+  value: false
+- name: ServiceConnectionId
+  value: ''
+  
 steps:
+  - task: AzureCLI@2
+    displayName: Création de l'App Registration
+    inputs:
+      azureSubscription: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+          # Get the current tenant ID
+          $tenantId = $(az account show --query tenantId -o tsv)
+          Write-Host "Authenticated to Azure with Tenant ID: $tenantId"
+
+          # Check if the app registration already exists
+          $appId = $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv)
+
+          if (-not $appId) {
+              Write-Host "Creating a new app registration..."
+
+              # Create the app registration
+              $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --output json
+              $appId = ($appOutput | ConvertFrom-Json).appId
+
+              # Create a new client secret
+              $clientSecretOutput = az ad app credential reset --id $appId --end-date (Get-Date).AddYears(2).ToString("yyyy-MM-dd") --query password -o tsv
+              $clientSecret = $clientSecretOutput.Trim()
+
+              Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
+              Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
+              Write-Host "##vso[task.setvariable variable=ClientSecret]$clientSecret"
+
+              Write-Host "App registration created with Application ID: $appId"
+          } else {
+              Write-Host "App registration already exists with Application ID: $appId"
+          }
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
     inputs:
@@ -59,40 +110,8 @@ steps:
       overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
-  
-  - task: PowerShell@2
-    displayName: 'Generate Service Connection JSON'
-    inputs:
-      targetType: 'inline'
-      script: |
-        $dockerRegistryUrl = '$(Deployment1.dockerRegistryUrl.value)'
-        $dockerUsername = '$(Deployment1.dockerUsername.value)'
-        $dockerPassword = '$(Deployment1.dockerPassword.value)'
-        $serviceConnectionName = '$(DockerRegistryServiceConnectionName)'
-        $jsonFilePath = '$(System.DefaultWorkingDirectory)\service-endpoint-config.json'
-
-        $serviceEndpointJson = @{
-            data = @{
-                registrytype = 'Others'
-                url = $dockerRegistryUrl
-            }
-            authorization = @{
-                parameters = @{
-                    username = $dockerUsername
-                    password = $dockerPassword
-                }
-                scheme = 'UsernamePassword'
-            }
-            name = $serviceConnectionName
-            type = 'dockerregistry'
-        }
-
-        $serviceEndpointJsonString = $serviceEndpointJson | ConvertTo-Json -Depth 10
-        $serviceEndpointJsonString | Out-File -FilePath $jsonFilePath -Encoding utf8
-        Write-Host "JSON file generated at: $jsonFilePath"
-
   - task: AzureCLI@2
-    displayName: 'Create Docker Registry Service Connection (Dynamic)'
+    displayName: 'Check Existing Service Connection'
     inputs:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
@@ -100,13 +119,89 @@ steps:
       inlineScript: |
         az extension add --name azure-devops
         az config set extension.dynamic_install_allow_preview=true
-        az devops service-endpoint create `
+        $serviceConnectionName = "$(DockerRegistryServiceConnectionName)"
+        $existingServiceConnection = az devops service-endpoint list `
+          --project "$(System.TeamProject)" `
+          --organization "$(System.CollectionUri)" `
+          --query "[?name=='$serviceConnectionName']" `
+          --output json
+
+        if ($existingServiceConnection -eq "[]") {
+          Write-Host "Service connection does not exist."
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]false"
+        } else {
+          $serviceConnectionId = ($existingServiceConnection | ConvertFrom-Json)[0].id
+          Write-Host "Service connection already exists with ID: $serviceConnectionId"
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]true"
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
+          Write-Host $serviceConnectionId
+        }
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
+
+  - task: PowerShell@2
+    displayName: 'Generate Service Connection JSON'
+    condition: eq(variables['ServiceConnectionExists'], 'false')
+    inputs:
+      targetType: 'inline'
+      script: |
+        $dockerRegistryUrl = "https://{0}" -f $(Deployment1.dockerRegistryUrl.value)
+        $dockerUsername = $(Deployment1.dockerUsername.value)
+        $dockerPassword = $(Deployment1.dockerPassword.value)
+        $serviceConnectionName = '$(DockerRegistryServiceConnectionName)'
+        $jsonFilePath = '$(System.DefaultWorkingDirectory)\service-endpoint-config.json'
+
+        $serviceEndpointJson = @{
+            data = @{
+                registrytype = 'Others'
+            }
+            authorization = @{
+                parameters = @{
+                    username = $dockerUsername
+                    password = $dockerPassword
+                    registry = $dockerRegistryUrl
+                }
+                scheme = 'UsernamePassword'
+            }
+            name = $serviceConnectionName
+            type = 'dockerregistry'
+        }
+
+        $serviceEndpointJsonString = $serviceEndpointJson | ConvertTo-Json -Depth 10 -Compress
+        [System.IO.File]::WriteAllBytes($jsonFilePath, [System.Text.Encoding]::UTF8.GetBytes($serviceEndpointJsonString))
+        Write-Host "JSON file generated at: $jsonFilePath"
+
+  - task: AzureCLI@2
+    displayName: 'Create Docker Registry Service Connection (Dynamic)'
+    condition: eq(variables['ServiceConnectionExists'], 'false')
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az extension add --name azure-devops
+        az config set extension.dynamic_install_allow_preview=true
+
+        # Create the service connection and capture the output
+        $serviceConnectionOutput = az devops service-endpoint create `
           --service-endpoint-configuration "$(System.DefaultWorkingDirectory)\service-endpoint-config.json" `
           --project "$(System.TeamProject)" `
-          --organization "$(System.CollectionUri)"
+          --organization "$(System.CollectionUri)" `
+          --output json
+
+        # Extract the 'id' field from the output
+        $serviceConnectionId = ($serviceConnectionOutput | ConvertFrom-Json).id
+        Write-Host "Service connection created with ID: $serviceConnectionId"
+
+        # Set the ID as a pipeline variable
+        Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
+
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
 
   - task: AzureCLI@2
     displayName: 'Grant Permissions for Service Connection'
+    condition: eq(variables['ServiceConnectionExists'], 'false')
     inputs:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
@@ -114,7 +209,10 @@ steps:
       inlineScript: |
         # Grant access to Project Collection Build Service account
         az devops service-endpoint update `
-          --name "$(DockerRegistryServiceConnectionName)" `
+          --id $(ServiceConnectionId) `
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)" `
           --enable-for-all
+          
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
