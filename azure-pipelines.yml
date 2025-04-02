@@ -43,6 +43,8 @@ variables:
   value: 'Docker Registry Dynamic'
 - name: AzureSubscription
   value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+- name: AzureDevOpsPAT
+  value: 'r9UMg3Jrr1NwuFXXZx7k8VMirDz2ezTKJVoocbBUS7yiurpvPen2JQQJ99BDACAAAAAAAAAAAAASAZDOrV1D'
 
 steps:
   - task: AzureResourceManagerTemplateDeployment@3
@@ -97,6 +99,8 @@ steps:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
       inlineScript: |
         az extension add --name azure-devops
         az config set extension.dynamic_install_allow_preview=true
