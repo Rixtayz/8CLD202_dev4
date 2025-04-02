@@ -67,10 +67,10 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $dockerRegistryUrl = '$(Deployment1.dockerRegistryUrl.value)'
-        $dockerUsername = '$(Deployment1.dockerUsername.value)'
-        $dockerPassword = '$(Deployment1.dockerPassword.value)'
-        $serviceConnectionName = '$(DockerRegistryServiceConnectionName)'
+        $dockerRegistryUrl = $(Deployment1.dockerRegistryUrl.value)
+        $dockerUsername = $(Deployment1.dockerUsername.value)
+        $dockerPassword = $(Deployment1.dockerPassword.value)
+        $serviceConnectionName = $(DockerRegistryServiceConnectionName)
         $jsonFilePath = '$(System.DefaultWorkingDirectory)\service-endpoint-config.json'
 
         $serviceEndpointJson = @{
@@ -106,7 +106,6 @@ steps:
           --service-endpoint-configuration "$(System.DefaultWorkingDirectory)\service-endpoint-config.json" `
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)"
-          --debug
 
     env:
       AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
