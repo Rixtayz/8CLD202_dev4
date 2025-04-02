@@ -63,33 +63,35 @@ steps:
     displayName: Création de l'App Registration
     inputs:
       azureSubscription: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
-      scriptType: 'bash'
+      scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
           # Get the current tenant ID
           $tenantId = $(az account show --query tenantId -o tsv)
+          Write-Host "Authenticated to Azure with Tenant ID: $tenantId"
 
           # Check if the app registration already exists
-          $app = $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv)
-          
-          if [ -z "$appId" ]; then
-              echo "Creating a new app registration..."
-              
+          $appId = $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv)
+
+          if (-not $appId) {
+              Write-Host "Creating a new app registration..."
+
               # Create the app registration
-              appOutput=$(az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" -o json)
-              appId=$(echo $appOutput | jq -r '.appId')
+              $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --output json
+              $appId = ($appOutput | ConvertFrom-Json).appId
 
               # Create a new client secret
-              secretOutput=$(az ad app credential reset --id $appId --password $(uuidgen) --end-date $(date -d "+2 years" +%Y-%m-%d) -o json)
-              clientSecret=$(echo $secretOutput | jq -r '.password')
+              $clientSecretOutput = az ad app credential reset --id $appId --end-date (Get-Date).AddYears(2).ToString("yyyy-MM-dd") --query password -o tsv
+              $clientSecret = $clientSecretOutput.Trim()
 
-              echo "##vso[task.setvariable variable=ApplicationId]$appId"
-              echo "##vso[task.setvariable variable=TenantId]$tenantId"
-              echo "##vso[task.setvariable variable=ClientSecret]$clientSecret"
+              Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
+              Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
+              Write-Host "##vso[task.setvariable variable=ClientSecret]$clientSecret"
 
-              echo "App registration created with Application ID: $appId"
-          else
-              echo "App registration already exists with Application ID: $appId"
+              Write-Host "App registration created with Application ID: $appId"
+          } else {
+              Write-Host "App registration already exists with Application ID: $appId"
+          }
 
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
