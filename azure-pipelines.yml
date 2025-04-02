@@ -66,39 +66,30 @@ steps:
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
-          # Authenticate to Azure using the service principal credentials provided by the service connection
-          $spClientId = "$(servicePrincipalId)"  # Automatically injected by the Azure subscription service connection
-          $spClientSecret = "$(servicePrincipalKey)"  # Automatically injected
-          $tenantId = "$(tenantId)"  # Automatically injected
-
-          Connect-AzAccount -ServicePrincipal -ApplicationId $spClientId -TenantId $tenantId -Credential (New-Object System.Management.Automation.PSCredential($spClientId, (ConvertTo-SecureString $spClientSecret -AsPlainText -Force)))
-
-          Write-Host "Authenticated to Azure with Tenant ID: $tenantId"
-
           # Get the current tenant ID
-          $tenantId = (Get-AzTenant).TenantId
+          $tenantId = $(az account show --query tenantId -o tsv)
 
           # Check if the app registration already exists
-          $app = Get-AzADApplication -Filter "DisplayName eq '$(AppRegistrationName)'" -ErrorAction SilentlyContinue
-
-          if ($null -eq $app) {
-              Write-Host "Creating a new app registration..."
+          $app = $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv)
+          
+          if [ -z "$appId" ]; then
+              echo "Creating a new app registration..."
+              
               # Create the app registration
-              $app = New-AzADApplication -DisplayName $(AppRegistrationName) -IdentifierUris "api://$($tenantId)/$appName"
+              appOutput=$(az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" -o json)
+              appId=$(echo $appOutput | jq -r '.appId')
 
               # Create a new client secret
-              $startDate = (Get-Date)
-              $endDate = $startDate.AddYears(2)
-              $secret = New-AzADAppCredential -ApplicationId $app.appId -StartDate $startDate -EndDate $endDate
+              secretOutput=$(az ad app credential reset --id $appId --password $(uuidgen) --end-date $(date -d "+2 years" +%Y-%m-%d) -o json)
+              clientSecret=$(echo $secretOutput | jq -r '.password')
 
-              Write-Host "##vso[task.setvariable variable=ApplicationId]$($app.ApplicationId)"
-              Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
-              Write-Host "##vso[task.setvariable variable=ClientSecret]$($secret.SecretText)"
+              echo "##vso[task.setvariable variable=ApplicationId]$appId"
+              echo "##vso[task.setvariable variable=TenantId]$tenantId"
+              echo "##vso[task.setvariable variable=ClientSecret]$clientSecret"
 
-              Write-Host "App registration created with Application ID: $($app.appId)"
-          } else {
-              Write-Host "App registration already exists with Application ID: $($app.appId)"
-          }
+              echo "App registration created with Application ID: $appId"
+          else
+              echo "App registration already exists with Application ID: $appId"
 
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
