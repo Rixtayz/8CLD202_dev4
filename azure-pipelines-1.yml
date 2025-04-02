@@ -22,7 +22,7 @@ steps:
     inputs:
       azureSubscription: $(AzureSubscription)
       KeyVaultName: 'GuroKeyVault'
-      SecretsFilter: 'ApplicationId,TenantId,ClientSecret'
+      SecretsFilter: 'ClientID,TenantID,ClientSecret'
       RunAsPreJob: false
 
   - task: Docker@2
@@ -37,8 +37,8 @@ steps:
         $(Build.BuildId)
         latest
       arguments: |
-            --build-arg Client_ID=$(ApplicationId)
-            --build-arg Tenant_ID=$(TenantId)
+            --build-arg Client_ID=$(ClientID)
+            --build-arg Tenant_ID=$(TenantID)
             --build-arg Secret_ID=$(ClientSecret)
 
   - task: Docker@2
