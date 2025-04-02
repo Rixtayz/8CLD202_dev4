@@ -169,3 +169,6 @@ steps:
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)" `
           --enable-for-all
+          
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
