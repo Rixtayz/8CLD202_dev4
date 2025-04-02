@@ -19,40 +19,53 @@ variables:
 - name: TenantId
 - name: ClientSecret
 
+# To automate
+- name: AzureAdDomainName 
+  value: 'guillaumerouthieruihotmail.onmicrosoft.com'
+- name: AzureAdClientId
+  value: 'c11d2628-cd67-4e13-8cbf-9a12c7fc5fd9'
+
+  # Resource group ainsi que l'acronyme utiliser pour créer le nom des resources
 - name: RG
-  value: 'Guro'
+  value: 'guro'
+ 
+  # Resources
 - name: RG_Location
   value: 'eastus'
 - name: Vault
-  value: 'GuroKeyVault'
+  value: '$(RG)KeyVault'
 - name: AppConfig
-  value: 'GuroAppConfiguration'
+  value: '$(RG)AppConfiguration'
 - name: LogAnalytics
   value: 'LogAnalyticsName'
-- name: InfrastructureFolder
-  value: 'CloudInfrastructure'
 - name: ApplicationInsight
   value: 'ApplicationInsight'
 - name: BlobName
-  value: 'guroblobstore'
+  value: '$(RG)blobstore'
+- name: SBusName
+  value: '$(RG)Sb'
+- name: EventHubName
+  value: '$(RG)EventHub'
+- name: CosmosDBName
+  value: '$(RG)cosmo'
+- name: ContentName
+  value: '$(RG)ContentSafety'
+- name: ContainerRegistryName
+  value: '$(RG)Registry'
+
 - name: BlobContainer1
   value: 'unvalidated'
 - name: BlobContainer2
   value: 'validated'
 - name: BlobContainer3
   value: 'synchro'
-- name: SBusName
-  value: 'GuroSb'
-- name: EventHubName
-  value: 'GuroEventHub'
-- name: CosmosDBName
-  value: 'gurocosmo'
-- name: ContentName
-  value: 'GuroContentSafety'
-- name: ContainerRegistryName
-  value: 'GuroRegistry'
+  
+- name: InfrastructureFolder
+  value: 'CloudInfrastructure'
+
 - name: DockerRegistryServiceConnectionName
   value: 'Docker Registry Dynamic'
+
 - name: AzureSubscription
   value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
 - name: AzureDevOpsPAT #https://learn.microsoft.com/en-us/azure/devops/cli/log-in-via-pat?view=azure-devops&tabs=windows
@@ -67,7 +80,7 @@ steps:
   - task: AzureCLI@2
     displayName: Création de l'App Registration
     inputs:
-      azureSubscription: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+      azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
@@ -109,7 +122,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName)'
+      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName) -AzureAdDomainName $(AzureAdDomainName) -AzureAdClientId $(AzureAdClientId)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
   - task: AzureCLI@2
