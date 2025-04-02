@@ -89,9 +89,12 @@ steps:
             type = 'dockerregistry'
         }
 
-        $serviceEndpointJsonString = $serviceEndpointJson | ConvertTo-Json -Depth 10
-        [System.IO.File]::WriteAllText($jsonFilePath, $serviceEndpointJsonString, [System.Text.Encoding]::UTF8)
+        $serviceEndpointJsonString = $serviceEndpointJson | ConvertTo-Json -Depth 10 -Compress
+        [System.Text.Encoding]::UTF8.GetBytes($serviceEndpointJsonString) | `
+        [System.IO.File]::WriteAllBytes($jsonFilePath)
         Write-Host "JSON file generated at: $jsonFilePath"
+
+        Get-Content $(System.DefaultWorkingDirectory)\service-endpoint-config.json
 
   - task: AzureCLI@2
     displayName: 'Create Docker Registry Service Connection (Dynamic)'
@@ -106,6 +109,8 @@ steps:
           --service-endpoint-configuration "$(System.DefaultWorkingDirectory)\service-endpoint-config.json" `
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)"
+          --debug
+
     env:
       AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
 
