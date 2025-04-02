@@ -8,6 +8,8 @@
 
 pool: "default"
 
+# Add Owner roles to pipeline service principale !!!!
+
 variables:
 - name: AppRegistrationName
   value: 'MVC_Dynamic'
