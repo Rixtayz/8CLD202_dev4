@@ -101,7 +101,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $dockerRegistryUrl = "https://$(Deployment1.dockerRegistryUrl.value)"
+        $dockerRegistryUrl = "https://{0}" -f $(Deployment1.dockerRegistryUrl.value)
         $dockerUsername = $(Deployment1.dockerUsername.value)
         $dockerPassword = $(Deployment1.dockerPassword.value)
         $serviceConnectionName = '$(DockerRegistryServiceConnectionName)'
