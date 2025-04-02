@@ -19,6 +19,8 @@ variables:
 - name: TenantId
 - name: ClientSecret
 
+- name: ServicePrincipalId
+
 # To automate
 - name: AzureAdDomainName 
   value: 'guillaumerouthieruihotmail.onmicrosoft.com'
@@ -78,7 +80,7 @@ variables:
   
 steps:
   - task: AzureCLI@2
-    displayName: Création de l'App Registration
+    displayName: App Registration creation
     inputs:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
@@ -119,7 +121,22 @@ steps:
           } else {
               Write-Host "App registration already exists with Application ID: $appId"
           }
-      
+
+  - task: AzureCLI@2
+    displayName: Get Service Principal ID of the Pipeline
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Fetch the service principal ID from the service connection
+        $spId = $(az ad sp list --filter "displayName eq '$(AzureSubscription)'" --query "[0].id" -o tsv)
+
+        Write-Host "Service Principal ID: $spId"
+
+        # Set pipeline variable for later use
+        Write-Host "##vso[task.setvariable variable=ServicePrincipalId]$spId"
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
     inputs:
