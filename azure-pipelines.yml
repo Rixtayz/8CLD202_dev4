@@ -90,6 +90,8 @@ steps:
           Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]true"
           Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
         }
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
 
   - task: PowerShell@2
     displayName: 'Generate Service Connection JSON'
