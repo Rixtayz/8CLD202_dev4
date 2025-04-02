@@ -119,7 +119,9 @@ steps:
           } else {
               Write-Host "App registration already exists with Application ID: $appId"
           }
-
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
+      
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment
     inputs:
