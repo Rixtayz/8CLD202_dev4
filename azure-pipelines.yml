@@ -99,8 +99,6 @@ steps:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
-    env:
-      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
       inlineScript: |
         az extension add --name azure-devops
         az config set extension.dynamic_install_allow_preview=true
@@ -108,6 +106,8 @@ steps:
           --service-endpoint-configuration "$(System.DefaultWorkingDirectory)\service-endpoint-config.json" `
           --project "$(System.TeamProject)" `
           --organization "$(System.CollectionUri)"
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
 
   - task: AzureCLI@2
     displayName: 'Grant Permissions for Service Connection'
