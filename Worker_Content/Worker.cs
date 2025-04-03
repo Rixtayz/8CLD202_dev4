@@ -43,6 +43,10 @@ namespace Worker_Content
         private SemaphoreSlim _semaphore;
 
         private const int ConcurentJobLimit = 5;
+        private const int Delay = 2;
+        private const int MaxDelay = 30;
+        private const int MaxRetry = 5;
+
 
         public Worker(ILogger<Worker> logger, IOptions<WorkerOptions> options)
         {
@@ -59,11 +63,11 @@ namespace Worker_Content
             BlobClientOptions blobClientOptions = new BlobClientOptions
             {
                 Retry = {
-                        Delay = TimeSpan.FromSeconds(2),     //The delay between retry attempts for a fixed approach or the delay on which to base
+                        Delay = TimeSpan.FromSeconds(Delay),     //The delay between retry attempts for a fixed approach or the delay on which to base
                                                              //calculations for a backoff-based approach
-                        MaxRetries = 5,                      //The maximum number of retry attempts before giving up
+                        MaxRetries = MaxRetry,                      //The maximum number of retry attempts before giving up
                         Mode = RetryMode.Exponential,        //The approach to use for calculating retry delays
-                        MaxDelay = TimeSpan.FromSeconds(10)  //The maximum permissible delay between retry attempts
+                        MaxDelay = TimeSpan.FromSeconds(MaxDelay)  //The maximum permissible delay between retry attempts
                         },
             };
 
@@ -73,19 +77,19 @@ namespace Worker_Content
             _messageQueue = new ConcurrentQueue<ServiceBusReceivedMessage>();
 
             // Hardcoded
-            string queueName = "contentsafetymessage";
+            string queueName = _options.ServiceBusQueue2Name;
 
             ServiceBusClientOptions clientOptions = new ServiceBusClientOptions
             {
                 RetryOptions = new ServiceBusRetryOptions
                 {
-                    Delay = TimeSpan.FromSeconds(10),
-                    MaxDelay = TimeSpan.FromSeconds(60),
+                    Delay = TimeSpan.FromSeconds(Delay),
+                    MaxDelay = TimeSpan.FromSeconds(MaxDelay),
                     Mode = ServiceBusRetryMode.Exponential,
-                    MaxRetries = 6,
+                    MaxRetries = MaxRetry,
                 },
                 TransportType = ServiceBusTransportType.AmqpWebSockets,
-                ConnectionIdleTimeout = TimeSpan.FromMinutes(10)   //Défault = 1 minutes
+                ConnectionIdleTimeout = TimeSpan.FromSeconds(MaxDelay)   //Défault = 1 minutes
             };
 
             _serviceBusClient = new ServiceBusClient(_options.ServiceBusKey, clientOptions);

@@ -6,9 +6,9 @@ EXPOSE 8080
 EXPOSE 8081
 
  #Pour le managed identity pour dev seulement.
- ENV AZURE_CLIENT_ID="722815e8-ef2b-4564-9179-f0ba95afd86e"
- ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
- ENV AZURE_CLIENT_SECRET="lNR8Q~A2VdolzCe2dFdobHhc2hG4zotSStuFuaOf"
+ #ENV AZURE_CLIENT_ID="722815e8-ef2b-4564-9179-f0ba95afd86e"
+ #ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
+ #ENV AZURE_CLIENT_SECRET="lNR8Q~A2VdolzCe2dFdobHhc2hG4zotSStuFuaOf"
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build

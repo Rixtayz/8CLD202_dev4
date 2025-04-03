@@ -47,8 +47,10 @@ variables:
   value: '$(RG)Sb'
 - name: EventHubName
   value: '$(RG)EventHub'
-- name: CosmosDBName
-  value: '$(RG)cosmo'
+- name: CosmosName
+  value: '$(RG)cosmos'
+- name: CosmosDatabaseName
+  value: 'ApplicationDB'
 - name: ContentName
   value: '$(RG)ContentSafety'
 - name: ContainerRegistryName
@@ -61,6 +63,16 @@ variables:
 - name: BlobContainer3
   value: 'synchro'
   
+- name: ServiceBusQueue1Name
+  value: '/imageresizemessage'
+- name: ServiceBusQueue2Name
+  value: '/contentsafetymessage'
+  
+- name: EventHubHubName
+  value: 'event'
+- name: EventHubConsumerGroupName
+  value: 'consumer'
+
 - name: InfrastructureFolder
   value: 'CloudInfrastructure'
 
@@ -132,7 +144,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosDBName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName) -AzureAdDomainName $(AzureAdDomainName) -AzureAdClientId $(AzureAdClientId)'
+      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosName) -NoSQLdatabaseName $(CosmosDatabaseName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName) -AzureAdDomainName $(AzureAdDomainName) -AzureAdClientId $(AzureAdClientId) -ServiceBusQueue1Name $(ServiceBusQueue1Name) -ServiceBusQueue2Name $(ServiceBusQueue2Name) -EventHubHubName $(EventHubHubName) -EventHubConsumerGroupName $(EventHubConsumerGroupName)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
 

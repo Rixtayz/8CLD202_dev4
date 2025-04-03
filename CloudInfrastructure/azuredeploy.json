@@ -35,6 +35,7 @@
     "NoSQLname": {
       "type": "string"
     },
+    "NoSQLdatabaseName": { "type": "string"},
     "storageAccountName": {
       "type": "String"
     },
@@ -56,6 +57,8 @@
     "ServiceBusName": {
       "type": "string"
     },
+    "ServiceBusQueue1Name": { "type": "string" },
+    "ServiceBusQueue2Name": { "type": "string" },
     "ContentSafetyname": {
       "type": "String"
     },
@@ -69,6 +72,8 @@
     "EventHubName": {
       "type": "string"
     },
+    "EventHubHubName": { "type": "string" },
+    "EventHubConsumerGroupName": { "type": "string" },
     "ContainerRegistryName": {
       "type": "string"
     }
@@ -90,7 +95,7 @@
           "name": "pergb2018"
         }
       }
-    },
+    }, // Log Analytics
     {
       "name": "[parameters('ApplicationInsightName')]",
       "type": "microsoft.insights/components",
@@ -107,7 +112,7 @@
         "Request_Source": "rest",
         "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('LogAnalyticsName'))]"
       }
-    },
+    }, // Application Insight
     {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2023-08-01-preview",
@@ -136,7 +141,7 @@
           }
         }
       }
-    },
+    }, // Key Vault
     {
       "type": "Microsoft.AppConfiguration/configurationStores",
       "apiVersion": "2023-03-01",
@@ -156,7 +161,7 @@
           "resourceId": "[resourceId('microsoft.insights/components', parameters('ApplicationInsightName'))]"
         }
       }
-    },
+    }, // Application Configuration
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-11-01-preview",
@@ -166,11 +171,10 @@
         "[resourceId('Microsoft.KeyVault/vaults', parameters('VaultName'))]",
         "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName'))]"
       ],
-      //This provide instrumentation key
       "properties": {
         "value": "[reference(resourceId('Microsoft.Insights/components', parameters('ApplicationInsightName')), '2020-02-02').ConnectionString]"
       }
-    },
+    }, // Application Configuration Connection String (Key Vault)
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2024-04-01-preview",
@@ -182,14 +186,13 @@
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
-      //this provide connectionString for the Blob Access
       "properties": {
         "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2019-06-01').keys[0].value, ';EndpointSuffix=core.windows.net')]",
         "attributes": {
           "enabled": true
         }
       }
-    },
+    }, // Blob Storage Connection String (Key Vault)
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2024-04-01-preview",
@@ -201,14 +204,13 @@
         "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
-      //this provide connectionString for the ServiceBus
       "properties": {
         "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationrules', parameters('ServiceBusName'), 'RootManageSharedAccessKey'), '2023-01-01-preview').primaryConnectionString]",
         "attributes": {
           "enabled": true
         }
       }
-    },
+    }, // Service Bus Connection String (Key Vault)
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2024-04-01-preview",
@@ -220,14 +222,13 @@
         "[parameters('ContentSafetyname')]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
-      //this provide connectionString for the ContentSafety
       "properties": {
         "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('ContentSafetyname')),'2024-06-01-preview').key1]",
         "attributes": {
           "enabled": true
         }
       }
-    },
+    }, // Content Safety Connection String (Key Vault)
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2024-04-01-preview",
@@ -239,14 +240,13 @@
         "[resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('NoSQLname'))]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
-      //this provide connectionString for the CosmoDB
       "properties": {
         "value": "[concat('AccountEndpoint=https://', parameters('NoSQLname'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('NoSQLname')), '2024-12-01-preview').primaryMasterKey)]",
         "attributes": {
           "enabled": true
         }
       }
-    }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
+    }, // CosmosDB Connection String (Key Vault)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -261,8 +261,20 @@
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringCosmosDB'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
-    },
-    // EVENT HUB ---------------------------------------
+    }, // CosmosDB Connection String (App Config)
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:CosmosDBdatabaseName')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('NoSQLname'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('NoSQLdatabaseName')]"
+      }
+    }, // CosmosDB Database Name (App Config)
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2024-04-01-preview",
@@ -275,14 +287,13 @@
         "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey')]",
         "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
       ],
-      //this provide connectionString for the EventHub
       "properties": {
         "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey'), '2024-05-01-preview').primaryConnectionString]",
         "attributes": {
           "enabled": true
         }
       }
-    },
+    }, // Event Hub Connection String (Key Vault)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -299,7 +310,35 @@
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringEventHub'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
-    },
+    }, // Event Hub Connection String (App Config)
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:EventHubName')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]",
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey')]"
+      ],
+      "properties": {
+        "value": "[parameters('EventHubHubName')]"
+      }
+    }, // Event Hub Hub Name (App Config)
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:EventHubConsumerName')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]",
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('EventHubName'), 'RootManageSharedAccessKey')]"
+      ],
+      "properties": {
+        "value": "[parameters('EventHubConsumerGroupName')]"
+      }
+    }, // Event Hub Consumer Name (App Config)
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2024-04-01-preview",
@@ -317,7 +356,7 @@
           "enabled": true
         }
       }
-    }, //https://github.com/Azure/AppConfiguration/issues/268#issuecomment-685319249
+    }, // Container Registry Password (Key Vault)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -332,7 +371,7 @@
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ContainerRegistry'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
-    },
+    }, // Container Registry Password (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -345,7 +384,7 @@
       "properties": {
         "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('ContainerRegistryName')), '2022-02-01-preview').username]"
       }
-    },
+    }, // Container Registry Username (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -360,7 +399,7 @@
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringContentSafety'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
-    },
+    }, // Content Safety Connection String (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -375,7 +414,33 @@
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringSB'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
-    },
+    }, // Service Bus Connection String (App Config)
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:ServiceBusQueue1Name')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('ServiceBusQueue1Name')]"
+      }
+    }, // Service Bus ServiceBusQueue1Name (App Config)
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2024-05-01",
+      // hardcoded
+      "name": "[format('{0}/{1}', parameters('AppConfigName'), 'ApplicationConfiguration:ServiceBusQueue2Name')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]",
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('ServiceBusQueue2Name')]"
+      }
+    }, // Service Bus ServiceBusQueue2Name (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -391,7 +456,7 @@
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringApplicationInsight'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
-    },
+    }, // Application Insight Connection String (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -407,7 +472,7 @@
         "value": "[concat('{\"uri\": \"',reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('VaultName'), 'ConnectionStringBlob'), '2019-09-01').secretUriWithVersion, '\"}')]",
         "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
       }
-    },
+    }, // Blob Storage Connection String (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -419,7 +484,7 @@
       "properties": {
         "value": "[parameters('storageBlobContainerName1')]"
       }
-    },
+    }, // Blob Storage Container 1 - Unvalidated (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -431,7 +496,7 @@
       "properties": {
         "value": "[parameters('storageBlobContainerName2')]"
       }
-    },
+    }, // Blob Storage Container 2 - Validated (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -443,7 +508,7 @@
       "properties": {
         "value": "[parameters('storageBlobContainerName3')]"
       }
-    },
+    }, // Blob Storage Container 3 - Synchro (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -455,7 +520,7 @@
       "properties": {
         "value": "[reference(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').endpoint]"
       }
-    },
+    }, // App Configuration End Point (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -468,7 +533,7 @@
       "properties": {
         "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('ContentSafetyname')), '2024-06-01-preview').endpoint]"
       }
-    },
+    }, // Content Safety Connection String (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -481,7 +546,7 @@
       "properties": {
         "value": "[concat('https://', parameters('VaultName'), '.vault.azure.net/')]"
       }
-    },
+    }, // Key Vault End Point (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -493,7 +558,7 @@
       "properties": {
         "value": "20"
       }
-    },
+    }, // Font Size (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -505,7 +570,7 @@
       "properties": {
         "value": "red"
       }
-    },
+    }, // Font Color (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -517,7 +582,7 @@
       "properties": {
         "value": "Yo, welcome !!"
       }
-    },
+    }, // Welcome Phrase (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -529,7 +594,7 @@
       "properties": {
         "value": 0
       }
-    },
+    }, // Sentinel (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -541,7 +606,7 @@
       "properties": {
         "value": "NoSQL"
       }
-    }, // Information pour l'identity
+    }, // Database Type (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -553,7 +618,7 @@
       "properties": {
         "value": "https://login.microsoftonline.com/"
       }
-    },
+    }, // Azure AD Instance (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -565,7 +630,7 @@
       "properties": {
         "value": "[parameters('AzureAdDomainName')]"
       }
-    },
+    }, // Azure AD Domain Name (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -577,7 +642,7 @@
       "properties": {
         "value": "[subscription().tenantId]"
       }
-    },
+    }, // Azure AD Tenant ID (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -589,7 +654,7 @@
       "properties": {
         "value": "[parameters('AzureAdClientId')]"
       }
-    },
+    }, // Azure AD Client ID (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2024-05-01",
@@ -601,7 +666,7 @@
       "properties": {
         "value": "/signin-oidc"
       }
-    }, // Feature Flag -- hardcoded
+    }, // Azure AD Signin (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2021-03-01-preview",
@@ -611,7 +676,7 @@
         "contentType": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
       },
       "dependsOn": [ "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('appConfigName'))]" ]
-    },
+    }, // Feature Flag A (App Config)
     {
       "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
       "apiVersion": "2021-03-01-preview",
@@ -621,7 +686,7 @@
         "contentType": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
       },
       "dependsOn": [ "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('appConfigName'))]" ]
-    }, // Blob creation
+    }, // Feature Flag B (App Config)
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2023-05-01",
@@ -667,7 +732,7 @@
           }
         }
       }
-    },
+    }, // Blob Storage
     {
       "type": "Microsoft.Storage/storageAccounts/blobServices",
       "apiVersion": "2023-05-01",
@@ -688,7 +753,7 @@
           "enabled": false
         }
       }
-    },
+    }, // Blob Service
     {
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-05-01",
@@ -705,7 +770,7 @@
         "denyEncryptionScopeOverride": false,
         "publicAccess": "Blob"
       }
-    },
+    }, // Blob Storage Container 1
     {
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-05-01",
@@ -722,8 +787,8 @@
         "denyEncryptionScopeOverride": false,
         "publicAccess": "Blob"
       }
-    },
-    { // Fix container for Synchro of EventHub
+    }, // Blob Storage Container 2
+    {
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-05-01",
       "name": "[concat(parameters('storageAccountName'), '/default/', parameters('storageBlobContainerName3'))]",
@@ -739,7 +804,7 @@
         "denyEncryptionScopeOverride": false,
         "publicAccess": "Blob"
       }
-    }, // SB
+    }, // Blob Storage Container 3
     {
       "type": "Microsoft.ServiceBus/namespaces",
       "apiVersion": "2023-01-01-preview",
@@ -755,12 +820,12 @@
         "disableLocalAuth": false,
         "publicNetworkAccess": "Enabled"
       }
-    },
-    { // Queue pour Image Resize / hardcoded
+    }, // Service Bus
+    {
       "type": "Microsoft.ServiceBus/namespaces/queues",
       "apiVersion": "2023-01-01-preview",
-      "name": "[concat(parameters('ServiceBusName'), '/imageresizemessage')]",
-      "location": "canadacentral",
+      "name": "[concat(parameters('ServiceBusName'), '/', parameters('ServiceBusQueue1Name'))]",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]"
       ],
@@ -779,12 +844,12 @@
         "enablePartitioning": false,
         "enableExpress": false
       }
-    },
-    { // Queue pour la validation du content / hardcoded
+    }, // Service Bus Queue 1 - Image Resize
+    {
       "type": "Microsoft.ServiceBus/namespaces/queues",
       "apiVersion": "2023-01-01-preview",
-      "name": "[concat(parameters('ServiceBusName'), '/contentsafetymessage')]",
-      "location": "canadacentral",
+      "name": "[concat(parameters('ServiceBusName'),'/', parameters('ServiceBusQueue2Name'))]",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]"
       ],
@@ -803,12 +868,12 @@
         "enablePartitioning": false,
         "enableExpress": false
       }
-    },
-    { // Ceci est pour recevoir la connectionString
+    }, // Service Bus Queue 2 - Content Safety
+    {
       "type": "Microsoft.ServiceBus/namespaces/authorizationrules",
       "apiVersion": "2023-01-01-preview",
       "name": "[concat(parameters('ServiceBusName'), '/RootManageSharedAccessKey')]",
-      "location": "canadacentral",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.ServiceBus/namespaces', parameters('ServiceBusName'))]"
       ],
@@ -819,23 +884,7 @@
           "Send"
         ]
       }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2017-05-10",
-      "name": "deployVnet",
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {},
-          "variables": {},
-          "resources": [] // No virtual network resources required since vnet is empty and virtualNetworkType is "None"
-        }
-      },
-      "condition": false // The condition evaluates to false since virtualNetworkType is "None"
-    },
+    }, // Service Bus Authorization Rules
     {
       "type": "Microsoft.CognitiveServices/accounts",
       "apiVersion": "2024-10-01",
@@ -877,7 +926,7 @@
           "condition": false // Hardcoded condition since isCommitmentPlanForDisconnectedContainerEnabled = false
         }
       ]
-    },
+    }, // Content Safety
     {
       "type": "Microsoft.CognitiveServices/accounts",
       "apiVersion": "2024-10-01",
@@ -914,24 +963,7 @@
           "condition": false
         }
       ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-05-01",
-      "name": "deployPrivateEndpoint-None",
-      "dependsOn": [
-        "[concat('Microsoft.CognitiveServices/accounts/', parameters('ContentSafetyname'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "resources": [
-          ]
-        }
-      }
-    },
+    }, // Content Safety Account
     {
       "apiVersion": "2024-12-01-preview",
       "kind": "GlobalDocumentDB",
@@ -971,7 +1003,7 @@
         "defaultExperience": "Core (SQL)",
         "hidden-cosmos-mmspecial": ""
       }
-    },
+    }, // CosmosDB
     {
       "type": "Microsoft.EventHub/namespaces",
       "apiVersion": "2024-05-01-preview",
@@ -990,7 +1022,7 @@
         "disableLocalAuth": "false",
         "publicNetworkAccess": "Enabled"
       }
-    },
+    }, // Event Hub Namespace
     {
       "type": "Microsoft.EventHub/namespaces/authorizationrules",
       "apiVersion": "2024-05-01-preview",
@@ -1006,11 +1038,11 @@
           "Send"
         ]
       }
-    },
+    }, // Event Hub Authorization Rules
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2024-05-01-preview",
-      "name": "[concat(parameters('EventHubName'), '/event')]",
+      "name": "[concat(parameters('EventHubName'), '/' ,parameters('EventHubHubName'))]",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
@@ -1027,7 +1059,7 @@
         "partitionCount": 1,
         "status": "Active"
       }
-    },
+    }, // Event Hub Hub
     {
       "type": "Microsoft.EventHub/namespaces/networkrulesets",
       "apiVersion": "2024-05-01-preview",
@@ -1043,29 +1075,29 @@
         "ipRules": [],
         "trustedServiceAccessEnabled": false
       }
-    },
+    }, // Event Hub Ruleset
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2024-05-01-preview",
       "name": "[concat(parameters('EventHubName'), '/event/$Default')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('EventHubName'), 'event')]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('EventHubName'), parameters('EventHubHubName'))]",
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
       ],
       "properties": {}
-    },
+    }, // Event Hub Default Consumer Group
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2024-05-01-preview",
-      "name": "[concat(parameters('EventHubName'), '/event/consumer')]",
+      "name": "[concat(parameters('EventHubName'), '/', parameters('EventHubHubName'), '/', parameters('EventHubConsumerGroupName'))]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('EventHubName'), 'event')]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('EventHubName'), parameters('EventHubHubName'))]",
         "[resourceId('Microsoft.EventHub/namespaces', parameters('EventHubName'))]"
       ],
       "properties": {}
-    },
+    }, // Event Hub Consumer Group
     {
       "type": "Microsoft.ContainerRegistry/registries",
       "apiVersion": "2022-02-01-preview",
@@ -1080,7 +1112,7 @@
         "publicNetworkAccess": "Enabled",
         "zoneRedundancy": "disabled"
       }
-    }
+    } // Container Registry
 
   ],
   "outputs": {
@@ -1100,7 +1132,6 @@
       "type": "String",
       "value": "[parameters('AppConfigName')]"
     },
-    // endpoint is not connectionstring .....
     "AppConfigEndpoint": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('AppConfigName')), '2023-03-01').endpoint]"

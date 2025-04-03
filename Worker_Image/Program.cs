@@ -32,6 +32,7 @@ namespace Worker_Image
             ConfigurationClient appConfigClient = new ConfigurationClient(new Uri(AppConfigEndPoint), defaultAzureCredential);
             ConfigurationSetting container1 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:UnvalidatedBlob");
             ConfigurationSetting container2 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:ValidatedBlob");
+            ConfigurationSetting ServiceBusQueue1Name = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:ServiceBusQueue1Name");
 
             // Création du Client Key Vault
             ConfigurationSetting endpointKeyVault = appConfigClient.GetConfigurationSetting("Endpoints:KeyVault");
@@ -48,6 +49,7 @@ namespace Worker_Image
                 options.BlobContainer1 = container1.Value;
                 options.BlobContainer2 = container2.Value;
                 options.ServiceBusKey = servicebusKeyVault.Value;
+                options.ServiceBusQueue1Name = servicebusKeyVault.Value;
             });
 
             // Application Insight trace/log/metrics
@@ -82,6 +84,8 @@ namespace Worker_Image
         public required string BlobContainer1 { get; set; }
         public required string BlobContainer2 { get; set; }
         public required string ServiceBusKey { get; set; }
+
+        public required string ServiceBusQueue1Name { get; set; }
     }
 }
 

@@ -13,7 +13,6 @@ using MVC.Data;
 using System.Text;
 using MVC.Models;
 using System.Text.Json;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Worker_DB
 {
@@ -26,6 +25,9 @@ namespace Worker_DB
 
         private SemaphoreSlim _semaphore;
 
+        private const int Delay = 2;
+        private const int MaxDelay = 30;
+        private const int MaxRetry = 5;
         private const int ConcurentJobLimit = 1;
 
         private IRepository _repo;
@@ -48,11 +50,11 @@ namespace Worker_DB
             BlobClientOptions blobClientOptions = new BlobClientOptions
             {
                 Retry = {
-                        Delay = TimeSpan.FromSeconds(2),     //The delay between retry attempts for a fixed approach or the delay on which to base
+                        Delay = TimeSpan.FromSeconds(Delay),     //The delay between retry attempts for a fixed approach or the delay on which to base
                                                              //calculations for a backoff-based approach
-                        MaxRetries = 5,                      //The maximum number of retry attempts before giving up
+                        MaxRetries = MaxRetry,                      //The maximum number of retry attempts before giving up
                         Mode = RetryMode.Exponential,        //The approach to use for calculating retry delays
-                        MaxDelay = TimeSpan.FromSeconds(10)  //The maximum permissible delay between retry attempts
+                        MaxDelay = TimeSpan.FromSeconds(MaxDelay)  //The maximum permissible delay between retry attempts
                         },
             };
 
@@ -61,23 +63,23 @@ namespace Worker_DB
             {
                 RetryOptions = new EventHubsRetryOptions
                 {
-                    Delay = TimeSpan.FromSeconds(2),
-                    MaximumDelay = TimeSpan.FromSeconds(60),
+                    Delay = TimeSpan.FromSeconds(Delay),
+                    MaximumDelay = TimeSpan.FromSeconds(MaxDelay),
                     Mode = EventHubsRetryMode.Exponential,
-                    MaximumRetries = 5,
+                    MaximumRetries = MaxRetry,
                 },
                 ConnectionOptions = new EventHubConnectionOptions
                 {
                     TransportType = EventHubsTransportType.AmqpWebSockets,
-                    ConnectionIdleTimeout = TimeSpan.FromSeconds(60),
+                    ConnectionIdleTimeout = TimeSpan.FromSeconds(MaxDelay),
                 }
             };
             
             // Blob pour la synchro
-            BlobContainerClient _blobServiceClientEvent = new BlobContainerClient(_options.BlobStorageKey, "synchro");
+            BlobContainerClient _blobServiceClientEvent = new BlobContainerClient(_options.BlobStorageKey, _options.storageBlobContainerName3);
 
             // nom du consummer group + nom du event hub apres la Key
-            _eventProcessorClient = new EventProcessorClient(_blobServiceClientEvent, "consumer", _options.EventHubKey + ";EntityPath=event", eventProcessorClientOptions);
+            _eventProcessorClient = new EventProcessorClient(_blobServiceClientEvent, _options.EventHubConsumerGroupName, _options.EventHubKey + ";EntityPath=" + _options.EventHubHubName, eventProcessorClientOptions);
 
             _messageQueue = new ConcurrentQueue<EventData>();
 

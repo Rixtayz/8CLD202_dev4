@@ -61,7 +61,7 @@ namespace Worker_Image
             _messageQueue = new ConcurrentQueue<ServiceBusReceivedMessage>();
 
             // Hardcoded
-            string queueName = "imageresizemessage";
+            string queueName = _options.ServiceBusQueue1Name;
 
             ServiceBusClientOptions clientOptions = new ServiceBusClientOptions
             {

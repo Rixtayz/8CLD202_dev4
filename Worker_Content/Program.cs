@@ -33,6 +33,7 @@ namespace Worker_Content
             ConfigurationSetting contentsafetyEndPoint = appConfigClient.GetConfigurationSetting("Endpoints:ContentSafety");
             ConfigurationSetting container1 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:UnvalidatedBlob");
             ConfigurationSetting container2 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:ValidatedBlob");
+            ConfigurationSetting ServiceBusQueue2Name = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:ServiceBusQueue2Name");
 
             // Création du Client Key Vault
             ConfigurationSetting endpointKeyVault = appConfigClient.GetConfigurationSetting("Endpoints:KeyVault");
@@ -41,11 +42,7 @@ namespace Worker_Content
             KeyVaultSecret blobKeyVault = keyVaultClient.GetSecret("ConnectionStringBlob");
             KeyVaultSecret servicebusKeyVault = keyVaultClient.GetSecret("ConnectionStringSB");
             KeyVaultSecret applicationinsightKeyVault = keyVaultClient.GetSecret("ConnectionStringApplicationInsight");
-
             KeyVaultSecret EventHubKey = keyVaultClient.GetSecret("ConnectionStringEventHub");
-            //KeyVaultSecret cosmosdbKeyVault = keyVaultClient.GetSecret("ConnectionStringCosmosDB");
-
-
             KeyVaultSecret contentsafetyKeyVault = keyVaultClient.GetSecret("ConnectionStringContentSafety");
 
             // Ajout de secrets a la configuration du worker
@@ -58,6 +55,7 @@ namespace Worker_Content
                 options.EventHubKey = EventHubKey.Value;
                 options.ContentSafetyKey = contentsafetyKeyVault.Value;
                 options.ContentSafetyEndpoint = contentsafetyEndPoint.Value;
+                options.ServiceBusQueue2Name = ServiceBusQueue2Name.Value;
             });
 
             // Application Insight trace/log/metrics
@@ -80,14 +78,6 @@ namespace Worker_Content
                 o.ConnectionString = applicationinsightKeyVault.Value;
             });
 
-
-            //// Ajotuer le EventHubController du businessLayer dans nos Injection ...
-            //builder.Services.AddScoped<EventHubController>(serviceProvider =>
-            //{
-            //    var logger = serviceProvider.GetRequiredService<ILogger<EventHubController>>();
-            //    return new EventHubController(logger, EventHubKey.Value);
-            //});
-
             var host = builder.Build();
             host.Run();
         }
@@ -102,5 +92,7 @@ namespace Worker_Content
         public required string EventHubKey { get; set; }
         public required string ContentSafetyKey { get; set; }
         public required string ContentSafetyEndpoint { get; set; }
+
+        public required string ServiceBusQueue2Name { get; set; }
     }
 }

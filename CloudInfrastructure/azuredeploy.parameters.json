@@ -20,9 +20,12 @@
     "ServiceBusName": {
       "value": "GuroSb"
     },
+    "ServiceBusQueue1Name": { "value": "imageresizemessage" },
+    "ServiceBusQueue2Name": { "value": "contentsafetymessage" },
     "NoSQLname": {
       "value": "gurocosmos"
     },
+    "NoSQLdatabaseName": {"value": "ApplicationDB"},
     "storageAccountName": {
       "value": "guroblobstore"
     },
@@ -50,6 +53,8 @@
     "EventHubName": {
       "value": "GuroEventHub"
     },
+    "EventHubHubName": { "value": "event" },
+    "EventHubConsumerGroupName": {"value": "consumer"},
     "ContainerRegistryName": {
       "value": "GuroRegistry"
     }

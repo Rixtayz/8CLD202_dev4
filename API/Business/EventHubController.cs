@@ -18,7 +18,7 @@ namespace MVC.Business
         // Event Hub producer
         private EventHubProducerClient eventHubProducerClient { get; }
 
-        public EventHubController(ILogger logger, string EventHubKey) 
+        public EventHubController(ILogger logger, string EventHubKey, string EventHubName) 
         {
             _logger = logger;
 
@@ -28,14 +28,14 @@ namespace MVC.Business
                 RetryOptions =
                 {
                     MaximumRetries = 5,
-                    Delay = TimeSpan.FromSeconds(5),
-                    MaximumDelay = TimeSpan.FromSeconds(50),
+                    Delay = TimeSpan.FromSeconds(2),
+                    MaximumDelay = TimeSpan.FromSeconds(30),
                     Mode = EventHubsRetryMode.Exponential
                 }
             };
 
             // Nom de l'event hub 
-            eventHubProducerClient = new EventHubProducerClient(EventHubKey, "event", _producerClientOptions);
+            eventHubProducerClient = new EventHubProducerClient(EventHubKey, EventHubName, _producerClientOptions);
         }
 
         public async Task SendEvent(Event message)

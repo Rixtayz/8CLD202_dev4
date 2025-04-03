@@ -10,6 +10,11 @@ namespace MVC.Business
         private ApplicationConfiguration _applicationConfiguration { get; }
         private ServiceBusClientOptions _serviceBusClientOptions { get; }
 
+        private const int Delay = 2;
+        private const int MaxDelay = 30;
+        private const int MaxRetry = 5;
+        private const int SendOffset = 5;
+
         public ServiceBusController(IOptionsSnapshot<ApplicationConfiguration> options)
         {
             _applicationConfiguration = options.Value;
@@ -23,13 +28,13 @@ namespace MVC.Business
             {
                 RetryOptions = new ServiceBusRetryOptions
                 {
-                    Delay = TimeSpan.FromSeconds(10),
-                    MaxDelay = TimeSpan.FromSeconds(60),
+                    Delay = TimeSpan.FromSeconds(Delay),
+                    MaxDelay = TimeSpan.FromSeconds(MaxDelay),
                     Mode = ServiceBusRetryMode.Exponential,
-                    MaxRetries = 6,
+                    MaxRetries = MaxRetry,
                 },
                 TransportType = ServiceBusTransportType.AmqpWebSockets,
-                ConnectionIdleTimeout = TimeSpan.FromMinutes(10)   //Défault = 1 minutes
+                ConnectionIdleTimeout = TimeSpan.FromSeconds(MaxDelay)   //Défault = 1 minutes
             };
         }
 
@@ -40,7 +45,7 @@ namespace MVC.Business
 
             if (Defer != 0)
             {
-                DateTimeOffset scheduleTime = DateTimeOffset.UtcNow.AddSeconds(5);
+                DateTimeOffset scheduleTime = DateTimeOffset.UtcNow.AddSeconds(SendOffset);
                 await serviceBusSender.ScheduleMessageAsync(message, scheduleTime);
             }
             else 
@@ -51,14 +56,14 @@ namespace MVC.Business
         {
             Console.WriteLine("Envoi d'un message pour ImageResize : " + DateTime.Now.ToString());
             ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new Tuple<Guid,Guid> (imageName,Id)));
-            await SendMessageAsync(_applicationConfiguration.SB_resizeQueueName, message);
+            await SendMessageAsync(_applicationConfiguration.ServiceBusQueue1Name, message);
         }
 
         public async Task SendContentTextToValidation(string text, Guid CommentId, Guid PostId)
         {
             Console.WriteLine("Envoi d'un message pour Text Content Validation : " + DateTime.Now.ToString());
             ServiceBusMessage message = new ServiceBusMessage(JsonSerializer.Serialize(new ContentTypeValidation(ContentType.Text, text, CommentId, PostId)));
-            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message);
+            await SendMessageAsync(_applicationConfiguration.ServiceBusQueue2Name, message);
         }
 
         public async Task SendContentImageToValidation(Guid imageName, Guid PostId)
@@ -69,7 +74,7 @@ namespace MVC.Business
             // Messsage planifier dans 5 seconds, le but étant de laisser le temps au Resize de passé avant.
             // Ceci n'est vraiment pas un design idéal.
 
-            await SendMessageAsync(_applicationConfiguration.SB_contentQueueName, message, 1);
+            await SendMessageAsync(_applicationConfiguration.ServiceBusQueue2Name, message, 1);
         }
     }
 }

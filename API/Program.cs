@@ -73,12 +73,10 @@ switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
         builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
             options.UseCosmos(
                     connectionString: builder.Configuration.GetConnectionString("CosmosDB")!,
-                    databaseName: "ApplicationDB",
+                    databaseName: builder.Configuration.GetValue<string>("ApplicationConfiguration:CosmosDBdatabaseName")!,
                     cosmosOptionsAction: options =>
                     {
                         options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
-                        //options.MaxRequestsPerTcpConnection(16);
-                        //options.MaxTcpConnectionsPerEndpoint(32);
                     }));
         builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPINoSQL>();
         break;
@@ -106,7 +104,7 @@ builder.Services.AddScoped<ServiceBusController>();
 // Ajotuer le EventHubController du businessLayer dans nos Injection ...
 builder.Services.AddScoped<EventHubController>(serviceProvider => { 
     var logger = serviceProvider.GetRequiredService<ILogger<EventHubController>>(); 
-    return new EventHubController(logger, builder.Configuration.GetConnectionString("EventHub")!); 
+    return new EventHubController(logger, builder.Configuration.GetConnectionString("EventHub")!, builder.Configuration.GetValue<string>("ApplicationConfiguration:EventHubConsumerName")!); 
 });
 
 var app = builder.Build();
