@@ -109,7 +109,7 @@ namespace MVC.Models
             var category = form["Category"]!;
             var user = form["User"]!;
 
-            return new ValueTask<PostCreateDTO>(new PostCreateDTO(title, category, user, image));
+            return new ValueTask<PostCreateDTO>(new PostCreateDTO(title!, category!, user!, image));
         }
 
 

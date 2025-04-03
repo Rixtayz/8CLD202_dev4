@@ -5,7 +5,7 @@
     public class ContentTypeValidation
     {
         public ContentType ContentType { get; set; }
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
         public Guid? CommentId { get; set; }
         public Guid PostId { get; set; }
 
