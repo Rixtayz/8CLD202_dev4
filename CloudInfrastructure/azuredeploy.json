@@ -913,7 +913,7 @@
           "apiVersion": "2021-10-01",
           "name": "DisconnectedContainer-ContentSafety-1",
           "dependsOn": [
-            "[resourceId('Microsoft.EventHub/namespaces', parameters('ContentSafetyName'))]",
+            "[resourceId('Microsoft.EventHub/namespaces', parameters('ContentSafetyName'))]"
           ],
           "properties": {
             "current": {
