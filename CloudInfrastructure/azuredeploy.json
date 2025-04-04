@@ -906,7 +906,8 @@
         },
         "parameters": {}
       },
-      "condition": "[and(and(not(empty(variables('vnet'))), equals(variables('vnet').newOrExisting, 'new')), equals(variables('virtualNetworkType'), 'External'))]"
+      "condition": "[not(empty(variables('vnet')))]"
+
     }, // Content Safety
     {
       "apiVersion": "2024-10-01",

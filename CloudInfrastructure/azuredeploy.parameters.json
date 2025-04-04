@@ -35,28 +35,14 @@
     "storageBlobContainerName2": {
       "value": "validated"
     },
-    "storageBlobContainerName3": {
-      "value": "synchro"
-    },
-    "AzureAdClientId": {
-      "value": "c11d2628-cd67-4e13-8cbf-9a12c7fc5fd9"
-    },
-    "AzureAdDomainName": {
-      "value": "guillaumerouthieruihotmail.onmicrosoft.com"
-    },
-    "ContentSafetyname": {
-      "value": "GuroContentSafety"
-    },
-    "resourceGroupName": {
-      "value": "Guro"
-    },
-    "EventHubName": {
-      "value": "GuroEventHub"
-    },
+    "storageBlobContainerName3": { "value": "synchro" },
+    "AzureAdClientId": { "value": "c11d2628-cd67-4e13-8cbf-9a12c7fc5fd9" },
+    "AzureAdDomainName": { "value": "guillaumerouthieruihotmail.onmicrosoft.com" },
+    "ContentSafetyname": { "value": "GuroContentSafety" },
+    "resourceGroupName": { "value": "Guro" },
+    "EventHubName": { "value": "GuroEventHub" },
     "EventHubHubName": { "value": "event" },
     "EventHubConsumerGroupName": { "value": "consumer" },
-    "ContainerRegistryName": {
-      "value": "GuroRegistry"
-    }
+    "ContainerRegistryName": { "value": "GuroRegistry" }
   }
 }
