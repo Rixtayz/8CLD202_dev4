@@ -867,7 +867,7 @@
       }
     }, // Service Bus Authorization Rules
 
-    { // Ceci est pour le contentSafety
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2017-05-10",
       "name": "deployVnet",
@@ -911,7 +911,7 @@
         "parameters": {}
       },
       "condition": "[and(and(not(empty(parameters('vnet'))), equals(parameters('vnet').newOrExisting, 'new')), equals(parameters('virtualNetworkType'), 'External'))]"
-    },
+    }, // Content Safety
     {
       "type": "Microsoft.CognitiveServices/accounts",
       "apiVersion": "2024-10-01",
@@ -948,7 +948,7 @@
           "condition": "[parameters('isCommitmentPlanForDisconnectedContainerEnabled')]"
         }
       ]
-    },
+    }, // Content Safety
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2018-05-01",
@@ -994,7 +994,7 @@
         "count": "[length(parameters('privateEndpoints'))]"
       },
       "condition": "[equals(parameters('virtualNetworkType'), 'Internal')]"
-    },
+    }, // Content Safety
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2018-05-01",
@@ -1094,7 +1094,8 @@
         "count": "[length(parameters('privateEndpoints'))]"
       },
       "condition": "[and(equals(parameters('virtualNetworkType'), 'Internal'), parameters('privateEndpoints')[copyIndex()].privateDnsZoneConfiguration.integrateWithPrivateDnsZone)]"
-    },
+    }, // Content Safety
+
     {
       "apiVersion": "2024-12-01-preview",
       "kind": "GlobalDocumentDB",
