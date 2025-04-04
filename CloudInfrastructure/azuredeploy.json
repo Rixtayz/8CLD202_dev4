@@ -919,11 +919,14 @@
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'deployVnet')]"
       ],
+      "tags": "[if(contains(parameters('tagValues'), 'Microsoft.CognitiveServices/accounts'), parameters('tagValues')['Microsoft.CognitiveServices/accounts'], json('{}'))]",
       "sku": {
         "name": "F0"
       },
       "kind": "ContentSafety",
-      "identity": "[parameters('identity')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "properties": {
         "customSubDomainName": "[toLower(parameters('ContentSafetyname'))]",
         "publicNetworkAccess": "[if(equals(parameters('virtualNetworkType'), 'Internal'), 'Disabled', 'Enabled')]",
@@ -1092,47 +1095,6 @@
       },
       "condition": "[and(equals(parameters('virtualNetworkType'), 'Internal'), parameters('privateEndpoints')[copyIndex()].privateDnsZoneConfiguration.integrateWithPrivateDnsZone)]"
     },
-    {
-      "apiVersion": "2024-12-01-preview",
-      "kind": "GlobalDocumentDB",
-      "type": "Microsoft.DocumentDb/databaseAccounts",
-      "name": "[parameters('NoSQLname')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "databaseAccountOfferType": "Standard",
-        "locations": [
-          {
-            "id": "[concat(parameters('NoSQLname'), '-', parameters('location'))]",
-            "failoverPriority": 0,
-            "locationName": "[variables('locationName')]"
-          }
-        ],
-        "backupPolicy": {
-          "type": "Periodic",
-          "periodicModeProperties": {
-            "backupIntervalInMinutes": 1440,
-            "backupRetentionIntervalInHours": 48,
-            "backupStorageRedundancy": "Local"
-          }
-        },
-        "isVirtualNetworkFilterEnabled": false,
-        "virtualNetworkRules": [],
-        "ipRules": [],
-        "dependsOn": [],
-        "minimalTlsVersion": "Tls12",
-        "capabilities": [],
-        "capacityMode": "Serverless",
-        "enableFreeTier": false,
-        "capacity": {
-          "totalThroughputLimit": 4000
-        }
-      },
-      "tags": {
-        "defaultExperience": "Core (SQL)",
-        "hidden-cosmos-mmspecial": ""
-      }
-    }, // Content Safety
-
     {
       "apiVersion": "2024-12-01-preview",
       "kind": "GlobalDocumentDB",
