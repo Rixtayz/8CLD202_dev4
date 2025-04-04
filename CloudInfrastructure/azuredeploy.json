@@ -920,7 +920,6 @@
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'deployVnet')]"
       ],
-      "tags": "[if(contains(parameters('tagValues'), 'Microsoft.CognitiveServices/accounts'), parameters('tagValues')['Microsoft.CognitiveServices/accounts'], json('{}'))]",
       "sku": {
         "name": "F0"
       },
