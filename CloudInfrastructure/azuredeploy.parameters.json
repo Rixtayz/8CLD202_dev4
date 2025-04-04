@@ -25,7 +25,7 @@
     "NoSQLname": {
       "value": "gurocosmos"
     },
-    "NoSQLdatabaseName": {"value": "ApplicationDB"},
+    "NoSQLdatabaseName": { "value": "ApplicationDB" },
     "storageAccountName": {
       "value": "guroblobstore"
     },
@@ -54,9 +54,33 @@
       "value": "GuroEventHub"
     },
     "EventHubHubName": { "value": "event" },
-    "EventHubConsumerGroupName": {"value": "consumer"},
+    "EventHubConsumerGroupName": { "value": "consumer" },
     "ContainerRegistryName": {
       "value": "GuroRegistry"
+    },
+
+    // Content Safety stuff
+    "virtualNetworkType": {
+      "value": "None"
+    },
+    "privateEndpoints": {
+      "value": []
+    },
+    "privateDnsZone": {
+      "value": "privatelink.cognitiveservices.azure.com"
+    },
+    "isCommitmentPlanForDisconnectedContainerEnabled": {
+      "value": false
+    },
+    "commitmentPlanForDisconnectedContainer": {
+      "value": {
+        "current": {
+          "count": 9
+        },
+        "hostingModel": "DisconnectedContainer",
+        "planType": "Lenovo",
+        "autoRenew": true
+      }
     }
   }
 }
