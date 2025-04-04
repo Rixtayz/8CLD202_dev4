@@ -933,7 +933,6 @@
       "name": "[parameters('ContentSafetyname')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'deployVnet')]"
       ],
       "sku": {
         "name": "F0"
