@@ -48,7 +48,7 @@ variables:
 - name: EventHubName
   value: '$(RG)EventHub'
 - name: CosmosName
-  value: '$(RG)cosmos'
+  value: '$(RG)cosmosdb'
 - name: CosmosDatabaseName
   value: 'ApplicationDB'
 - name: ContentName
