@@ -2,39 +2,19 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "location": {
-      "value": "eastus"
-    },
-    "VaultName": {
-      "value": "GuroKeyVault"
-    },
-    "AppConfigName": {
-      "value": "GuroAppConfiguration"
-    },
-    "LogAnalyticsName": {
-      "value": "LogAnalytics"
-    },
-    "ApplicationInsightName": {
-      "value": "ApplicationInsights"
-    },
-    "ServiceBusName": {
-      "value": "GuroSb"
-    },
+    "location": { "value": "eastus" },
+    "VaultName": { "value": "GuroKeyVault" },
+    "AppConfigName": { "value": "GuroAppConfiguration" },
+    "LogAnalyticsName": { "value": "LogAnalytics" },
+    "ApplicationInsightName": { "value": "ApplicationInsights" },
+    "ServiceBusName": { "value": "GuroSb" },
     "ServiceBusQueue1Name": { "value": "imageresizemessage" },
     "ServiceBusQueue2Name": { "value": "contentsafetymessage" },
-    "NoSQLname": {
-      "value": "gurocosmos"
-    },
+    "NoSQLname": { "value": "gurocosmos" },
     "NoSQLdatabaseName": { "value": "ApplicationDB" },
-    "storageAccountName": {
-      "value": "guroblobstore"
-    },
-    "storageBlobContainerName1": {
-      "value": "unvalidated"
-    },
-    "storageBlobContainerName2": {
-      "value": "validated"
-    },
+    "storageAccountName": { "value": "guroblobstore" },
+    "storageBlobContainerName1": { "value": "unvalidated" },
+    "storageBlobContainerName2": { "value": "validated" },
     "storageBlobContainerName3": { "value": "synchro" },
     "AzureAdClientId": { "value": "c11d2628-cd67-4e13-8cbf-9a12c7fc5fd9" },
     "AzureAdDomainName": { "value": "guillaumerouthieruihotmail.onmicrosoft.com" },
@@ -43,6 +23,41 @@
     "EventHubName": { "value": "GuroEventHub" },
     "EventHubHubName": { "value": "event" },
     "EventHubConsumerGroupName": { "value": "consumer" },
-    "ContainerRegistryName": { "value": "GuroRegistry" }
+    "ContainerRegistryName": { "value": "GuroRegistry" },
+
+
+    "virtualNetworkType": {
+      "value": "None"
+    },
+    "vnet": {
+      "value": {}
+    },
+    "ipRules": {
+      "value": []
+    },
+    "identity": {
+      "value": {
+        "type": "SystemAssigned"
+      }
+    },
+    "privateEndpoints": {
+      "value": []
+    },
+    "privateDnsZone": {
+      "value": "[$item.privateDnsZoneConfiguration.integrateWithPrivateDnsZone]"
+    },
+    "isCommitmentPlanForDisconnectedContainerEnabled": {
+      "value": false
+    },
+    "commitmentPlanForDisconnectedContainer": {
+      "value": {
+        "current": {
+          "count": 9
+        },
+        "hostingModel": "DisconnectedContainer",
+        "planType": "Lenovo",
+        "autoRenew": true
+      }
+    }
   }
 }
