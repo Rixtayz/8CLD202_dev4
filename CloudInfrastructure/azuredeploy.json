@@ -888,7 +888,7 @@
     {
       "type": "Microsoft.CognitiveServices/accounts",
       "apiVersion": "2024-10-01",
-      "name": "ContentSafetyName", // Hardcoded ContentSafety name
+      "name": "[parameters('ContentSafetyName')]", // Hardcoded ContentSafety name
       "location": "eastus", // Hardcoded location
       "dependsOn": [], // No dependency on deployVnet since deployVnet won't be executed
       "sku": {
@@ -899,7 +899,7 @@
         "type": "SystemAssigned"
       },
       "properties": {
-        "customSubDomainName": "contentsafetyname", // Hardcoded subdomain name in lowercase
+        "customSubDomainName": "[parameters('ContentSafetyName')]", // Hardcoded subdomain name in lowercase
         "publicNetworkAccess": "Enabled", // Hardcoded value since virtualNetworkType = "None"
         "networkAcls": {
           "defaultAction": "Allow", // Hardcoded value since virtualNetworkType = "None"
@@ -913,7 +913,7 @@
           "apiVersion": "2021-10-01",
           "name": "DisconnectedContainer-ContentSafety-1",
           "dependsOn": [
-            "ContentSafetyName"
+            "[resourceId('Microsoft.EventHub/namespaces', parameters('ContentSafetyName'))]",
           ],
           "properties": {
             "current": {
