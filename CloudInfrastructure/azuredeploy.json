@@ -48,6 +48,7 @@
       "value": "privatelink.cognitiveservices.azure.com"
     },
     "isCommitmentPlanForDisconnectedContainerEnabled": {
+      "type":  "Boolean",
       "value": false
     },
     "commitmentPlanForDisconnectedContainer": {
@@ -938,7 +939,7 @@
           "apiVersion": "2021-10-01",
           "name": "DisconnectedContainer-ContentSafety-1",
           "properties": "[variables('commitmentPlanForDisconnectedContainer')]",
-          "condition": "[variables('isCommitmentPlanForDisconnectedContainerEnabled')]",
+          "condition": false,
           "dependsOn": [
             "[parameters('ContentSafetyname')]"
           ]
