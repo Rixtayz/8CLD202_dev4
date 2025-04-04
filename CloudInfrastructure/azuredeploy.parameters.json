@@ -25,6 +25,7 @@
     "EventHubConsumerGroupName": { "value": "consumer" },
     "ContainerRegistryName": { "value": "GuroRegistry" },
 
+    // Content Safety Stuff
 
     "virtualNetworkType": {
       "value": "None"

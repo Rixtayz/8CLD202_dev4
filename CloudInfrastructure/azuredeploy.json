@@ -29,6 +29,7 @@
     "EventHubConsumerGroupName": { "type": "string" },
     "ContainerRegistryName": { "type": "string" },
 
+    // Content Safety Stuff ...
 
     "virtualNetworkType": {
       "type": "String"
@@ -61,7 +62,7 @@
     "defaultVNetName": "csCSDefaultVNet9901",
     "defaultSubnetName": "csCSDefaultSubnet9901",
     "defaultAddressPrefix": "13.41.6.0/26",
-    "LocationName": "[replace(toLower(parameters('location')), ' ', '')]",
+    "LocationName": "[replace(toLower(parameters('location')), ' ', '')]"
 
   }, // Content Safety stuff ...
   "resources": [
