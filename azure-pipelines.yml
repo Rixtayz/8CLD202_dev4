@@ -48,7 +48,7 @@ variables:
 - name: EventHubName
   value: '$(RG)EventHub'
 - name: CosmosName
-  value: '$(RG)cosmos'
+  value: '$(RG)cosmosdb'
 - name: CosmosDatabaseName
   value: 'ApplicationDB'
 - name: ContentName
@@ -116,7 +116,7 @@ steps:
           Write-Host "Creating a new app registration..."
 
           # Create the app registration with redirect URL, single-tenant type, and ID tokens enabled
-          $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --sign-in-audience AzureADMyOrg --web-redirect-uris "https://localhost:7182/signin-oidc,https://localhost:7182" --enable-id-token-issuance true --output json
+          $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --sign-in-audience AzureADMyOrg --web-redirect-uris "https://localhost/signin-oidc" "http://localhost" --front-channel-logout-url "https://localhost/signout-oidc" --enable-id-token-issuance true --enable-public-client true --output json
 
           # Create the app registration
           $appId = ($appOutput | ConvertFrom-Json).appId
@@ -209,9 +209,18 @@ steps:
         } else {
           $serviceConnectionId = ($existingServiceConnection | ConvertFrom-Json)[0].id
           Write-Host "Service connection already exists with ID: $serviceConnectionId"
-          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]true"
-          Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
-          Write-Host $serviceConnectionId
+
+          # Deleting the existing service connection
+          Write-Host "Deleting existing service connection..."
+          az devops service-endpoint delete `
+            --id $serviceConnectionId `
+            --organization "$(System.CollectionUri)" `
+            --project "$(System.TeamProject)" `
+            --yes
+          Write-Host "Existing service connection deleted successfully."
+
+          # Indicating it can be recreated
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]false"
         }
     env:
       AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
