@@ -209,9 +209,18 @@ steps:
         } else {
           $serviceConnectionId = ($existingServiceConnection | ConvertFrom-Json)[0].id
           Write-Host "Service connection already exists with ID: $serviceConnectionId"
-          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]true"
-          Write-Host "##vso[task.setvariable variable=ServiceConnectionId]$serviceConnectionId"
-          Write-Host $serviceConnectionId
+
+          # Deleting the existing service connection
+          Write-Host "Deleting existing service connection..."
+          az devops service-endpoint delete `
+            --id $serviceConnectionId `
+            --organization "$(System.CollectionUri)" `
+            --project "$(System.TeamProject)" `
+            --yes
+          Write-Host "Existing service connection deleted successfully."
+
+          # Indicating it can be recreated
+          Write-Host "##vso[task.setvariable variable=ServiceConnectionExists]false"
         }
     env:
       AZURE_DEVOPS_EXT_PAT: $(AzureDevOpsPAT)
