@@ -48,7 +48,6 @@
       "value": "privatelink.cognitiveservices.azure.com"
     },
     "isCommitmentPlanForDisconnectedContainerEnabled": {
-      "type":  "Boolean",
       "value": false
     },
     "commitmentPlanForDisconnectedContainer": {
