@@ -94,5 +94,7 @@ steps:
           $clientid = $(ClientID)
           $publicip = $(Deployment2.PublicIP.value)
 
+          Write-host $clientid
+  
           Write-Host "Updating the App Registration with the Public IP..."
           az ad app update --id $clientid --web-redirect-uris "https://$publicip/signin-oidc" "https://$publicip" --output json
