@@ -116,7 +116,8 @@ steps:
           Write-Host "Creating a new app registration..."
 
           # Create the app registration with redirect URL, single-tenant type, and ID tokens enabled
-          $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --sign-in-audience AzureADMyOrg --web-redirect-uris "https://localhost/signin-oidc" "http://localhost" --front-channel-logout-url "https://localhost/signout-oidc" --enable-id-token-issuance true --enable-public-client true --output json
+          # https://github.com/pnp/cli-microsoft365/issues/5870
+          $appOutput = az ad app create --display-name "$(AppRegistrationName)" --identifier-uris "api://$tenantId/$(AppRegistrationName)" --sign-in-audience AzureADMyOrg --web-redirect-uris "https://localhost/signin-oidc" "https://localhost" --enable-id-token-issuance true --output json
 
           # Create the app registration
           $appId = ($appOutput | ConvertFrom-Json).appId
