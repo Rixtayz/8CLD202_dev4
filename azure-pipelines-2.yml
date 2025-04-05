@@ -41,7 +41,6 @@ variables:
 - name: InfrastructureFolder
   value: 'DeployACI\DeployACI'
 
-
 steps:
   - task: AzureKeyVault@2
     displayName: 'Reading Secrets'
