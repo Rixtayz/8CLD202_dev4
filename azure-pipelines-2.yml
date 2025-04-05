@@ -90,7 +90,7 @@ steps:
       scriptLocation: 'inlineScript'
       inlineScript: |
           # Update the app registration with the public IP
-          $publicIp = "$(Deployment2.PublicIP.value)".Trim()
+          $publicIp = $(Deployment2.PublicIP.value).Trim()
           Write-Host "Public IP : publicIp"
           Write-Host "https://$publicIp/signin-oidc" "https://$publicIp"
   
