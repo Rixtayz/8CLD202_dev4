@@ -18,8 +18,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-Console.WriteLine("Reading app config : ");
-
 // Lecture du AppConfig Endpoint
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 
@@ -47,7 +45,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     });
 });
 
-Console.WriteLine("Loggged to App Config/Keyvault");
+Console.WriteLine("Loggged to App Config/Keyvault ...");
 
 // Ajout du service middleware pour AppConfig et FeatureFlag
 builder.Services.AddAzureAppConfiguration();
@@ -65,32 +63,18 @@ builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
     options.EnableLiveMetrics = true;
 });
 
-//Add DbContext
-// Ajouter la BD ( SQL ou NoSQL )
-switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
-{
-    case "SQL":
-        builder.Services.AddDbContext<ApplicationDbContextSQL>();
-        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPISQL>();
-        break;
+// Add DbContext
+// Ajouter la BD NoSQL 
+builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
+    options.UseCosmos(
+            connectionString: builder.Configuration.GetConnectionString("CosmosDB")!,
+            databaseName: builder.Configuration.GetValue<string>("ApplicationConfiguration:CosmosDBdatabaseName")!,
+            cosmosOptionsAction: options =>
+            {
+                options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
+            }));
+builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPINoSQL>();
 
-    case "NoSQL":
-        builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
-            options.UseCosmos(
-                    connectionString: builder.Configuration.GetConnectionString("CosmosDB")!,
-                    databaseName: builder.Configuration.GetValue<string>("ApplicationConfiguration:CosmosDBdatabaseName")!,
-                    cosmosOptionsAction: options =>
-                    {
-                        options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
-                    }));
-        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPINoSQL>();
-        break;
-
-    case "InMemory":
-        builder.Services.AddDbContext<ApplicationDbContextInMemory>();
-        builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPIInMemory>();
-        break;
-}
 // Ajouter le service pour Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -98,7 +82,6 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<FileUploadOperationFilter>(); // Add custom operation filter, Ceci est pour le FileUpload
     c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml")); // Pour ajouter la documentation Swagger
 });
-
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de dépendance
 builder.Services.AddScoped<BlobController>();
@@ -114,27 +97,13 @@ builder.Services.AddScoped<EventHubController>(serviceProvider => {
 
 var app = builder.Build();
 
-// Configuration de la BD ( SQL ou NoSQL )
-switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
+// Configuration de la BD
+using (var scope = app.Services.CreateScope())
 {
-    case "SQL":
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
-
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.Migrate();
-        }
-        break;
-
-    case "NoSQL":
-        using (var scope = app.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
-            await context.Database.EnsureCreatedAsync();
-        }
-        break;
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
+    await context.Database.EnsureCreatedAsync();
 }
+
 
 // Configuration des services Swagger
 app.MapOpenApi();
@@ -144,7 +113,7 @@ app.UseSwaggerUI();
 //app.UseHttpsRedirection();
 
 //API Specific
-
+Console.WriteLine("Mapping API ...");
 
 //Post
 app.MapGet("/Posts/", async (IRepositoryAPI repo) => await repo.GetAPIPostsIndex());
