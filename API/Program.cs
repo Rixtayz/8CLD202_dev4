@@ -19,8 +19,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+Console.WriteLine("Reading app config : ");
+
 // Lecture du AppConfig Endpoint
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
+
+Console.WriteLine("App config : " + AppConfigEndPoint);
 
 // Option pour le credential recu des variables d'environement.
 DefaultAzureCredential defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
@@ -43,6 +47,8 @@ builder.Configuration.AddAzureAppConfiguration(options =>
         keyVaultOptions.SetCredential(defaultAzureCredential);
     });
 });
+
+Console.WriteLine("Loggged to App Config/Keyvault");
 
 // Ajout du service middleware pour AppConfig et FeatureFlag
 builder.Services.AddAzureAppConfiguration();
