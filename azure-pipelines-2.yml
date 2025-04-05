@@ -7,6 +7,8 @@ pool: "default"
 variables:
 - name: AzureSubscription
   value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+- name: AppRegistrationName
+  value: 'MVC_Dynamic'
 
 - name: RG
   value: 'guro'
@@ -17,7 +19,7 @@ variables:
 - name: Vault
   value: '$(RG)KeyVault'
 
-- name: AciName1
+- name: AciName1        # non dynamique ...update pourrais être fait via un service connection pour app config
   value: 'guroaciapi'
 - name: AciImage1
   value: 'guroregistry.azurecr.io/api:latest'
@@ -94,4 +96,4 @@ steps:
           $appId = $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv)
   
           Write-Host "Updating the App Registration with the Public IP..."
-          az ad app update --id $clientid --web-redirect-uris "https://$publicip/signin-oidc" "https://$publicip" --output json
+          az ad app update --id $appId --web-redirect-uris "https://$publicip/signin-oidc" "https://$publicip" --output json
