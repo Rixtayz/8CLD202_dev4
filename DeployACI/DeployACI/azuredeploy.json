@@ -44,7 +44,7 @@
                   "value": "[parameters('AciTenantId')]"
                 },
                 {
-                  "name": "Endpoints__AppConfiguration",
+                  "name": "AppConfigurationEndpoints",
                   "value": "[parameters('AppConfigEndpoint')]"
                 },
                 {
