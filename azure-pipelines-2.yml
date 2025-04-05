@@ -41,7 +41,7 @@ steps:
       SecretsFilter: 'ClientID,TenantID,ClientSecret,ContainerRegistry'
       RunAsPreJob: false
 
-  - task: AzureResourceManagerTemplateDeployment@3
+  - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
     displayName: ACI API Deployment
     inputs:
       deploymentScope: 'Resource Group'
@@ -52,6 +52,6 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-AciName $(AciName) -AciImage $(AciImage) -AciPort $(AciPort) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint) '
+      overrideParameters: '-AciName $(AciName) -AciImage $(AciImage) -AciPort $(AciPort) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
