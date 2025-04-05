@@ -151,7 +151,7 @@ steps:
           az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
           # Get Publisher Domain Name
-          $publisherDomainName = $(az ad tenant show --query "verifiedDomains[0].name" -o tsv)
+          $publisherDomainName = $(az ad app show --id $appId --query "publisherDomain")
           Write-Host "Publisher Domain Name: $publisherDomainName"
 
           Write-Host "##vso[task.setvariable variable=ApplicationId]$AzureAdDomainName"
