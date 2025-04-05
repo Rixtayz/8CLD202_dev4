@@ -18,7 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Lecture du AppConfig Endpoint
+// Lecture des variables d'environment.
+builder.Configuration.AddEnvironmentVariables(); // La deuxième partie est pour recevoir l'information a partir du ACI
+
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 if(string.IsNullOrEmpty(AppConfigEndPoint)) // La deuxième partie est pour recevoir l'information a partir du ACI
     AppConfigEndPoint = Environment.GetEnvironmentVariable("AppConfigurationEndpoints")!;
