@@ -24,10 +24,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Cette information pourrait �tre passer via une variable d'environement ou encore mieux, utiliser le endpoint et le defaultazurecredential comme dans l'exemple plus bas.
-// https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-aspnet-core-app?tabs=entra-id
-// Meilleur option ici en utilisant Microsoft EntraID pour ce connecter via l'endpoint ainsi nous n'avons aucun secrets "exposed"
+// Lecture des variables d'environment.
+builder.Configuration.AddEnvironmentVariables();
+
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
+if (string.IsNullOrEmpty(AppConfigEndPoint)) // La deuxième partie est pour recevoir l'information a partir du ACI
+    AppConfigEndPoint = Environment.GetEnvironmentVariable("AppConfigurationEndpoints")!;
+
+Console.WriteLine("App Config Endpoint : " + AppConfigEndPoint);
+Console.WriteLine("AZURE_CLIENT_ID : " + Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"));
+Console.WriteLine("AZURE_TENANT_ID : " + Environment.GetEnvironmentVariable("AZURE_TENANT_ID"));
+Console.WriteLine("AZURE_CLIENT_SECRET : " + Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET"));
 
 // Option pour le credential recu des variables d'environement.
 DefaultAzureCredential defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
@@ -64,6 +71,8 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     });
 });
 
+Console.WriteLine("Loggged to App Config/Keyvault ...");
+
 // Ajout du service middleware pour AppConfig et FeatureFlag
 builder.Services.AddAzureAppConfiguration();
 builder.Services.AddFeatureManagement();
@@ -96,32 +105,21 @@ builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((mo
     o.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight")!;
 });
 
+Console.WriteLine("Loggged to Application Insight ...");
 
-// Ajouter la BD ( SQL ou NoSQL )
-switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
-{
-    case "SQL":
-        builder.Services.AddDbContext<ApplicationDbContextSQL>();
-        builder.Services.AddScoped<IRepository, EFRepositorySQL>();
-        break;
+// Ajouter la BD NoSQL
 
-    case "NoSQL":
-        builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
-            options.UseCosmos(
-                    connectionString: builder.Configuration.GetConnectionString("CosmosDB")!,
-                    databaseName: builder.Configuration.GetValue<string>("ApplicationConfiguration:CosmosDBdatabaseName")!,
-                    cosmosOptionsAction: options =>
-                    {
-                        options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
-                    }));
-        builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
-        break;
+builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
+    options.UseCosmos(
+            connectionString: builder.Configuration.GetConnectionString("CosmosDB")!,
+            databaseName: builder.Configuration.GetValue<string>("ApplicationConfiguration:CosmosDBdatabaseName")!,
+            cosmosOptionsAction: options =>
+            {
+                options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
+            }));
+builder.Services.AddScoped<IRepository, EFRepositoryNoSQL>();
 
-    case "InMemory":
-        builder.Services.AddDbContext<ApplicationDbContextInMemory>();
-        builder.Services.AddScoped<IRepository, EFRepositoryInMemory>();
-        break;
-}
+Console.WriteLine("Loggged to Database ...");
 
 // Ajouter le BlobController du BusinessLayer dans nos Injection de d�pendance
 builder.Services.AddScoped<BlobController>();
@@ -135,6 +133,8 @@ builder.Services.AddScoped<EventHubController>(serviceProvider =>
     var logger = serviceProvider.GetRequiredService<ILogger<EventHubController>>();
     return new EventHubController(logger, builder.Configuration.GetConnectionString("EventHub")!, builder.Configuration.GetValue<string>("ApplicationConfiguration:EventHubConsumerName")!);
 });
+
+Console.WriteLine("Loggged to Event Hub ");
 
 // Exclusion du Healthz chech
 builder.Services.AddAuthorization(options =>
@@ -161,26 +161,13 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Configuration de la BD ( SQL ou NoSQL )
-switch (builder.Configuration.GetValue<string>("DatabaseConfiguration"))
+Console.WriteLine("Build ...");
+
+// Configuration de la BD NoSQL 
+using (var scope = app.Services.CreateScope())
 {
-    case "SQL":
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
-
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.Migrate();
-        }
-        break;
-
-    case "NoSQL":
-        using (var scope = app.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
-            await context.Database.EnsureCreatedAsync();
-        }
-        break;
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
+    await context.Database.EnsureCreatedAsync();
 }
 
 // Utilise le middleware de AppConfig pour rafraichir la configuration dynamique.
