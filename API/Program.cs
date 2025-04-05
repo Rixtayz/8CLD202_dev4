@@ -11,7 +11,6 @@ using MVC.Business;
 // Monitoring
 using Microsoft.AspNetCore.Http.HttpResults;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
-using Azure.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
