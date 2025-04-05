@@ -98,4 +98,4 @@ steps:
   #         $appValue = ($app | ConvertFrom-Json)[0].value
 
   #         Write-Host "Updating the App Registration $appValue with the Public IP..."
-  #         az ad app update --id $appValue --web-redirect-uris "https://$(Deployment2.PublicIP.value)/signin-oidc"
+  #         az ad app update --id $appValue --web-redirect-uris "https://$(Deployment2.PublicIP.value)/signin-oidc" "https://$(Deployment2.PublicIP.value)"
