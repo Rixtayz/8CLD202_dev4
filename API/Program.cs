@@ -19,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 // Lecture des variables d'environment.
-builder.Configuration.AddEnvironmentVariables(); // La deuxième partie est pour recevoir l'information a partir du ACI
+builder.Configuration.AddEnvironmentVariables();
 
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
 if(string.IsNullOrEmpty(AppConfigEndPoint)) // La deuxième partie est pour recevoir l'information a partir du ACI
