@@ -50,20 +50,20 @@ steps:
       SecretsFilter: 'ClientID,TenantID,ClientSecret,ContainerRegistry'
       RunAsPreJob: false
 
-  # - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
-  #   displayName: ACI API Deployment
-  #   inputs:
-  #     deploymentScope: 'Resource Group'
-  #     azureResourceManagerConnection: $(AzureSubscription)
-  #     action: 'Create Or Update Resource Group'
-  #     resourceGroupName: '$(RG)'
-  #     location: '$(RG_Location)'
-  #     templateLocation: 'Linked artifact'
-  #     csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
-  #     csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-  #     overrideParameters: '-AciName $(AciName1) -AciImage $(AciImage1) -AciPort $(AciPort1) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint) -RegistryServer $(RegistryServer) -RegistryUsername $(RegistryUsername) -RegistryPassword $(ContainerRegistry)'
-  #     deploymentMode: 'Incremental'
-  #     deploymentOutputs: 'Deployment1'
+  - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
+    displayName: ACI API Deployment
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: $(AzureSubscription)
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: '$(RG)'
+      location: '$(RG_Location)'
+      templateLocation: 'Linked artifact'
+      csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
+      csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
+      overrideParameters: '-AciName $(AciName1) -AciImage $(AciImage1) -AciPort $(AciPort1) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint) -RegistryServer $(RegistryServer) -RegistryUsername $(RegistryUsername) -RegistryPassword $(ContainerRegistry)'
+      deploymentMode: 'Incremental'
+      deploymentOutputs: 'Deployment1'
   
   - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
     displayName: ACI MVC Deployment
