@@ -17,12 +17,12 @@ USER root
 RUN apt-get update && apt-get install -y iputils-ping
 
 # Pour le managed identity en Dev seulement.
-ENV AZURE_CLIENT_ID="71cfba22-690f-49c1-96ad-1956705fcd85"
+ENV AZURE_CLIENT_ID="edf61cab-a4b6-46af-9251-e57928fbae5a"
 ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
-ENV AZURE_CLIENT_SECRET="3Or8Q~QpOy6Uuwc3E5pwq01J~ioIzjc8DZH34bCc"
+ENV AZURE_CLIENT_SECRET="wQG8Q~3PwKygpoBOAZA5uxN4_gdbpvIJg7N1xaxT"
 
 # Pour forcer le redirect URL / Valider aussi le launchSetting.json pour le numéro du port ...
-ENV ASPNETCORE_URLS=http://+:8080,https://+:8081
+ENV ASPNETCORE_URLS=http://+:8080;https://+:8081
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
