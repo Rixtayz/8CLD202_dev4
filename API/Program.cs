@@ -28,7 +28,6 @@ Console.WriteLine("AZURE_CLIENT_ID : " + Environment.GetEnvironmentVariable("AZU
 Console.WriteLine("AZURE_TENANT_ID : " + Environment.GetEnvironmentVariable("AZURE_TENANT_ID"));
 Console.WriteLine("AZURE_CLIENT_SECRET : " + Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET"));
 
-
 // Option pour le credential recu des variables d'environement.
 DefaultAzureCredential defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
 {
@@ -61,13 +60,13 @@ builder.Services.AddFeatureManagement();
 builder.Services.Configure<ApplicationConfiguration>(builder.Configuration.GetSection("ApplicationConfiguration"));
 
 // Add Application Insights telemetry
-// I don't like this ...
-// Environment.GetEnvironmentVariable("HOSTNAME")!
 builder.Services.AddOpenTelemetry().UseAzureMonitor(options => 
 { 
     options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsight"); 
     options.EnableLiveMetrics = true;
 });
+
+Console.WriteLine("Loggged to Application Insight ...");
 
 // Add DbContext
 // Ajouter la BD NoSQL 
@@ -80,6 +79,8 @@ builder.Services.AddDbContext<ApplicationDbContextNoSQL>(options =>
                 options.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
             }));
 builder.Services.AddScoped<IRepositoryAPI, EFRepositoryAPINoSQL>();
+
+Console.WriteLine("Loggged to Database ...");
 
 // Ajouter le service pour Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -101,6 +102,8 @@ builder.Services.AddScoped<EventHubController>(serviceProvider => {
     return new EventHubController(logger, builder.Configuration.GetConnectionString("EventHub")!, builder.Configuration.GetValue<string>("ApplicationConfiguration:EventHubConsumerName")!); 
 });
 
+Console.WriteLine("Loggged to Event Hub ");
+
 var app = builder.Build();
 
 // Configuration de la BD
@@ -109,7 +112,6 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
     await context.Database.EnsureCreatedAsync();
 }
-
 
 // Configuration des services Swagger
 app.MapOpenApi();
