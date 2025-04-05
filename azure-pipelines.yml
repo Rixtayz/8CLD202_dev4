@@ -11,6 +11,7 @@ pool: "default"
 # Add Owner roles to pipeline service principale !!!!
 # Add Global Administrator in AD to pipeline service principale !!!!
 # Add Key Vault Secrets Officer to pipeline sevice principale !!!!
+# Add AcrPull to pipeline service principale !!!!
 
 variables:
 - name: AppRegistrationName
