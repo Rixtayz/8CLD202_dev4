@@ -20,6 +20,8 @@ builder.Services.AddOpenApi();
 
 // Lecture du AppConfig Endpoint
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
+if(string.IsNullOrEmpty(AppConfigEndPoint))
+    AppConfigEndPoint = builder.Configuration.GetValue<string>("AppConfigurationEndpoints")!;
 
 Console.WriteLine("App Config Endpoint : " + AppConfigEndPoint);
 Console.WriteLine("AZURE_CLIENT_ID : " + builder.Configuration.GetValue<string>("AZURE_CLIENT_ID")!);
