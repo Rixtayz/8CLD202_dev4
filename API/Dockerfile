@@ -2,8 +2,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+EXPOSE 8081
 
 # Pour le managed identity pour dev seulement.
 ENV AZURE_CLIENT_ID="7656a5d3-6163-44fb-b6f0-1d8b2772701d"
@@ -11,8 +11,8 @@ ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
 ENV AZURE_CLIENT_SECRET=".Ul8Q~PBnMSsenrIpkDqi~2WNZP~VtbJoKDDDcVD"
 
 # Pour forcer le redirect URL
-ENV ASPNETCORE_HTTP_PORTS=http://+:80
-ENV ASPNETCORE_HTTPS_PORTS=https://+:443
+ENV ASPNETCORE_HTTP_PORTS=http://+:8080
+ENV ASPNETCORE_HTTPS_PORTS=https://+:8081
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
