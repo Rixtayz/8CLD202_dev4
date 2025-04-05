@@ -30,7 +30,7 @@ variables:
   value: 'guroRegistry'
 
 - name: InfrastructureFolder
-  value: 'DeployACI'
+  value: 'DeployACI\DeployACI'
 
 steps:
   - task: AzureKeyVault@2
