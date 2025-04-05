@@ -1,0 +1,87 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "type": "String" },
+    "AciName": { "type": "String" },
+    "AciImage": { "type": "String" },
+    "AciPort": { "type": "int" },
+    "AciClientId": { "type": "String" },
+    "AciTenantId": { "type": "String" },
+    "AciSecret": { "type": "securestring" },
+    "AppConfigEndpoint": { "type": "String" },
+    "RegistryServer": { "type": "string" },
+    "RegistryUsername": { "type": "string" },
+    "RegistryPassword": {"type": "securestring"}
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2024-10-01-preview",
+      "name": "[parameters('AciName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": "Standard",
+        "containers": [
+          {
+            "name": "[parameters('AciName')]",
+            "properties": {
+              "image": "guroregistry.azurecr.io/api:latest",
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": "[parameters('AciPort')]"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "AZURE_CLIENT_ID",
+                  "value": "[parameters('AciClientId')]"
+                },
+                {
+                  "name": "AZURE_TENANT_ID",
+                  "value": "[parameters('AciTenantId')]"
+                },
+                {
+                  "name": "Endpoints__AppConfiguration",
+                  "value": "[parameters('AppConfigEndpoint')]"
+                },
+                {
+                  "name": "AZURE_CLIENT_SECRET",
+                  "value": "[parameters('AciSecret')]"
+                }
+              ],
+              "resources": {
+                "requests": {
+                  "memoryInGB": 1.5,
+                  "cpu": 1
+                }
+              }
+            }
+          }
+        ],
+        "initContainers": [],
+        "imageRegistryCredentials": [
+          {
+            "server": "[parameters('RegistryServer')]",
+            "username": "[parameters('RegistryUsername')]",
+            "password": "[parameters('RegistryPassword')]"
+          }
+        ],
+        "restartPolicy": "OnFailure",
+        "ipAddress": {
+          "ports": [
+            {
+              "protocol": "TCP",
+              "port": "[parameters('AciPort')]"
+            }
+          ],
+          "type": "Public"
+        },
+        "osType": "Linux"
+      }
+    }
+  ],
+  "outputs": {}
+}
