@@ -20,13 +20,13 @@ builder.Services.AddOpenApi();
 
 // Lecture du AppConfig Endpoint
 string AppConfigEndPoint = builder.Configuration.GetValue<string>("Endpoints:AppConfiguration")!;
-if(string.IsNullOrEmpty(AppConfigEndPoint))
-    AppConfigEndPoint = builder.Configuration.GetValue<string>("AppConfigurationEndpoints")!;
+if(string.IsNullOrEmpty(AppConfigEndPoint)) // La deuxième partie est pour recevoir l'information a partir du ACI
+    AppConfigEndPoint = Environment.GetEnvironmentVariable("AppConfigurationEndpoints")!;
 
 Console.WriteLine("App Config Endpoint : " + AppConfigEndPoint);
-Console.WriteLine("AZURE_CLIENT_ID : " + builder.Configuration.GetValue<string>("AZURE_CLIENT_ID")!);
-Console.WriteLine("AZURE_TENANT_ID : " + builder.Configuration.GetValue<string>("AZURE_TENANT_ID")!);
-Console.WriteLine("AZURE_CLIENT_SECRET : " + builder.Configuration.GetValue<string>("AZURE_CLIENT_SECRET")!);
+Console.WriteLine("AZURE_CLIENT_ID : " + Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"));
+Console.WriteLine("AZURE_TENANT_ID : " + Environment.GetEnvironmentVariable("AZURE_TENANT_ID"));
+Console.WriteLine("AZURE_CLIENT_SECRET : " + Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET"));
 
 
 // Option pour le credential recu des variables d'environement.
