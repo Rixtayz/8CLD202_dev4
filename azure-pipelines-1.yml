@@ -31,7 +31,7 @@ steps:
       targetType: 'inline'
       script: |
         # Define the path to the Dockerfile
-        $dockerfilePath = "./API/Dockerfile"
+        $dockerfilePath = "$(Build.SourcesDirectory)/API/Dockerfile"
         
         # Check if the Dockerfile exists
         if (-Not (Test-Path -Path $dockerfilePath)) {
