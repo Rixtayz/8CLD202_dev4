@@ -83,5 +83,10 @@
       }
     }
   ],
-  "outputs": {}
+  "outputs": {
+    "PublicIP": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups', parameters('AciName'))).ipAddress.ip]"
+    }
+  }
 }
