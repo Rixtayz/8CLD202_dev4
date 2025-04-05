@@ -21,6 +21,10 @@ ENV AZURE_CLIENT_ID="edf61cab-a4b6-46af-9251-e57928fbae5a"
 ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
 ENV AZURE_CLIENT_SECRET="wQG8Q~3PwKygpoBOAZA5uxN4_gdbpvIJg7N1xaxT"
 
+# Pour les certificats SSL
+ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/app/Cert/composecert.pfx
+ENV ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
+
 # Pour forcer le redirect URL / Valider aussi le launchSetting.json pour le numéro du port ...
 ENV ASPNETCORE_URLS=http://+:8080;https://+:8081
 
