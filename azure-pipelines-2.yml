@@ -16,12 +16,21 @@ variables:
   value: 'eastus'
 - name: Vault
   value: '$(RG)KeyVault'
-- name: AciName
+
+- name: AciName1
   value: 'guroaciapi'
-- name: AciImage
+- name: AciImage1
   value: 'guroregistry.azurecr.io/api:latest'
-- name: AciPort
+- name: AciPort1
   value: '8080'
+  
+- name: AciName2
+  value: 'guroacimvc'
+- name: AciImage2
+  value: 'guroregistry.azurecr.io/mvc:latest'
+- name: AciPort2
+  value: '8081'
+
 - name: AppConfigEndpoint # Ont pourrait apporter la variable du premier pipeline ...
   value: 'https://guroappconfiguration.azconfig.io'  
 - name: RegistryServer # Ont pourrait apporter la variable du premier pipeline ...
@@ -32,6 +41,7 @@ variables:
 - name: InfrastructureFolder
   value: 'DeployACI\DeployACI'
 
+
 steps:
   - task: AzureKeyVault@2
     displayName: 'Reading Secrets'
@@ -41,8 +51,23 @@ steps:
       SecretsFilter: 'ClientID,TenantID,ClientSecret,ContainerRegistry'
       RunAsPreJob: false
 
+  # - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
+  #   displayName: ACI API Deployment
+  #   inputs:
+  #     deploymentScope: 'Resource Group'
+  #     azureResourceManagerConnection: $(AzureSubscription)
+  #     action: 'Create Or Update Resource Group'
+  #     resourceGroupName: '$(RG)'
+  #     location: '$(RG_Location)'
+  #     templateLocation: 'Linked artifact'
+  #     csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
+  #     csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
+  #     overrideParameters: '-AciName $(AciName1) -AciImage $(AciImage1) -AciPort $(AciPort1) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint) -RegistryServer $(RegistryServer) -RegistryUsername $(RegistryUsername) -RegistryPassword $(ContainerRegistry)'
+  #     deploymentMode: 'Incremental'
+  #     deploymentOutputs: 'Deployment1'
+  
   - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
-    displayName: ACI API Deployment
+    displayName: ACI MVC Deployment
     inputs:
       deploymentScope: 'Resource Group'
       azureResourceManagerConnection: $(AzureSubscription)
@@ -52,6 +77,6 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-AciName $(AciName) -AciImage $(AciImage) -AciPort $(AciPort) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint) -RegistryServer $(RegistryServer) -RegistryUsername $(RegistryUsername) -RegistryPassword $(ContainerRegistry)'
+      overrideParameters: '-AciName $(AciName2) -AciImage $(AciImage2) -AciPort $(AciPort2) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint) -RegistryServer $(RegistryServer) -RegistryUsername $(RegistryUsername) -RegistryPassword $(ContainerRegistry)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
