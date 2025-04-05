@@ -21,12 +21,6 @@ variables:
 - name: TenantId
 - name: ClientSecret
 
-# To automate
-- name: AzureAdDomainName 
-  value: 'guillaumerouthieruihotmail.onmicrosoft.com'
-- name: AzureAdClientId
-  value: 'c11d2628-cd67-4e13-8cbf-9a12c7fc5fd9'
-
   # Resource group ainsi que l'acronyme utiliser pour créer le nom des resources
 - name: RG
   value: 'guro'
@@ -156,6 +150,11 @@ steps:
           # Assign "Storage Blob Data Contributor" role
           az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --subscription $subscriptionId --scope "/subscriptions/$subscriptionId"
 
+          # Get Publisher Domain Name
+          $publisherDomainName = $(az ad signed-in-user show --query "userPrincipalName" -o tsv).Split("@")[1]
+          Write-Host "Publisher Domain Name: $publisherDomainName"
+
+          Write-Host "##vso[task.setvariable variable=ApplicationId]$AzureAdDomainName"
           Write-Host "##vso[task.setvariable variable=ApplicationId]$appId"
           Write-Host "##vso[task.setvariable variable=TenantId]$tenantId"
           Write-Host "##vso[task.setvariable variable=ClientSecret]$clientSecret"
@@ -173,7 +172,7 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosName) -NoSQLdatabaseName $(CosmosDatabaseName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName) -AzureAdDomainName $(AzureAdDomainName) -AzureAdClientId $(AzureAdClientId) -ServiceBusQueue1Name $(ServiceBusQueue1Name) -ServiceBusQueue2Name $(ServiceBusQueue2Name) -EventHubHubName $(EventHubHubName) -EventHubConsumerGroupName $(EventHubConsumerGroupName)'
+      overrideParameters: '-ContentSafetyname $(ContentName) -NoSQLname $(CosmosName) -NoSQLdatabaseName $(CosmosDatabaseName) -ServiceBusName $(SBusName) -location $(RG_Location) -VaultName $(Vault) -AppConfigName $(AppConfig) -LogAnalyticsName $(LogAnalytics) -ApplicationInsightName $(ApplicationInsight) -storageAccountName $(BlobName) -storageBlobContainerName1 $(BlobContainer1) -storageBlobContainerName2 $(BlobContainer2) -storageBlobContainerName3 $(BlobContainer3) -EventHubName $(EventHubName) -ContainerRegistryName $(ContainerRegistryName) -AzureAdDomainName $(AzureAdDomainName) -AzureAdClientId $(AzureAdClientId) -ServiceBusQueue1Name $(ServiceBusQueue1Name) -ServiceBusQueue2Name $(ServiceBusQueue2Name) -EventHubHubName $(EventHubHubName) -EventHubConsumerGroupName $(EventHubConsumerGroupName) -AzureAdClientId $(ApplicationId) -AzureAdDomainName $(AzureAdDomainName)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
 
