@@ -34,6 +34,8 @@ namespace Worker_Content
             ConfigurationSetting container1 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:UnvalidatedBlob");
             ConfigurationSetting container2 = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:ValidatedBlob");
             ConfigurationSetting ServiceBusQueue2Name = appConfigClient.GetConfigurationSetting("ApplicationConfiguration:ServiceBusQueue2Name");
+            ConfigurationSetting EventHubHubName = appConfigClient.GetConfigurationSetting("\r\nApplicationConfiguration:EventHubName");
+
 
             // Création du Client Key Vault
             ConfigurationSetting endpointKeyVault = appConfigClient.GetConfigurationSetting("Endpoints:KeyVault");
@@ -53,6 +55,7 @@ namespace Worker_Content
                 options.BlobContainer2 = container2.Value;
                 options.ServiceBusKey = servicebusKeyVault.Value;
                 options.EventHubKey = EventHubKey.Value;
+                options.EventHubHubName = EventHubHubName.Value;
                 options.ContentSafetyKey = contentsafetyKeyVault.Value;
                 options.ContentSafetyEndpoint = contentsafetyEndPoint.Value;
                 options.ServiceBusQueue2Name = ServiceBusQueue2Name.Value;
@@ -90,9 +93,10 @@ namespace Worker_Content
         public required string BlobContainer2 { get; set; }
         public required string ServiceBusKey { get; set; }
         public required string EventHubKey { get; set; }
+
+        public required string EventHubHubName { get; set; }
         public required string ContentSafetyKey { get; set; }
         public required string ContentSafetyEndpoint { get; set; }
-
         public required string ServiceBusQueue2Name { get; set; }
     }
 }

@@ -27,7 +27,7 @@
           {
             "name": "[parameters('AciName')]",
             "properties": {
-              "image": "guroregistry.azurecr.io/api:latest",
+              "image": "[parameters('AciImage')]",
               "ports": [
                 {
                   "protocol": "TCP",

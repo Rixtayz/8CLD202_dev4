@@ -54,7 +54,7 @@ namespace Worker_Content
             _options = options.Value;
 
             //Ajouter le EventHubController
-            _eventHubController = new EventHubController(logger, _options.EventHubKey);
+            _eventHubController = new EventHubController(logger, _options.EventHubKey, _options.EventHubHubName);
 
             // Content Safety
             _contentSafetyClient = new ContentSafetyClient(new Uri(_options.ContentSafetyEndpoint), new AzureKeyCredential(_options.ContentSafetyKey));
