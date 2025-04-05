@@ -52,12 +52,6 @@ steps:
       SecretsFilter: 'ClientID,TenantID,ClientSecret,ContainerRegistry'
       RunAsPreJob: false
 
-  - task: AzureAppConfigurationExport@10
-    inputs:
-      azureSubscription: '$(AzureSubscription)'
-      AppConfigurationEndpoint: '$(AppConfigEndpoint)'
-      KeyFilter: 'DatabaseConfiguration'
-
   # - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
   #   displayName: ACI API Deployment
   #   inputs:
@@ -98,5 +92,8 @@ steps:
           # Update the app registration with the public IP
           Write-Host "Public IP : $(Deployment2.PublicIP.value)" 
   
-          Write-Host "Updating the App Registration $(AzureAd:ClientId)) with the Public IP..."
-          az ad app update --id $(AzureAd:ClientId) --web-redirect-uris "https://$publicip/signin-oidc" "https://$publicip"
+          $app = $(az appconfig kv list --endpoint $(AppConfigEndpoint) --auth-mode login --key "AzureAd:ClientId" --top 1 -o json)
+          $appValue = ($app | ConvertFrom-Json)[0].value
+
+          Write-Host "Updating the App Registration $appValue with the Public IP..."
+          az ad app update --id $appValue --web-redirect-uris "https://$publicip/signin-oidc" "https://$publicip"
