@@ -79,3 +79,14 @@ steps:
       overrideParameters: '-AciName $(AciName2) -AciImage $(AciImage2) -AciPort $(AciPort2) -AciClientId $(ClientID) -AciTenantId $(TenantID) -AciSecret $(ClientSecret) -AppConfigEndpoint $(AppConfigEndpoint) -RegistryServer $(RegistryServer) -RegistryUsername $(RegistryUsername) -RegistryPassword $(ContainerRegistry)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment2'
+  
+  - task: AzureCLI@2
+    displayName: Update App Registration Redirect URL
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+          # Update the app registration with the public IP
+          Write-Host "Updating the App Registration with the Public IP..."
+          az ad app update --id $(ClientID) --web-redirect-uris "https://$(Deployment2.PublicIP.value)/signin-oidc" "https://$(Deployment2.PublicIP.value)" --output json
