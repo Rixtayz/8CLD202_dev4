@@ -56,7 +56,7 @@ steps:
     inputs:
       azureSubscription: '$(AzureSubscription)'
       AppConfigurationEndpoint: '$(AppConfigEndpoint)'
-      KeyFilter: 'AzureAd:ClientId'
+      KeyFilter: 'DatabaseConfiguration'
 
   # - task: AzureResourceManagerTemplateDeployment@3  #Review to remove ACR pull requirement 
   #   displayName: ACI API Deployment
