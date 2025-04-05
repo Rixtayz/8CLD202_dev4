@@ -25,6 +25,56 @@ steps:
   #     SecretsFilter: 'ClientID,TenantID,ClientSecret'
   #     RunAsPreJob: false
 
+  - task: PowerShell@2
+    displayName: Remove ENV information from API
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Define the path to the Dockerfile
+        $dockerfilePath = "./API/Dockerfile"
+        
+        # Check if the Dockerfile exists
+        if (-Not (Test-Path -Path $dockerfilePath)) {
+            Write-Host "Dockerfile not found at $dockerfilePath"
+            exit 1
+        }
+        
+        # Read the Dockerfile content into an array
+        $dockerfileContent = Get-Content -Path $dockerfilePath
+        
+        # Define the patterns to match (partial strings with wildcards)
+        $patternsToRemove = @(
+            "ENV AZURE_CLIENT_ID*",
+            "ENV AZURE_TENANT_ID*",
+            "ENV AZURE_CLIENT_SECRET*"
+        )
+        
+        # Initialize a collection to hold the updated Dockerfile content
+        $updatedDockerfileContent = @()
+        
+        # Loop through each line in the Dockerfile
+        foreach ($line in $dockerfileContent) {
+            $matchFound = $false
+        
+            # Check if the line matches any of the patterns
+            foreach ($pattern in $patternsToRemove) {
+                if ($line -like $pattern) {
+                    $matchFound = $true
+                    break
+                }
+            }
+        
+            # Add the line to the updated content only if no match was found
+            if (-Not $matchFound) {
+                $updatedDockerfileContent += $line
+            }
+        }
+        
+        # Write the updated content back to the Dockerfile
+        $updatedDockerfileContent | Set-Content -Path $dockerfilePath
+        
+        Write-Host "Lines matching the specified patterns have been removed from the Dockerfile."
+
   - task: Docker@2
     displayName: 'Packaging API'
     inputs:
