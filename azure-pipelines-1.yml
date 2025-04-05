@@ -9,8 +9,6 @@ trigger:
 pool: "default"
 
 variables:
-- name: ContainerRegistryName
-  value: 'GuroRegistry'
 - name: DockerRegistryServiceConnectionName
   value: 'Docker Registry Dynamic'
 - name: AzureSubscription
