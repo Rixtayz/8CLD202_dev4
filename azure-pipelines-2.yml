@@ -91,10 +91,6 @@ steps:
       inlineScript: |
           # Update the app registration with the public IP
           Write-Host "Public IP : $(Deployment2.PublicIP.value)" 
-
-          # Check if the app registration already exists
-          $appId = $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv)
-          Write-Host "Application Id : $appId"
   
-          Write-Host "Updating the App Registration with the Public IP..."
-          az ad app update --id $appId --web-redirect-uris "https://$publicip/signin-oidc" "https://$publicip" --output json
+          Write-Host "Updating the App Registration $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv) with the Public IP..."
+          az ad app update --id $(az ad app list --filter "displayName eq '$(AppRegistrationName)'" --query "[].appId" -o tsv) --web-redirect-uris "https://$publicip/signin-oidc" "https://$publicip"
