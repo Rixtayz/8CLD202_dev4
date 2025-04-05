@@ -90,8 +90,9 @@ steps:
       scriptLocation: 'inlineScript'
       inlineScript: |
           # Update the app registration with the public IP
-          Write-Host "Public IP : $(Deployment2.PublicIP.value)" 
-          Write-Host "https://$(Deployment2.PublicIP.value)/signin-oidc" "https://$(Deployment2.PublicIP.value)"
+          $publicIp = "$(Deployment2.PublicIP.value)".Trim()
+          Write-Host "Public IP : publicIp"
+          Write-Host "https://$publicIp/signin-oidc" "https://$publicIp"
   
           $app = $(az appconfig kv list --endpoint $(AppConfigEndpoint) --auth-mode login --key "AzureAd:ClientId" --top 1 -o json)
           $appValue = ($app | ConvertFrom-Json)[0].value
