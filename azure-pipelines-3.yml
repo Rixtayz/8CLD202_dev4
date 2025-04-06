@@ -1,0 +1,52 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool: "default"
+
+variables:
+  # Resource group ainsi que l'acronyme utiliser pour créer le nom des resources
+- name: RG
+  value: 'guro'
+
+- name: AzureSubscription
+  value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+
+  # Resources
+- name: RG_Location
+  value: 'eastus'
+- name: clusterName
+  value: '$(RG)kube'
+- name: dnsPrefix
+  value: '$(RG)kube'
+- name: agentCount
+  value: 3
+- name: agentVMsize
+  value: 'standard_d2s_v3'
+- name: linuxAdminUsername
+  value: 'kubeadmin'
+- name: sshRSAPublicKey
+  value: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDPKnMG2k3N3c8NOZg+mR0+I5nCCfzHyZrV/ez0JlN7+HqOaGQS0Jq/+YDxY0ZPtJrGcJxj6YmEzo+4rgFAjiYPc74yZcSxyVUe7bIJxEqW3BAG6gRlK/O5S9H7acfm4NYn2mpecZTIfSdFU4YXeTu6IHh2e3ds+GMhGkLbO1te4vWkGUsvoDt2SpAHAqlqFvNadNvqR2jnYd9zRypxncatGLzi7Z47xZzzhe3u0ZXmmLHGvarmnAZc/VrZoNHmVMrrL9V6OYjVaCepHhFpNy/9SPbXaG/ekA0ABPIwmMHlagtNhQ2s+MrfSV99YGI5C6iZBHWnGGr972Wi+BnFpH0oJuzXiEdO7sioMO1RsGnZbexi2Ka6+GJqq0tzxztmTKskhGAZahmn+4Fiv/f7lsjiJ+n5BEAFxfCGGsjv0X9XyKbNtZ47pvmOsO05xZudOv6vhvqrOrcNdxCfLoVEl2XbqwNsU0iGPi631EnID/LBhD6WPNC4GeVKlLPwf13RDEE= generated-by-azure"
+
+- name: InfrastructureFolder
+  value: 'DeployKube'
+
+steps:
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: ARM Deployment Kube Cluster
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: $(AzureSubscription)
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: '$(RG)'
+      location: '$(RG_Location)'
+      templateLocation: 'Linked artifact'
+      csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
+      csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
+      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMsize $(agentVMsize) -linuxAdminUsername $(linuxAdminUsername) -sshRSAPublicKey $(sshRSAPublicKey)'
+      deploymentMode: 'Incremental'
+      deploymentOutputs: 'Deployment1'
