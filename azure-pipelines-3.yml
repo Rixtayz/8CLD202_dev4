@@ -36,15 +36,27 @@ variables:
 
 steps:
   - task: AzureCLI@2
+    displayName: Create SSH Key for Kube
     inputs:
       azureSubscription: $(AzureSubscription)
       scriptType: 'ps'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        # Create an SSH key pair using Azure CLI
-        az sshkey create --name "KubeSSHKey" --resource-group "guro"
-        $key = $(az sshkey show --name "KubeSSHKey" --resource-group "guro" --query "publicKey" -- tsv)
-        
+        # Check if the SSH key exists
+        $keyExists = $(az sshkey list --resource-group $(RG) --query "[?name=='KubeSSHKey'] | length(@)" -o tsv)
+
+        if ($keyExists -eq 0) {
+          # Key doesn't exist, so create it
+          az sshkey create --name "KubeSSHKey" --resource-group $(RG)
+          Write-Host "SSH key 'KubeSSHKey' created successfully."
+        } else {
+          Write-Host "SSH key 'KubeSSHKey' already exists."
+        }
+
+        # Fetch the public key
+        $key = $(az sshkey show --name "KubeSSHKey" --resource-group $(RG) --query "publicKey" -o tsv)
+
+        # Output the public key
         Write-Host $key
         Write-Host "##vso[task.setvariable variable=sshRSAPublicKey]$key"
 
