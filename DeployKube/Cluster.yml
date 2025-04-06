@@ -17,7 +17,28 @@
             image: guroregistry.azurecr.io/api:latest
             ports:
               - containerPort: 8080
-  
+            env:
+              - name: AppConfigurationEndpoints
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AppConfigurationEndpoints
+              - name: AZURE_CLIENT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_ID
+              - name: AZURE_TENANT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_TENANT_ID
+              - name: AZURE_CLIENT_SECRET
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_SECRET
+
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -42,6 +63,27 @@
                 cpu: "100m" # Minimum CPU required
               limits:
                 cpu: "500m" # Maximum CPU allocated
+            env:
+              - name: AppConfigurationEndpoints
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AppConfigurationEndpoints
+              - name: AZURE_CLIENT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_ID
+              - name: AZURE_TENANT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_TENANT_ID
+              - name: AZURE_CLIENT_SECRET
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_SECRET
 
 - apiVersion: autoscaling/v2
   kind: HorizontalPodAutoscaler
@@ -79,6 +121,27 @@
         containers:
           - name: worker-content
             image: guroregistry.azurecr.io/worker_content:latest
+            env:
+              - name: AppConfigurationEndpoints
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AppConfigurationEndpoints
+              - name: AZURE_CLIENT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_ID
+              - name: AZURE_TENANT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_TENANT_ID
+              - name: AZURE_CLIENT_SECRET
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_SECRET
 
 - apiVersion: apps/v1
   kind: Deployment
@@ -97,6 +160,27 @@
         containers:
           - name: worker-db
             image: guroregistry.azurecr.io/worker_db:latest
+            env:
+              - name: AppConfigurationEndpoints
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AppConfigurationEndpoints
+              - name: AZURE_CLIENT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_ID
+              - name: AZURE_TENANT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_TENANT_ID
+              - name: AZURE_CLIENT_SECRET
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_SECRET
 
 - apiVersion: apps/v1
   kind: Deployment
@@ -115,6 +199,27 @@
         containers:
           - name: worker-image
             image: guroregistry.azurecr.io/worker_image:latest
+            env:
+              - name: AppConfigurationEndpoints
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AppConfigurationEndpoints
+              - name: AZURE_CLIENT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_ID
+              - name: AZURE_TENANT_ID
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_TENANT_ID
+              - name: AZURE_CLIENT_SECRET
+                valueFrom:
+                    secretKeyRef:
+                    name: my-secret
+                    key: AZURE_CLIENT_SECRET
 
 - apiVersion: v1
   kind: Service
