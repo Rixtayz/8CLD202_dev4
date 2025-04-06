@@ -25,8 +25,8 @@ variables:
   value: '$(RG)kube'
 - name: agentCount
   value: 3
-- name: agentVMsize
-  value: 'standard_d2s_v3'
+- name: agentVMSize
+  value: "standard_d2s_v3"
 - name: linuxAdminUsername
   value: 'kubeadmin'
 - name: sshRSAPublicKey
@@ -47,6 +47,6 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMsize $(agentVMsize) -linuxAdminUsername $(linuxAdminUsername) -sshRSAPublicKey $(sshRSAPublicKey)'
+      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMSize $(agentVMsize) -linuxAdminUsername $(linuxAdminUsername) -sshRSAPublicKey $(sshRSAPublicKey)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
