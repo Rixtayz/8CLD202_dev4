@@ -25,17 +25,41 @@ variables:
   value: '$(RG)kube'
 - name: agentCount
   value: 3
-- name: agentVMsize
-  value: 'standard_d2s_v3'
+- name: agentVMSize
+  value: "standard_d2s_v3"
 - name: linuxAdminUsername
-  value: 'kubeadmin'
+  value: "kubeadmin"
 - name: sshRSAPublicKey
-  value: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDPKnMG2k3N3c8NOZg+mR0+I5nCCfzHyZrV/ez0JlN7+HqOaGQS0Jq/+YDxY0ZPtJrGcJxj6YmEzo+4rgFAjiYPc74yZcSxyVUe7bIJxEqW3BAG6gRlK/O5S9H7acfm4NYn2mpecZTIfSdFU4YXeTu6IHh2e3ds+GMhGkLbO1te4vWkGUsvoDt2SpAHAqlqFvNadNvqR2jnYd9zRypxncatGLzi7Z47xZzzhe3u0ZXmmLHGvarmnAZc/VrZoNHmVMrrL9V6OYjVaCepHhFpNy/9SPbXaG/ekA0ABPIwmMHlagtNhQ2s+MrfSV99YGI5C6iZBHWnGGr972Wi+BnFpH0oJuzXiEdO7sioMO1RsGnZbexi2Ka6+GJqq0tzxztmTKskhGAZahmn+4Fiv/f7lsjiJ+n5BEAFxfCGGsjv0X9XyKbNtZ47pvmOsO05xZudOv6vhvqrOrcNdxCfLoVEl2XbqwNsU0iGPi631EnID/LBhD6WPNC4GeVKlLPwf13RDEE= generated-by-azure"
 
 - name: InfrastructureFolder
   value: 'DeployKube'
 
 steps:
+  - task: AzureCLI@2
+    displayName: Create SSH Key for Kube
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Check if the SSH key exists
+        $keyExists = $(az sshkey list --resource-group $(RG) --query "[?name=='KubeSSHKey'] | length(@)" -o tsv)
+
+        if ($keyExists -eq 0) {
+          # Key doesn't exist, so create it
+          az sshkey create --name "KubeSSHKey" --resource-group $(RG)
+          Write-Host "SSH key 'KubeSSHKey' created successfully."
+        } else {
+          Write-Host "SSH key 'KubeSSHKey' already exists."
+        }
+
+        # Fetch the public key
+        $key = $(az sshkey show --name "KubeSSHKey" --resource-group $(RG) --query "publicKey" -o tsv)
+
+        # Output the public key
+        Write-Host $key
+        Write-Host "##vso[task.setvariable variable=sshRSAPublicKey]$key"
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment Kube Cluster
     inputs:
@@ -47,6 +71,6 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMsize $(agentVMsize) -linuxAdminUsername $(linuxAdminUsername) -sshRSAPublicKey $(sshRSAPublicKey)'
+      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMSize $(agentVMsize) -linuxAdminUsername $(linuxAdminUsername) -sshRSAPublicKey $(sshRSAPublicKey)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
