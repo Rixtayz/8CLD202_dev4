@@ -81,6 +81,6 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMSize $(agentVMsize) -linuxAdminUsername $(linuxAdminUsername) -sshRSAPublicKey $(sshRSAPublicKey)'
+      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMSize $(agentVMsize)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
