@@ -110,10 +110,7 @@ steps:
         az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
 
         # Create Kubernetes secrets
-        kubectl create secret generic my-secret --from-literal=AppConfigurationEndpoints=$(AppConfigEndpoint) \
-                                                --from-literal=AZURE_CLIENT_ID=$(ClientID) \
-                                                --from-literal=AZURE_TENANT_ID=$(TenantID) \
-                                                --from-literal=AZURE_CLIENT_SECRET=$(ClientSecret)
+        kubectl create secret generic my-secret --from-literal=AppConfigurationEndpoints=$(AppConfigEndpoint) --from-literal=AZURE_CLIENT_ID=$(ClientID) --from-literal=AZURE_TENANT_ID=$(TenantID) --from-literal=AZURE_CLIENT_SECRET=$(ClientSecret)
         echo "Secrets created successfully!"
 
   - task: AzureCLI@2
