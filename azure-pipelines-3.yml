@@ -60,6 +60,16 @@ steps:
         Write-Host $key
         Write-Host "##vso[task.setvariable variable=sshRSAPublicKey]$key"
 
+  - script: |
+      echo "clusterName: $(clusterName)"
+      echo "location: $(RG_Location)"
+      echo "dnsPrefix: $(dnsPrefix)"
+      echo "agentCount: $(agentCount)"
+      echo "agentVMSize: $(agentVMsize)"
+      echo "linuxAdminUsername: $(linuxAdminUsername)"
+      echo "sshRSAPublicKey: $(sshRSAPublicKey)"
+    displayName: "Debug Parameter Values"
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: ARM Deployment Kube Cluster
     inputs:
@@ -71,6 +81,6 @@ steps:
       templateLocation: 'Linked artifact'
       csmFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.json'
       csmParametersFile: '$(Build.SourcesDirectory)\$(InfrastructureFolder)\azuredeploy.parameters.json'
-      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMSize $(agentVMsize) -sshRSAPublicKey $(sshRSAPublicKey)'
+      overrideParameters: '-clusterName $(clusterName) -location $(RG_Location) -dnsPrefix $(dnsPrefix) -agentCount $(agentCount) -agentVMSize $(agentVMsize) -linuxAdminUsername $(linuxAdminUsername) -sshRSAPublicKey $(sshRSAPublicKey)'
       deploymentMode: 'Incremental'
       deploymentOutputs: 'Deployment1'
