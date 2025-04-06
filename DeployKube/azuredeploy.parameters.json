@@ -24,7 +24,7 @@
       "value": "kubeadmin"
     },
     "sshRSAPublicKey": {
-      "value": null
+      "value": "key"
     }
   }
 }
