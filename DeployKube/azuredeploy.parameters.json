@@ -1,0 +1,119 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apiVersion": {
+      "value": "2023-10-01"
+    },
+    "resourceName": {
+      "value": "guroKube"
+    },
+    "location": {
+      "value": "canadacentral"
+    },
+    "dnsPrefix": {
+      "value": "guroKube-dns"
+    },
+    "kubernetesVersion": {
+      "value": "1.30.10"
+    },
+    "networkPlugin": {
+      "value": "azure"
+    },
+    "enableRBAC": {
+      "value": true
+    },
+    "nodeResourceGroup": {
+      "value": "MC_guroKube_group_guroKube_canadacentral"
+    },
+    "clusterSku": {
+      "value": {
+        "name": "Base",
+        "tier": "Free"
+      }
+    },
+    "upgradeChannel": {
+      "value": "patch"
+    },
+    "clusterIdentity": {
+      "value": {
+        "type": "SystemAssigned"
+      }
+    },
+    "adminGroupObjectIDs": {
+      "value": []
+    },
+    "disableLocalAccounts": {
+      "value": false
+    },
+    "azureRbac": {
+      "value": false
+    },
+    "enableOmsAgent": {
+      "value": false
+    },
+    "isAvailabilityZoneEnabled": {
+      "value": true
+    },
+    "supportPlan": {
+      "value": "KubernetesOfficial"
+    },
+    "nodeOSUpgradeChannel": {
+      "value": "NodeImage"
+    },
+    "isPrivateClusterSupported": {
+      "value": true
+    },
+    "enablePrivateCluster": {
+      "value": false
+    },
+    "networkPluginMode": {
+      "value": "overlay"
+    },
+    "networkDataplane": {
+      "value": "azure"
+    },
+    "isAzurePolicySupported": {
+      "value": true
+    },
+    "enableAzurePolicy": {
+      "value": false
+    },
+    "isSecretStoreCSIDDriverSupported": {
+      "value": true
+    },
+    "enableSecretStoreCSIDriver": {
+      "value": false
+    },
+    "vmssNodePool": {
+      "value": true
+    },
+    "acrName": {
+      "value": "guroRegistry"
+    },
+    "acrResourceGroup": {
+      "value": "guro"
+    },
+    "isImageCleanerEnabled": {
+      "value": true
+    },
+    "imageCleanerIntervalHours": {
+      "value": 168
+    },
+    "enableOIDC": {
+      "value": true
+    },
+    "issuerURL": {
+      "value": ""
+    },
+    "enableWorkloadIdentity": {
+      "value": true
+    },
+    "clusterTags": {
+      "value": {}
+    },
+    "tagsForAllResources": {
+      "value": {}
+    }
+  }
+}
