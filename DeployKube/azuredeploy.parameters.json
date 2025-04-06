@@ -1,119 +1,30 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "apiVersion": {
-      "value": "2023-10-01"
-    },
-    "resourceName": {
+    "clusterName": {
       "value": "guroKube"
     },
     "location": {
-      "value": "canadacentral"
+      "value": "eastus"
     },
     "dnsPrefix": {
-      "value": "guroKube-dns"
+      "value": "gurokube"
     },
-    "kubernetesVersion": {
-      "value": "1.30.10"
+    "osDiskSizeGB": {
+      "value": 0
     },
-    "networkPlugin": {
-      "value": "azure"
+    "agentCount": {
+      "value": 3
     },
-    "enableRBAC": {
-      "value": true
+    "agentVMSize": {
+      "value": "standard_d2s_v3"
     },
-    "nodeResourceGroup": {
-      "value": "MC_guroKube_group_guroKube_canadacentral"
+    "linuxAdminUsername": {
+      "value": "kubeadmin"
     },
-    "clusterSku": {
-      "value": {
-        "name": "Base",
-        "tier": "Free"
-      }
-    },
-    "upgradeChannel": {
-      "value": "patch"
-    },
-    "clusterIdentity": {
-      "value": {
-        "type": "SystemAssigned"
-      }
-    },
-    "adminGroupObjectIDs": {
-      "value": []
-    },
-    "disableLocalAccounts": {
-      "value": false
-    },
-    "azureRbac": {
-      "value": false
-    },
-    "enableOmsAgent": {
-      "value": false
-    },
-    "isAvailabilityZoneEnabled": {
-      "value": true
-    },
-    "supportPlan": {
-      "value": "KubernetesOfficial"
-    },
-    "nodeOSUpgradeChannel": {
-      "value": "NodeImage"
-    },
-    "isPrivateClusterSupported": {
-      "value": true
-    },
-    "enablePrivateCluster": {
-      "value": false
-    },
-    "networkPluginMode": {
-      "value": "overlay"
-    },
-    "networkDataplane": {
-      "value": "azure"
-    },
-    "isAzurePolicySupported": {
-      "value": true
-    },
-    "enableAzurePolicy": {
-      "value": false
-    },
-    "isSecretStoreCSIDDriverSupported": {
-      "value": true
-    },
-    "enableSecretStoreCSIDriver": {
-      "value": false
-    },
-    "vmssNodePool": {
-      "value": true
-    },
-    "acrName": {
-      "value": "guroRegistry"
-    },
-    "acrResourceGroup": {
-      "value": "guro"
-    },
-    "isImageCleanerEnabled": {
-      "value": true
-    },
-    "imageCleanerIntervalHours": {
-      "value": 168
-    },
-    "enableOIDC": {
-      "value": true
-    },
-    "issuerURL": {
-      "value": ""
-    },
-    "enableWorkloadIdentity": {
-      "value": true
-    },
-    "clusterTags": {
-      "value": {}
-    },
-    "tagsForAllResources": {
-      "value": {}
+    "sshRSAPublicKey": {
+      "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDPKnMG2k3N3c8NOZg+mR0+I5nCCfzHyZrV/ez0JlN7+HqOaGQS0Jq/+YDxY0ZPtJrGcJxj6YmEzo+4rgFAjiYPc74yZcSxyVUe7bIJxEqW3BAG6gRlK/O5S9H7acfm4NYn2mpecZTIfSdFU4YXeTu6IHh2e3ds+GMhGkLb"
     }
   }
 }
