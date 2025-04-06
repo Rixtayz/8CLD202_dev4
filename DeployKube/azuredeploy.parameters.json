@@ -24,7 +24,7 @@
       "value": "kubeadmin"
     },
     "sshRSAPublicKey": {
-      "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDPKnMG2k3N3c8NOZg+mR0+I5nCCfzHyZrV/ez0JlN7+HqOaGQS0Jq/+YDxY0ZPtJrGcJxj6YmEzo+4rgFAjiYPc74yZcSxyVUe7bIJxEqW3BAG6gRlK/O5S9H7acfm4NYn2mpecZTIfSdFU4YXeTu6IHh2e3ds+GMhGkLb"
+      "value": null
     }
   }
 }
