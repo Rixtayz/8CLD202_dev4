@@ -110,26 +110,23 @@ steps:
         az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
 
         # Create Kubernetes secrets
-        kubectl create secret generic my-secret --from-literal=AppConfigurationEndpoints=$(AppConfigEndpoint) \
-                                                --from-literal=AZURE_CLIENT_ID=$(ClientID) \
-                                                --from-literal=AZURE_TENANT_ID=$(TenantID) \
-                                                --from-literal=AZURE_CLIENT_SECRET=$(ClientSecret)
+        kubectl create secret generic my-secret --from-literal=AppConfigurationEndpoints=$(AppConfigEndpoint) --from-literal=AZURE_CLIENT_ID=$(ClientID) --from-literal=AZURE_TENANT_ID=$(TenantID) --from-literal=AZURE_CLIENT_SECRET=$(ClientSecret)
         echo "Secrets created successfully!"
 
-  - task: AzureCLI@2
-    displayName: Deploy YAML to Kubernetes Cluster
-    inputs:
-      azureSubscription: $(AzureSubscription)
-      scriptType: 'ps' # Use PowerShell
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # Log in to Azure CLI (already done with AzureSubscription)
-        echo "Deploying YAML to Kubernetes cluster."
+  # - task: AzureCLI@2
+  #   displayName: Deploy YAML to Kubernetes Cluster
+  #   inputs:
+  #     azureSubscription: $(AzureSubscription)
+  #     scriptType: 'ps' # Use PowerShell
+  #     scriptLocation: 'inlineScript'
+  #     inlineScript: |
+  #       Log in to Azure CLI (already done with AzureSubscription)
+  #       echo "Deploying YAML to Kubernetes cluster."
 
-        # Ensure kubectl is installed and connected to the cluster
-        az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
+  #       Ensure kubectl is installed and connected to the cluster
+  #       az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
 
-        # Apply your deployment YAML file
-        kubectl apply -f $(Build.SourcesDirectory)\$(InfrastructureFolder)\Cluster.yml
+  #       Apply your deployment YAML file
+  #       kubectl apply --validate=false -f $(Build.SourcesDirectory)\$(InfrastructureFolder)\Cluster.yml
 
-        echo "YAML file deployed successfully!"
+  #       echo "YAML file deployed successfully!"
