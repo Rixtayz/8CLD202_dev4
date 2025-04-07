@@ -20,22 +20,22 @@
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AppConfigurationEndpoints
               - name: AZURE_CLIENT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_ID
               - name: AZURE_TENANT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_TENANT_ID
               - name: AZURE_CLIENT_SECRET
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_SECRET
 
@@ -66,22 +66,22 @@
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AppConfigurationEndpoints
               - name: AZURE_CLIENT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_ID
               - name: AZURE_TENANT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_TENANT_ID
               - name: AZURE_CLIENT_SECRET
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_SECRET
 
@@ -124,22 +124,22 @@
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AppConfigurationEndpoints
               - name: AZURE_CLIENT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_ID
               - name: AZURE_TENANT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_TENANT_ID
               - name: AZURE_CLIENT_SECRET
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_SECRET
 
@@ -163,22 +163,22 @@
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AppConfigurationEndpoints
               - name: AZURE_CLIENT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_ID
               - name: AZURE_TENANT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_TENANT_ID
               - name: AZURE_CLIENT_SECRET
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_SECRET
 
@@ -202,22 +202,22 @@
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AppConfigurationEndpoints
               - name: AZURE_CLIENT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_ID
               - name: AZURE_TENANT_ID
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_TENANT_ID
               - name: AZURE_CLIENT_SECRET
                 valueFrom:
-                    secretKeyRef:
+                  secretKeyRef:
                     name: my-secret
                     key: AZURE_CLIENT_SECRET
 
