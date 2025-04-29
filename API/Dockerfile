@@ -5,11 +5,12 @@ WORKDIR /app
 EXPOSE 8080
 
 # Pour le managed identity pour dev seulement.
-ENV AZURE_CLIENT_ID="7656a5d3-6163-44fb-b6f0-1d8b2772701d"
-ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
-ENV AZURE_CLIENT_SECRET=".Ul8Q~PBnMSsenrIpkDqi~2WNZP~VtbJoKDDDcVD"
+# ENV AZURE_CLIENT_ID="7656a5d3-6163-44fb-b6f0-1d8b2772701d"
+# ENV AZURE_TENANT_ID="2b2a6365-d23a-4e3d-a0be-a44e8f5319b9"
+# ENV AZURE_CLIENT_SECRET=".Ul8Q~PBnMSsenrIpkDqi~2WNZP~VtbJoKDDDcVD"
+# Ces identifiants doivent être injectés via des variables d'environnement dynamiques (Azure DevOps, App Service, Kubernetes, etc.) ou récupérés dynamiquement depuis Azure Key Vault/App Configuration.
 
-# Pour forcer le redirect URL / Valider aussi le launchSetting.json pour le num�ro du port ...
+# Pour forcer le redirect URL / Valider aussi le launchSetting.json pour le numéro du port ...
 ENV ASPNETCORE_URLS=http://+:8080
 
 # This stage is used to build the service project

@@ -140,4 +140,30 @@ else {
     }
 }
 
- Write-Host "End of script."
+# Ajout automatique des secrets d'identité Azure dans Key Vault après le déploiement
+$vaultName = (Get-AzResource -ResourceGroupName $ResourceGroupName -ResourceType 'Microsoft.KeyVault/vaults').Name
+
+if ($vaultName) {
+    Write-Host "Ajout ou mise à jour des secrets ClientID, TenantID et ClientSecret dans le Key Vault $vaultName..."
+
+    $clientId = az keyvault secret show --vault-name $vaultName --name "ClientID" --query "value" -o tsv 2>$null
+    if (-not $clientId) {
+        $clientId = Read-Host -Prompt "Entrez la valeur du ClientID Azure AD à stocker dans Key Vault ($vaultName)"
+        az keyvault secret set --vault-name $vaultName --name "ClientID" --value $clientId | Out-Null
+    }
+    $tenantId = az keyvault secret show --vault-name $vaultName --name "TenantID" --query "value" -o tsv 2>$null
+    if (-not $tenantId) {
+        $tenantId = Read-Host -Prompt "Entrez la valeur du TenantID Azure AD à stocker dans Key Vault ($vaultName)"
+        az keyvault secret set --vault-name $vaultName --name "TenantID" --value $tenantId | Out-Null
+    }
+    $clientSecret = az keyvault secret show --vault-name $vaultName --name "ClientSecret" --query "value" -o tsv 2>$null
+    if (-not $clientSecret) {
+        $clientSecret = Read-Host -Prompt "Entrez la valeur du ClientSecret Azure AD à stocker dans Key Vault ($vaultName)"
+        az keyvault secret set --vault-name $vaultName --name "ClientSecret" --value $clientSecret | Out-Null
+    }
+    Write-Host "Secrets d'identité Azure ajoutés ou mis à jour dans Key Vault."
+} else {
+    Write-Host "Aucun Key Vault trouvé dans le groupe de ressources $ResourceGroupName. Les secrets d'identité Azure n'ont pas été créés."
+}
+
+Write-Host "End of script."

@@ -113,20 +113,35 @@ steps:
         kubectl create secret generic my-secret --from-literal=AppConfigurationEndpoints=$(AppConfigEndpoint) --from-literal=AZURE_CLIENT_ID=$(ClientID) --from-literal=AZURE_TENANT_ID=$(TenantID) --from-literal=AZURE_CLIENT_SECRET=$(ClientSecret)
         echo "Secrets created successfully!"
 
-  # - task: AzureCLI@2
-  #   displayName: Deploy YAML to Kubernetes Cluster
-  #   inputs:
-  #     azureSubscription: $(AzureSubscription)
-  #     scriptType: 'ps' # Use PowerShell
-  #     scriptLocation: 'inlineScript'
-  #     inlineScript: |
-  #       Log in to Azure CLI (already done with AzureSubscription)
-  #       echo "Deploying YAML to Kubernetes cluster."
+  - task: AzureCLI@2
+    displayName: Create KEDA Secrets
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
 
-  #       Ensure kubectl is installed and connected to the cluster
-  #       az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
+        # Récupérer les secrets depuis Key Vault
+        $serviceBusConnection = az keyvault secret show --vault-name GuroKeyVault --name "ConnectionStringSB" --query "value" -o tsv
+        $eventHubConnection = az keyvault secret show --vault-name GuroKeyVault --name "ConnectionStringEventHub" --query "value" -o tsv
 
-  #       Apply your deployment YAML file
-  #       kubectl apply --validate=false -f $(Build.SourcesDirectory)\$(InfrastructureFolder)\Cluster.yml
+        # Créer les secrets Kubernetes pour KEDA
+        kubectl delete secret keda-servicebus-auth --ignore-not-found
+        kubectl create secret generic keda-servicebus-auth --from-literal=connection=$serviceBusConnection
 
-  #       echo "YAML file deployed successfully!"
+        kubectl delete secret keda-eventhub-auth --ignore-not-found
+        kubectl create secret generic keda-eventhub-auth --from-literal=connection=$eventHubConnection
+
+        echo "KEDA secrets created successfully!"
+
+  - task: AzureCLI@2
+    displayName: Deploy YAML to Kubernetes Cluster
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: 'ps'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
+        kubectl apply --validate=false -f $(Build.SourcesDirectory)\$(InfrastructureFolder)\Cluster.yml
+        echo "YAML file deployed successfully!"

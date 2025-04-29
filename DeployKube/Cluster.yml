@@ -244,3 +244,102 @@
         targetPort: 8081
     selector:
       app: mvc
+
+- apiVersion: autoscaling/v2
+  kind: HorizontalPodAutoscaler
+  metadata:
+    name: api-deployment-hpa
+  spec:
+    scaleTargetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: api-deployment
+    minReplicas: 1
+    maxReplicas: 3
+    metrics:
+      - type: Resource
+        resource:
+          name: cpu
+          target:
+            type: Utilization
+            averageUtilization: 50
+
+# KEDA ScaledObject pour Worker_Content (Service Bus)
+- apiVersion: keda.sh/v1alpha1
+  kind: ScaledObject
+  metadata:
+    name: worker-content-scaledobject
+  spec:
+    scaleTargetRef:
+      name: worker-content-deployment
+    minReplicaCount: 1
+    maxReplicaCount: 5
+    triggers:
+      - type: azure-servicebus
+        metadata:
+          queueName: <contentsafetymessage> 
+          namespace: TbSb679
+          messageCount: "5"
+        authenticationRef:
+          name: keda-servicebus-auth
+
+# KEDA ScaledObject pour Worker_Image (Service Bus)
+- apiVersion: keda.sh/v1alpha1
+  kind: ScaledObject
+  metadata:
+    name: worker-image-scaledobject
+  spec:
+    scaleTargetRef:
+      name: worker-image-deployment
+    minReplicaCount: 1
+    maxReplicaCount: 5
+    triggers:
+      - type: azure-servicebus
+        metadata:
+          queueName: <imageresizemessage>
+          namespace: TbSb679
+          messageCount: "5"
+        authenticationRef:
+          name: keda-servicebus-auth
+
+# KEDA ScaledObject pour Worker_DB (Event Hub)
+- apiVersion: keda.sh/v1alpha1
+  kind: ScaledObject
+  metadata:
+    name: worker-db-scaledobject
+  spec:
+    scaleTargetRef:
+      name: worker-db-deployment
+    minReplicaCount: 1
+    maxReplicaCount: 5
+    triggers:
+      - type: azure-eventhub
+        metadata:
+          eventHubNamespace: TbEventHub679
+          eventHubName: <event>
+          consumerGroup: <consumer> 
+          unprocessedEventThreshold: "5"
+        authenticationRef:
+          name: keda-eventhub-auth
+
+# TriggerAuthentication pour KEDA Service Bus
+- apiVersion: keda.sh/v1alpha1
+  kind: TriggerAuthentication
+  metadata:
+    name: keda-servicebus-auth
+  spec:
+    secretTargetRef:
+      - parameter: connection
+        name: keda-servicebus-auth
+        key: connection
+
+# TriggerAuthentication pour KEDA Event Hub
+- apiVersion: keda.sh/v1alpha1
+  kind: TriggerAuthentication
+  metadata:
+    name: keda-eventhub-auth
+  spec:
+    secretTargetRef:
+      - parameter: connection
+        name: keda-eventhub-auth
+        key: connection
