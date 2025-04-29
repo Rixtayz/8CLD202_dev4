@@ -75,7 +75,7 @@ variables:
   value: 'Docker Registry Dynamic'
 
 - name: AzureSubscription
-  value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
+  value: 'Azure subscription 1 (12e1fee6-c197-4f1a-81a1-42e0ff6d215e)'
 - name: AzureDevOpsPAT #https://learn.microsoft.com/en-us/azure/devops/cli/log-in-via-pat?view=azure-devops&tabs=windows
   value: 'r9UMg3Jrr1NwuFXXZx7k8VMirDz2ezTKJVoocbBUS7yiurpvPen2JQQJ99BDACAAAAAAAAAAAAASAZDOrV1D'
 
