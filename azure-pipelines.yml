@@ -23,7 +23,7 @@ variables:
 
   # Resource group ainsi que l'acronyme utiliser pour créer le nom des resources
 - name: RG
-  value: 'guro'
+  value: 'tb'
  
   # Resources
 - name: RG_Location

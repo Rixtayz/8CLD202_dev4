@@ -14,7 +14,7 @@
       spec:
         containers:
           - name: api
-            image: guroregistry.azurecr.io/api:latest
+            image: tbregistry.azurecr.io/api:latest
             ports:
               - containerPort: 8080
             env:
@@ -55,7 +55,7 @@
       spec:
         containers:
           - name: mvc
-            image: guroregistry.azurecr.io/mvc:latest
+            image: tbregistry.azurecr.io/mvc:latest
             ports:
               - containerPort: 8081
             resources: # Correctly define resource requests and limits here
@@ -120,7 +120,7 @@
       spec:
         containers:
           - name: worker-content
-            image: guroregistry.azurecr.io/worker_content:latest
+            image: tbregistry.azurecr.io/worker_content:latest
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:
@@ -159,7 +159,7 @@
       spec:
         containers:
           - name: worker-db
-            image: guroregistry.azurecr.io/worker_db:latest
+            image: tbregistry.azurecr.io/worker_db:latest
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:
@@ -198,7 +198,7 @@
       spec:
         containers:
           - name: worker-image
-            image: guroregistry.azurecr.io/worker_image:latest
+            image: tbregistry.azurecr.io/worker_image:latest
             env:
               - name: AppConfigurationEndpoints
                 valueFrom:

@@ -1,4 +1,3 @@
-
 trigger:
 - master
 
@@ -11,7 +10,7 @@ variables:
   value: 'MVC_Dynamic'
 
 - name: RG
-  value: 'guro'
+  value: 'tb'
 
   # Resources
 - name: RG_Location
@@ -20,25 +19,25 @@ variables:
   value: '$(RG)KeyVault'
 
 - name: AciName1        # non dynamique ...update pourrais être fait via un service connection pour app config
-  value: 'guroaciapi'
+  value: 'tbaciapi'
 - name: AciImage1
-  value: 'guroregistry.azurecr.io/api:latest'
+  value: 'tbregistry.azurecr.io/api:latest'
 - name: AciPort1
   value: '8080'
   
 - name: AciName2
-  value: 'guroacimvc'
+  value: 'tbacimvc'
 - name: AciImage2
-  value: 'guroregistry.azurecr.io/mvc:latest'
+  value: 'tbregistry.azurecr.io/mvc:latest'
 - name: AciPort2
   value: '8081'
 
 - name: AppConfigEndpoint # Ont pourrait apporter la variable du premier pipeline ...
-  value: 'https://guroappconfiguration.azconfig.io'  
+  value: 'https://tbappconfiguration.azconfig.io'  
 - name: RegistryServer # Ont pourrait apporter la variable du premier pipeline ...
-  value: 'guroregistry.azurecr.io'  
+  value: 'tbregistry.azurecr.io'  
 - name: RegistryUsername # Ont pourrait apporter la variable du premier pipeline ...
-  value: 'guroRegistry'
+  value: 'tbRegistry'
 
 - name: InfrastructureFolder
   value: 'DeployACI\DeployACI'
@@ -48,7 +47,7 @@ steps:
     displayName: 'Reading Secrets'
     inputs:
       azureSubscription: $(AzureSubscription)
-      KeyVaultName: 'GuroKeyVault'
+      KeyVaultName: 'TbKeyVault'
       SecretsFilter: 'ClientID,TenantID,ClientSecret,ContainerRegistry'
       RunAsPreJob: false
 

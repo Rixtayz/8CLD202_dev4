@@ -11,7 +11,7 @@ pool: "default"
 variables:
   # Resource group ainsi que l'acronyme utiliser pour créer le nom des resources
 - name: RG
-  value: 'guro'
+  value: 'tb'
 
 - name: AzureSubscription
   value: 'Azure subscription 1(970fcef5-9c23-4f7d-a11b-5a96d104f066)'
@@ -35,7 +35,7 @@ variables:
   value: 'DeployKube'
 
 - name: AppConfigEndpoint # Ont pourrait apporter la variable du premier pipeline ...
-  value: 'https://guroappconfiguration.azconfig.io'  
+  value: 'https://tbappconfiguration.azconfig.io'  
 
 steps:
   - task: AzureCLI@2
@@ -92,7 +92,7 @@ steps:
     displayName: 'Reading Secrets'
     inputs:
       azureSubscription: $(AzureSubscription)
-      KeyVaultName: 'GuroKeyVault'
+      KeyVaultName: 'TbKeyVault679'
       SecretsFilter: 'ClientID,TenantID,ClientSecret'
       RunAsPreJob: false
 
@@ -123,8 +123,8 @@ steps:
         az aks get-credentials --resource-group $(RG) --name $(clusterName) --overwrite-existing
 
         # Récupérer les secrets depuis Key Vault
-        $serviceBusConnection = az keyvault secret show --vault-name GuroKeyVault --name "ConnectionStringSB" --query "value" -o tsv
-        $eventHubConnection = az keyvault secret show --vault-name GuroKeyVault --name "ConnectionStringEventHub" --query "value" -o tsv
+        $serviceBusConnection = az keyvault secret show --vault-name TbKeyVault --name "ConnectionStringSB" --query "value" -o tsv
+        $eventHubConnection = az keyvault secret show --vault-name TbKeyVault --name "ConnectionStringEventHub" --query "value" -o tsv
 
         # Créer les secrets Kubernetes pour KEDA
         kubectl delete secret keda-servicebus-auth --ignore-not-found
